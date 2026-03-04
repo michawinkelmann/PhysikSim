@@ -183,6 +183,8 @@ function drawFieldBase() {
       seg.setAttribute("y1", y);
       seg.setAttribute("x2", x + 6);
       seg.setAttribute("y2", y);
+      seg.setAttribute("data-cx", x);
+      seg.setAttribute("data-cy", y);
       seg.setAttribute("stroke", "rgba(16,19,33,.18)");
       seg.setAttribute("stroke-width", "1.8");
       seg.setAttribute("stroke-linecap", "round");
@@ -281,8 +283,8 @@ function updateField() {
   const magnets = state.magnets.filter((m) => m.visible);
 
   filings.forEach((seg) => {
-    const x = (Number(seg.getAttribute("x1")) + Number(seg.getAttribute("x2"))) / 2;
-    const y = Number(seg.getAttribute("y1"));
+    const x = Number(seg.getAttribute("data-cx"));
+    const y = Number(seg.getAttribute("data-cy"));
     const f = fieldAt(x, y, magnets);
     const len = clamp(8 + f.mag * 13000, 7, 18);
     const dx = Math.cos(f.angle) * len;
