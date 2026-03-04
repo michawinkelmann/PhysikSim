@@ -175,6 +175,8 @@ function makeLine(x1, y1, x2, y2) {
 function drawFieldBase() {
   const g = document.getElementById("overlays");
   g.innerHTML = "";
+
+  // Feldlinien-Segmente (Ausrichtung des Feldes)
   for (let y = 70; y <= 530; y += 35) {
     for (let x = 70; x <= 930; x += 35) {
       const seg = document.createElementNS(NS, "line");
@@ -189,6 +191,28 @@ function drawFieldBase() {
       seg.setAttribute("stroke-width", "1.8");
       seg.setAttribute("stroke-linecap", "round");
       g.appendChild(seg);
+    }
+  }
+
+  // Zusätzliche Eisenspäne-Punkte, deren Sichtbarkeit mit der Feldstärke zunimmt.
+  // Dadurch wird die Feldstärke über wahrgenommene "Dichte" klarer erkennbar.
+  for (let y = 62; y <= 538; y += 22) {
+    for (let x = 62; x <= 938; x += 22) {
+      const dot = document.createElementNS(NS, "circle");
+      const jx = ((x * 17 + y * 11) % 7) - 3;
+      const jy = ((x * 13 + y * 19) % 7) - 3;
+      const cx = x + jx;
+      const cy = y + jy;
+
+      dot.setAttribute("data-filings-dot", "1");
+      dot.setAttribute("data-cx", cx);
+      dot.setAttribute("data-cy", cy);
+      dot.setAttribute("cx", cx);
+      dot.setAttribute("cy", cy);
+      dot.setAttribute("r", "1.25");
+      dot.setAttribute("fill", "rgba(16,19,33,.22)");
+      dot.setAttribute("opacity", "0.03");
+      g.appendChild(dot);
     }
   }
 }
@@ -280,6 +304,7 @@ function findMagnetFromEvent(evt) {
 
 function updateField() {
   const filings = Array.from(document.querySelectorAll('[data-filings="1"]'));
+  const filingDots = Array.from(document.querySelectorAll('[data-filings-dot="1"]'));
   const magnets = state.magnets.filter((m) => m.visible);
 
   filings.forEach((seg) => {
@@ -295,6 +320,18 @@ function updateField() {
     seg.setAttribute("x2", (x + dx).toFixed(2));
     seg.setAttribute("y2", (y + dy).toFixed(2));
     seg.setAttribute("opacity", clamp(0.14 + f.mag * 16000, 0.14, 0.95).toFixed(2));
+    seg.setAttribute("stroke-width", clamp(1.2 + f.mag * 26000, 1.2, 3.6).toFixed(2));
+  });
+
+  filingDots.forEach((dot) => {
+    const x = Number(dot.getAttribute("data-cx"));
+    const y = Number(dot.getAttribute("data-cy"));
+    const f = fieldAt(x, y, magnets);
+    const normalized = clamp(f.mag * 18500, 0, 1);
+    const density = Math.pow(normalized, 1.5);
+
+    dot.setAttribute("opacity", (0.015 + density * 0.7).toFixed(3));
+    dot.setAttribute("r", (0.9 + density * 1.15).toFixed(2));
   });
 }
 
