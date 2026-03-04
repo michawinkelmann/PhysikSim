@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>PhysikSim‑Lab – Magnetwirkung sichtbar machen</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="title" id="title">Magnetwirkung sichtbar machen</div>
+      <div class="muted" id="subtitle">Schritt 1 von 4</div>
+    </div>
+    <div class="actions">
+      <a class="btn ghost" href="../../../index.html" aria-label="Zurück zur Übersicht">← Übersicht</a>
+      <button class="btn ghost" id="helpBtn" title="Hilfe">?</button>
+      <button class="btn primary" id="resetBtn" title="Alles zurücksetzen">Reset</button>
+    </div>
+  </header>
+
+  <nav class="stepper" id="stepper" aria-label="Schritte"></nav>
+
+  <main class="layout">
+    <section class="stageWrap card" aria-label="Experimentierfläche">
+      <div class="rowBtns" style="margin-bottom:10px;">
+        <button class="btn" id="flipBtn">Magnet drehen</button>
+        <button class="btn" id="toggleSecondBtn">2. Magnet anzeigen</button>
+      </div>
+      <svg id="stage" viewBox="0 0 1000 600" role="img" aria-label="Tisch mit Magneten und Eisenspänen">
+        <rect x="0" y="0" width="1000" height="600" rx="26" class="tableBg"/>
+        <g id="grid"></g>
+        <g id="overlays"></g>
+        <g id="objects"></g>
+      </svg>
+      <div class="muted small" id="stageHint">Ziehe den Magneten. Die Eisenspäne richten sich entlang der Feldlinien aus.</div>
+    </section>
+
+    <aside class="panel" id="panel" aria-label="Aufgaben">
+      <div class="panelHandle">
+        <button class="panelToggle btn ghost" id="panelToggle" aria-expanded="true">Aufgaben ▲</button>
+      </div>
+      <div class="panelBody">
+        <section class="card soft">
+          <h2>Aufgaben</h2>
+          <div id="tasks"></div>
+          <div class="rowBtns">
+            <button class="btn" id="prevStep">Zurück</button>
+            <button class="btn primary" id="nextStep">Weiter</button>
+          </div>
+          <div id="taskFeedback" class="note" hidden></div>
+        </section>
+
+        <section class="card soft">
+          <h2>Hinweis</h2>
+          <div class="note">Je dichter die Feldlinien (Eisenspäne), desto stärker ist die magnetische Wirkung.</div>
+        </section>
+      </div>
+    </aside>
+  </main>
+
+  <div class="modal" id="helpModal" hidden>
+    <div class="modalCard card">
+      <h2>Bedienung</h2>
+      <ul class="bullets">
+        <li><b>Ziehen:</b> Magnete antippen und bewegen.</li>
+        <li><b>Magnet drehen:</b> Vertauscht Nord- und Südseite (180°).</li>
+        <li><b>2. Magnet anzeigen:</b> Für Anziehung/Abstoßung im Schritt „Wechselwirkung".</li>
+        <li><b>Reset:</b> Setzt Schritt, Aufbau und Antworten zurück.</li>
+      </ul>
+      <button class="btn primary" id="closeHelp">OK</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
