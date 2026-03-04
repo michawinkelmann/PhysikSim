@@ -1,0 +1,39 @@
+:root{
+  --bg:#eef3f9;
+  --card:#ffffff;
+  --text:#0f172a;
+  --muted:#475569;
+  --brand:#0b63c7;
+  --brand-soft:#dbeafe;
+  --ok:#0f766e;
+  --bad:#b91c1c;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text)}
+.topbar{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:14px 18px;background:#fff;border-bottom:1px solid #dbe3ef;position:sticky;top:0;z-index:3}
+.title{font-weight:800;font-size:1.2rem}
+.muted{color:var(--muted)}
+.actions{display:flex;gap:8px}
+.btn{border:1px solid #cbd5e1;background:#fff;padding:9px 12px;border-radius:10px;font-weight:700;cursor:pointer}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.ghost{background:#f8fafc}
+.tabs{display:flex;gap:8px;padding:12px 18px;position:sticky;top:68px;background:var(--bg);z-index:2;border-bottom:1px solid #dde7f2}
+.tab{border:1px solid #bfdbfe;background:#fff;color:#1d4ed8;font-weight:800;padding:8px 14px;border-radius:999px;cursor:pointer}
+.tab.active{background:var(--brand);border-color:var(--brand);color:#fff}
+.layout{padding:16px;max-width:1000px;margin:0 auto}
+.card{background:var(--card);border:1px solid #dbe3ef;border-radius:16px;padding:16px;box-shadow:0 4px 16px rgba(16,24,40,.06)}
+.hidden{display:none}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0}
+select,input[type="range"]{padding:9px 10px;border-radius:10px;border:1px solid #cbd5e1;min-width:220px}
+input[type="range"]{padding:0}
+.result{margin:8px 0 12px;padding:10px 12px;border-radius:10px;background:#f8fafc;border:1px dashed #cbd5e1;font-weight:600}
+.result.ok{color:var(--ok);background:#ecfeff;border-color:#99f6e4}
+.result.bad{color:var(--bad);background:#fff1f2;border-color:#fecdd3}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+th,td{border-bottom:1px solid #e2e8f0;padding:7px 6px;text-align:left}
+.note{margin-top:12px;padding:10px;background:var(--brand-soft);border-radius:10px;color:#1e3a8a;font-weight:600}
+@media (max-width:700px){
+  .topbar{position:static}
+  .tabs{top:0;position:static}
+  .stackOnSmall{align-items:flex-start;flex-direction:column}
+}

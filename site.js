@@ -38,6 +38,16 @@ const EXPERIMENTS = [
     path: "experiments/magnetismus/magnetwirkung-sichtbar-machen/index.html",
     status: "ready"
   },
+  {
+    id: "wie-magnete-wirken",
+    title: "Wie Magnete wirken",
+    topic: "Magnetismus",
+    grade: "Klasse 5",
+    teaser: "Vier interaktive Buch-Experimente (A–D): Stoffe, Metalle, Reichweite sowie Abschirmung von Magneten.",
+    tags: ["Stoffe", "Metalle", "Reichweite", "Abschirmung"],
+    path: "experiments/magnetismus/wie-magnete-wirken/index.html",
+    status: "ready"
+  },
 ];
 
 const ui = {
