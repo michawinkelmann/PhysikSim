@@ -11,14 +11,15 @@ const EXPERIMENTS = {
       "Halte die Stricknadel mit der Zange in die Kerzenflamme.",
       "Nähere die Stricknadel erneut der Büroklammer.",
       "Wiederhole Schritt 1 und Schritt 2.",
-      "Schlage die Stricknadel einige Male auf den Tisch und teste erneut."
+      "Schlage die Stricknadel mindestens 3-mal auf den Tisch (oder nutze den Button) und teste erneut."
     ]
   },
   B: {
     title: "Experiment B – Aus zwei mach eins",
     materials: ["Eisendraht", "Kneifzange", "2 Stabmagnete", "Büroklammer", "großer Eisennagel"],
     steps: [
-      "Magnetisiere den Draht und schneide ihn mit der Zange in der Mitte durch.",
+      "Magnetisiere den Draht grob und teile ihn anschließend mit " +
+        "dem Button \"Draht teilen\" in zwei Stücke.",
       "Prüfe beide Drahtstücke jeweils an einer Büroklammer.",
       "Lege die zwei Stabmagnete so, dass sich Nord- und Südpol berühren.",
       "Nähere einen Eisennagel an die Berührungsstelle."
@@ -163,11 +164,11 @@ function renderContextButton() {
   btn.hidden = true;
   if (state.experiment === "A" && state.stepIndex === 5) {
     btn.hidden = false;
-    btn.textContent = "Auf Tisch schlagen";
+    btn.textContent = "Nadel auf den Tisch schlagen";
   }
   if (state.experiment === "B" && state.stepIndex === 0) {
     btn.hidden = false;
-    btn.textContent = "Draht in der Mitte durchschneiden";
+    btn.textContent = "Draht teilen";
   }
 }
 
@@ -201,8 +202,8 @@ function onContextAction() {
   }
   if (state.experiment === "B" && state.stepIndex === 0) {
     const b = state.B;
-    if (b.magnetized < 55) {
-      state.feedback = "Magnetisiere den Draht zuerst durch mehrfaches Streichen.";
+    if (b.magnetized < 30) {
+      state.feedback = "Magnetisiere den Draht noch etwas (mind. 30%), dann kannst du ihn teilen.";
     } else {
       b.wireCut = true;
       b.stepDone[0] = true;
@@ -326,9 +327,9 @@ function updateB() {
   const step = state.stepIndex;
 
   if (step === 0 && !b.wireCut && b.magnetTool.x > 620 && Math.abs(b.magnetTool.y - b.wire.y) < 28) {
-    b.magnetized = Math.min(100, b.magnetized + 12);
+    b.magnetized = Math.min(100, b.magnetized + 16);
     b.magnetTool.x = 240;
-    state.feedback = `Draht magnetisiert: ${Math.round(b.magnetized)}%.`;
+    state.feedback = `Draht magnetisiert: ${Math.round(b.magnetized)}%. Ab 30% kannst du ihn teilen.`;
   }
 
   if (step === 1 && b.wireCut) {
@@ -525,6 +526,9 @@ function applyNeedleHit() {
   a.hitCount += 1;
   a.magnetization = Math.max(0, a.magnetization - 25);
   state.feedback = `Schlag ${a.hitCount}/3 ausgeführt.`;
+  if (a.hitCount >= 1) {
+    a.clipAttached = false;
+  }
   if (a.hitCount >= 3) {
     a.stepDone[5] = true;
     a.clipAttached = false;
