@@ -48,6 +48,7 @@ textarea{ width:100%; min-height:96px; border:1px solid var(--border); border-ra
 .stageValue{ font:700 20px/1 var(--font); fill:#1d4ed8; }
 
 .modal{ position:fixed; inset:0; background:rgba(16,19,33,.45); display:grid; place-items:center; padding:20px; z-index:50; }
+.modal[hidden]{ display:none !important; }
 .modalCard{ max-width:520px; width:min(100%,520px); }
 
 @media (min-width:900px){
