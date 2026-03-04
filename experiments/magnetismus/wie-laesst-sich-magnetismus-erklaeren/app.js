@@ -225,13 +225,18 @@ function onDown(evt) {
 
 function onMove(evt) {
   if (!state.dragging) return;
+  const stepBeforePhysics = state.stepIndex;
   const p = svgPoint(evt);
   const key = state.dragging.key;
   const pos = getPos(key);
   pos.x = clamp(p.x + state.dragging.dx, 80, 920);
   pos.y = clamp(p.y + state.dragging.dy, 90, 550);
   applyPhysics();
-  renderScene();
+  if (state.stepIndex !== stepBeforePhysics) {
+    render();
+  } else {
+    renderScene();
+  }
 }
 
 function onUp() {
@@ -312,6 +317,8 @@ function updateA() {
   if (a.clipAttached && step === 5 && a.magnetization < 30) {
     a.clipAttached = false;
   }
+
+  autoAdvanceIfCurrentStepCompleted(step);
 }
 
 function updateB() {
@@ -360,6 +367,16 @@ function updateB() {
       state.feedback = "Der Nagel wird an der Berührungsstelle stark angezogen.";
     }
   }
+
+  autoAdvanceIfCurrentStepCompleted(step);
+}
+
+function autoAdvanceIfCurrentStepCompleted(stepAtStart) {
+  const done = state[state.experiment].stepDone;
+  if (state.stepIndex !== stepAtStart) return;
+  if (!done[stepAtStart]) return;
+  if (stepAtStart >= done.length - 1) return;
+  state.stepIndex = stepAtStart + 1;
 }
 
 function renderScene() {
