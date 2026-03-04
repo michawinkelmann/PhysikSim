@@ -19,6 +19,16 @@ const EXPERIMENTS = [
     status: "ready"
   },
   {
+    id: "magnetismus-erklaeren",
+    title: "Wie lässt sich Magnetismus erklären?",
+    topic: "Magnetismus",
+    grade: "Klasse 5",
+    teaser: "Magnetisieren, Entmagnetisieren und Pole mit zwei einfachen Versuchsreihen verstehen.",
+    tags: ["Elementarmagnete", "Erhitzen", "Schlagen", "Pole"],
+    path: "experiments/magnetismus/wie-laesst-sich-magnetismus-erklaeren/index.html",
+    status: "ready"
+  },
+  {
     id: "freier-fall",
     title: "Freier Fall – Zeit & Strecke (Vorbereitung)",
     topic: "Mechanik",
