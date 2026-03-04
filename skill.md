@@ -93,6 +93,11 @@ Nutze diese Tokens (in jedem Experiment `:root{…}` oder gemeinsam):
 - Mobile: `position: fixed; bottom:0;` + einklappbar via `data-collapsed="true"`
 - Desktop: ab `@media (min-width: 900px)` auf `position: static;`
 
+**Modal / Hilfe‑Popup**
+- `.modal` + `hidden`‑Attribut für Ein-/Ausblenden
+- Pflichtregel in CSS: `.modal[hidden]{ display:none !important; }`
+- Sonst überschreibt `.modal { display: … }` das `hidden`‑Attribut und das Popup bleibt offen.
+
 **Inputs**
 - `.field`, `input/textarea/select` mit großen Paddings
 
@@ -156,6 +161,7 @@ function onDown(evt){
 - **Link‑Check:** Startseite → Experiment → „← Übersicht“ funktioniert
 - **Touch‑Check:** Drag stabil (kein Abbruch, kein Hover‑Zwang)
 - **Reset‑Check:** reproduzierbar, setzt alles zurück
+- **Modal‑Check:** Hilfe öffnen/schließen (Button „OK“), danach ist die Bühne wieder bedienbar
 - **Stabilitäts‑Check:** keine „Jitter“‑Effekte, keine „Explosionen“, Clamp/Dämpfung nutzen
 
 ---

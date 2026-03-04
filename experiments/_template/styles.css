@@ -161,6 +161,7 @@ h2{ margin: 0 0 var(--s-2); font: 800 var(--fs-3)/1.15 var(--font); }
   display:flex; align-items:center; justify-content:center;
   padding: var(--s-4);
 }
+.modal[hidden]{ display:none !important; }
 .modalCard{ max-width: 560px; width: 100%; }
 
 @media (min-width: 900px){
