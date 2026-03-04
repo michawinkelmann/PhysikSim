@@ -28,7 +28,12 @@
   <main class="layout">
     <section class="card" id="panelA">
       <h2>A – Welche Stoffe werden von einem Magneten angezogen?</h2>
-      <p class="muted">Wähle verschiedene Gegenstände und prüfe, ob sie vom Magneten angezogen werden.</p>
+      <p class="muted">Ziehe die Gegenstände auf den Experimentiertisch und teste sie am Magneten.</p>
+      <div class="scene" id="sceneA">
+        <div class="desk"></div>
+        <div class="magnet" aria-hidden="true"><span>N</span><span>S</span></div>
+        <div class="object-layer" id="aObjects"></div>
+      </div>
       <div class="row">
         <select id="aObjectSelect"></select>
         <button class="btn" id="aTestBtn">Am Magnet testen</button>
@@ -43,7 +48,12 @@
 
     <section class="card hidden" id="panelB">
       <h2>B – Welche Metalle werden von einem Magneten angezogen?</h2>
-      <p class="muted">Teste Metallgegenstände und sammle die Beobachtungen in der Tabelle.</p>
+      <p class="muted">Bewege die Metallobjekte im Versuchsfeld. Der Test zeigt dir sofort die Magnetwirkung.</p>
+      <div class="scene" id="sceneB">
+        <div class="desk"></div>
+        <div class="magnet" aria-hidden="true"><span>N</span><span>S</span></div>
+        <div class="object-layer" id="bObjects"></div>
+      </div>
       <div class="row">
         <select id="bObjectSelect"></select>
         <button class="btn" id="bTestBtn">Metall testen</button>
@@ -58,7 +68,13 @@
 
     <section class="card hidden" id="panelC">
       <h2>C – Wie weit reicht die Wirkung von Magneten?</h2>
-      <p class="muted">Bewege den Magneten zur Büroklammer. Die Anziehung beginnt bei einer bestimmten Entfernung.</p>
+      <p class="muted">Schiebe den Magneten entlang des Geodreiecks zur Büroklammer und lies den Abstand ab.</p>
+      <div class="scene c-scene" id="sceneC">
+        <div class="desk"></div>
+        <div class="ruler" aria-hidden="true"></div>
+        <div class="paperclip" id="cClip" aria-hidden="true"></div>
+        <div class="magnet moving" id="cMagnet" aria-hidden="true"><span>N</span><span>S</span></div>
+      </div>
       <div class="row stackOnSmall">
         <label for="cDistance">Abstand zum Nullpunkt: <span id="cDistanceValue">10.0</span> cm</label>
         <input id="cDistance" type="range" min="0" max="15" step="0.1" value="10"/>
@@ -77,7 +93,14 @@
 
     <section class="card hidden" id="panelD">
       <h2>D – Durchdringung und Abschirmung untersuchen</h2>
-      <p class="muted">Lege unterschiedliche Platten zwischen Magnet und Büroklammer und beobachte die Wirkung.</p>
+      <p class="muted">Lege Platten zwischen Magnet und Büroklammer. Beobachte, ob die Magnetwirkung abgeschirmt wird.</p>
+      <div class="scene d-scene" id="sceneD">
+        <div class="desk"></div>
+        <div class="stand" aria-hidden="true"></div>
+        <div class="magnet clamp" aria-hidden="true"><span>N</span><span>S</span></div>
+        <div class="plate" id="dPlate" aria-hidden="true"></div>
+        <div class="hanging-clip" id="dClip" aria-hidden="true"></div>
+      </div>
       <div class="row stackOnSmall">
         <label for="dMaterial">Plattenmaterial</label>
         <select id="dMaterial"></select>

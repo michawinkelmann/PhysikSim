@@ -1,7 +1,7 @@
 const state = {
   tab: "A",
-  A: { rows: [], magneticMaterials: new Set() },
-  B: { rows: [], magneticMetals: new Set() },
+  A: { rows: [], magneticMaterials: new Set(), active: null },
+  B: { rows: [], magneticMetals: new Set(), active: null },
   C: { trial: 1, threshold: randomThreshold(), rows: [] },
   D: { rows: [], pass: 0, shield: 0 }
 };
@@ -45,7 +45,11 @@ function init() {
   fillSelect("aObjectSelect", objectsA, (o) => `${o.name} (${o.material})`);
   fillSelect("bObjectSelect", objectsB, (o) => `${o.name} (${o.metal})`);
   fillSelect("dMaterial", materialsD, (o) => o.name);
+  createDraggableObjects("A", objectsA, "aObjects", "material");
+  createDraggableObjects("B", objectsB, "bObjects", "metal");
 
+  document.getElementById("aObjectSelect").addEventListener("change", () => setActiveObject("A"));
+  document.getElementById("bObjectSelect").addEventListener("change", () => setActiveObject("B"));
   document.getElementById("aTestBtn").addEventListener("click", testA);
   document.getElementById("bTestBtn").addEventListener("click", testB);
   document.getElementById("cDistance").addEventListener("input", updateDistanceLabel);
@@ -53,6 +57,70 @@ function init() {
   document.getElementById("cTrialBtn").addEventListener("click", nextTrialC);
   document.getElementById("dTestBtn").addEventListener("click", testD);
   document.getElementById("resetBtn").addEventListener("click", resetAll);
+
+  setActiveObject("A");
+  setActiveObject("B");
+}
+
+function createDraggableObjects(tab, objects, containerId, field) {
+  const layer = document.getElementById(containerId);
+  layer.innerHTML = "";
+  objects.forEach((item, index) => {
+    const el = document.createElement("button");
+    el.className = "obj";
+    el.type = "button";
+    el.dataset.tab = tab;
+    el.dataset.index = String(index);
+    el.innerHTML = `${item.name}<small>${item[field]}</small>`;
+    el.style.left = `${16 + (index % 3) * 29}%`;
+    el.style.top = `${16 + Math.floor(index / 3) * 18}%`;
+    bindDrag(el, layer);
+    el.addEventListener("click", () => {
+      const select = document.getElementById(tab === "A" ? "aObjectSelect" : "bObjectSelect");
+      select.selectedIndex = index;
+      setActiveObject(tab);
+    });
+    layer.appendChild(el);
+  });
+}
+
+function bindDrag(el, container) {
+  el.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    el.setPointerCapture(event.pointerId);
+    const box = container.getBoundingClientRect();
+    const obj = el.getBoundingClientRect();
+    const offsetX = event.clientX - obj.left;
+    const offsetY = event.clientY - obj.top;
+    el.style.cursor = "grabbing";
+
+    const move = (e) => {
+      const left = clamp(e.clientX - box.left - offsetX, 6, box.width - obj.width - 6);
+      const top = clamp(e.clientY - box.top - offsetY, 8, box.height - obj.height - 8);
+      el.style.left = `${(left / box.width) * 100}%`;
+      el.style.top = `${(top / box.height) * 100}%`;
+    };
+
+    const up = () => {
+      el.style.cursor = "grab";
+      el.removeEventListener("pointermove", move);
+      el.removeEventListener("pointerup", up);
+      el.removeEventListener("pointercancel", up);
+    };
+
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerup", up);
+    el.addEventListener("pointercancel", up);
+  });
+}
+
+function setActiveObject(tab) {
+  const selectId = tab === "A" ? "aObjectSelect" : "bObjectSelect";
+  const select = document.getElementById(selectId);
+  state[tab].active = select.selectedIndex;
+  document.querySelectorAll(`.obj[data-tab='${tab}']`).forEach((objEl) => {
+    objEl.classList.toggle("active", Number(objEl.dataset.index) === select.selectedIndex);
+  });
 }
 
 function bindTabs() {
@@ -75,8 +143,11 @@ function setTab(tab) {
 }
 
 function testA() {
-  const item = objectsA[document.getElementById("aObjectSelect").selectedIndex];
+  setActiveObject("A");
+  const index = document.getElementById("aObjectSelect").selectedIndex;
+  const item = objectsA[index];
   const result = item.magnetic ? "ja" : "nein";
+  animateObjectResult("A", index, item.magnetic);
   if (item.magnetic) state.A.magneticMaterials.add(item.material);
   addUniqueRow(state.A.rows, item.name, [item.name, item.material, result]);
   renderRows("aTableBody", state.A.rows);
@@ -86,8 +157,11 @@ function testA() {
 }
 
 function testB() {
-  const item = objectsB[document.getElementById("bObjectSelect").selectedIndex];
+  setActiveObject("B");
+  const index = document.getElementById("bObjectSelect").selectedIndex;
+  const item = objectsB[index];
   const result = item.magnetic ? "ja" : "nein";
+  animateObjectResult("B", index, item.magnetic);
   if (item.magnetic) state.B.magneticMetals.add(item.metal);
   addUniqueRow(state.B.rows, item.name, [item.name, item.metal, result]);
   renderRows("bTableBody", state.B.rows);
@@ -96,27 +170,42 @@ function testB() {
   document.getElementById("bSummary").textContent = `Metalle mit Magnetwirkung: ${metals.length ? metals.join(", ") : "–"}`;
 }
 
+function animateObjectResult(tab, index, magnetic) {
+  const el = document.querySelector(`.obj[data-tab='${tab}'][data-index='${index}']`);
+  if (!el) return;
+  if (magnetic) {
+    el.style.left = "71%";
+    el.style.top = "68%";
+  } else {
+    el.classList.remove("bad-shake");
+    void el.offsetWidth;
+    el.classList.add("bad-shake");
+  }
+}
+
 function updateDistanceLabel() {
-  document.getElementById("cDistanceValue").textContent = Number(document.getElementById("cDistance").value).toFixed(1);
+  const distance = Number(document.getElementById("cDistance").value);
+  document.getElementById("cDistanceValue").textContent = distance.toFixed(1);
+  document.getElementById("cMagnet").style.left = `${8 + (15 - distance) * 4.4}%`;
 }
 
 function testC() {
   const distance = Number(document.getElementById("cDistance").value);
   const attracted = distance <= state.C.threshold;
+  const clip = document.getElementById("cClip");
   const msg = attracted
     ? `Büroklammer wird angezogen bei ${distance.toFixed(1)} cm.`
     : `Noch keine Anziehung bei ${distance.toFixed(1)} cm. Näher heran bewegen.`;
   setResult("cResult", `${msg} (Versuch ${state.C.trial}/3)`, attracted);
 
+  clip.classList.toggle("clip-pull", attracted);
+
   if (attracted) {
     const existing = state.C.rows.find((r) => r[0] === String(state.C.trial));
     const row = [String(state.C.trial), distance.toFixed(1)];
-    if (existing) {
-      existing[1] = row[1];
-    } else {
-      state.C.rows.push(row);
-      state.C.rows.sort((a, b) => Number(a[0]) - Number(b[0]));
-    }
+    if (existing) existing[1] = row[1];
+    else state.C.rows.push(row);
+    state.C.rows.sort((a, b) => Number(a[0]) - Number(b[0]));
     renderRows("cTableBody", state.C.rows);
     updateCSummary();
   }
@@ -129,6 +218,7 @@ function nextTrialC() {
   }
   state.C.trial += 1;
   state.C.threshold = randomThreshold();
+  document.getElementById("cClip").classList.remove("clip-pull");
   document.getElementById("cResult").className = "result";
   document.getElementById("cResult").textContent = `Versuch ${state.C.trial} von 3 gestartet.`;
 }
@@ -146,6 +236,12 @@ function updateCSummary() {
 function testD() {
   const item = materialsD[document.getElementById("dMaterial").selectedIndex];
   const blocked = item.shields;
+  const plate = document.getElementById("dPlate");
+  const clip = document.getElementById("dClip");
+  plate.style.background = blocked ? "#64748b" : "#cbd5e1";
+  plate.style.borderColor = blocked ? "#334155" : "#94a3b8";
+  clip.classList.toggle("drop", blocked);
+
   const obs = blocked ? "Büroklammer fällt herunter (Wirkung abgeschirmt)" : "Büroklammer bleibt hängen (Wirkung dringt durch)";
   if (blocked) state.D.shield += 1;
   else state.D.pass += 1;
@@ -195,6 +291,10 @@ function randomThreshold() {
   return 5.8 + Math.random() * 1.8;
 }
 
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
 function resetAll() {
   state.A.rows = [];
   state.A.magneticMaterials = new Set();
@@ -223,8 +323,21 @@ function resetAll() {
   document.getElementById("dResult").textContent = "Noch kein Material getestet.";
 
   document.getElementById("cDistance").value = "10";
+  document.getElementById("dPlate").style.background = "#94a3b8";
+  document.getElementById("dPlate").style.borderColor = "#64748b";
+  document.getElementById("dClip").classList.remove("drop");
+  document.getElementById("cClip").classList.remove("clip-pull");
+
+  createDraggableObjects("A", objectsA, "aObjects", "material");
+  createDraggableObjects("B", objectsB, "bObjects", "metal");
+  document.getElementById("aObjectSelect").selectedIndex = 0;
+  document.getElementById("bObjectSelect").selectedIndex = 0;
+  setActiveObject("A");
+  setActiveObject("B");
+
   updateDistanceLabel();
   setTab("A");
 }
 
 init();
+updateDistanceLabel();
