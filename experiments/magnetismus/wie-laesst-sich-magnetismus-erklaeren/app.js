@@ -1,354 +1,498 @@
 const NS = "http://www.w3.org/2000/svg";
+const STAGE = { w: 1000, h: 600 };
 
-const state = {
-  stepIndex: 0,
-  panelCollapsed: false,
-  answers: {},
-  model: {
-    needleMagnetization: 0,
-    clipAttraction: 0,
-    heated: false,
-    struck: false,
-    splitMagnet: false,
-    nailForce: 0
+const EXPERIMENTS = {
+  A: {
+    title: "Experiment A – Einen Magneten selbst herstellen",
+    materials: ["Magnet", "Stricknadel", "Büroklammer", "Kerze", "Zange"],
+    steps: [
+      "Streiche mit dem Magneten mehrfach in einer Richtung über die Stricknadel.",
+      "Nähere die Stricknadel der Büroklammer.",
+      "Halte die Stricknadel mit der Zange in die Kerzenflamme.",
+      "Nähere die Stricknadel erneut der Büroklammer.",
+      "Wiederhole Schritt 1 und Schritt 2.",
+      "Schlage die Stricknadel einige Male auf den Tisch und teste erneut."
+    ]
+  },
+  B: {
+    title: "Experiment B – Aus zwei mach eins",
+    materials: ["Eisendraht", "Kneifzange", "2 Stabmagnete", "Büroklammer", "großer Eisennagel"],
+    steps: [
+      "Magnetisiere den Draht und schneide ihn mit der Zange in der Mitte durch.",
+      "Prüfe beide Drahtstücke jeweils an einer Büroklammer.",
+      "Lege die zwei Stabmagnete so, dass sich Nord- und Südpol berühren.",
+      "Nähere einen Eisennagel an die Berührungsstelle."
+    ]
   }
 };
 
-const steps = [
-  {
-    title: "A1/A2: Magnetisieren",
-    hint: "Streiche die Nadel mehrfach in eine Richtung und nähere sie der Büroklammer.",
-    materials: ["Magnet", "Stricknadel", "Büroklammer"],
-    checklist: [
-      "Schritt 1: Streiche mit dem Magneten mehrfach in eine Richtung über die Stricknadel.",
-      "Schritt 2: Nähere die Stricknadel der Büroklammer."
-    ],
-    tasks: [
-      { id: "s1_obs", type: "text", prompt: "Notiere deine Beobachtung nach Schritt 1 und 2.", placeholder: "Beobachtung..." },
-      { id: "s1_mc", type: "mcq", prompt: "Wo ist die magnetische Wirkung an einem Stabmagneten meist am stärksten?", options: ["In der Mitte", "An den Polen/Enden"], correct: 1 }
-    ]
+const state = {
+  experiment: "A",
+  stepIndex: 0,
+  panelCollapsed: false,
+  dragging: null,
+  feedback: "",
+  A: {
+    magnetization: 0,
+    strokes: 0,
+    heated: false,
+    clipAttached: false,
+    hitCount: 0,
+    stepDone: [false, false, false, false, false, false],
+    holdMs: 0,
+    lastHeatTick: 0,
+    needle: { x: 560, y: 210 },
+    magnet: { x: 240, y: 210 },
+    clip: { x: 260, y: 450 }
   },
-  {
-    title: "A3/A4: Entmagnetisieren durch Wärme",
-    hint: "Erhitze die Nadel in der Flamme und prüfe erneut die Anziehung.",
-    materials: ["Magnetisierte Stricknadel", "Kerze", "Zange", "Büroklammer"],
-    checklist: [
-      "Schritt 3: Halte die Stricknadel mit der Zange einige Minuten in die Kerzenflamme.",
-      "Schritt 4: Nähere die Stricknadel erneut der Büroklammer."
-    ],
-    tasks: [
-      { id: "s2_obs", type: "textcheck", minChars: 35, prompt: "Beschreibe den Vorgang des Entmagnetisierens.", placeholder: "Beim Erhitzen ..." }
-    ]
-  },
-  {
-    title: "A5/A6: Wiederholen und Schlagen",
-    hint: "Magnetisiere erneut und schlage die Nadel mehrmals auf den Tisch.",
-    materials: ["Magnet", "Stricknadel", "Büroklammer", "Tisch"],
-    checklist: [
-      "Schritt 5: Wiederhole Schritt 1 und Schritt 2.",
-      "Schritt 6: Schlage die Stricknadel einige Male auf den Tisch und prüfe erneut."
-    ],
-    tasks: [
-      { id: "s3_mc", type: "mcq", prompt: "Was passiert mit der Ordnung der Elementarmagnete beim Schlagen?", options: ["Sie ordnen sich stärker", "Sie geraten wieder ungeordnet"], correct: 1 },
-      { id: "s3_conclusion", type: "textcheck", minChars: 45, prompt: "Ziehe eine Schlussfolgerung zum Magnetisieren und Entmagnetisieren.", placeholder: "Schlussfolgerung..." }
-    ]
-  },
-  {
-    title: "B: Aus zwei mach eins",
-    hint: "Teile den magnetisierten Draht und bringe Nord- und Südpol zusammen.",
-    materials: ["Eisendraht", "Kneifzange", "2 Stabmagnete", "Büroklammer", "großer Eisennagel"],
-    checklist: [
-      "Schritt 1/2: Magnetisiere den Draht, teile ihn und teste die Enden an Büroklammern.",
-      "Schritt 3/4: Lege Nord- und Südpol zusammen und halte den Nagel an die Berührungsstelle."
-    ],
-    tasks: [
-      { id: "s4_obs", type: "text", prompt: "Was beobachtest du an der Berührungsstelle von Nord- und Südpol?", placeholder: "Beobachtung..." },
-      { id: "s4_model", type: "mcq", prompt: "Warum kann die Berührungsstelle den Nagel stark anziehen?", options: ["Die Feldlinien bündeln sich dort", "Dort gibt es gar kein Feld"], correct: 0 }
-    ]
+  B: {
+    magnetized: 0,
+    wireCut: false,
+    clipLeftAttached: false,
+    clipRightAttached: false,
+    contactBuilt: false,
+    nailAttached: false,
+    stepDone: [false, false, false, false],
+    wire: { x: 520, y: 230 },
+    wireLeft: { x: 470, y: 230 },
+    wireRight: { x: 570, y: 230 },
+    magnetTool: { x: 240, y: 210 },
+    barA: { x: 350, y: 470 },
+    barB: { x: 650, y: 470 },
+    nail: { x: 500, y: 130 },
+    clipLeft: { x: 300, y: 440 },
+    clipRight: { x: 720, y: 440 }
   }
-];
+};
 
-function init(){
+function init() {
   bindUI();
-  updateStepper();
-  renderStep();
+  render();
 }
 
-function bindUI(){
+function bindUI() {
   document.getElementById("resetBtn").addEventListener("click", resetAll);
-  document.getElementById("nextStep").addEventListener("click", ()=>setStep((state.stepIndex + 1) % steps.length));
-  document.getElementById("checkBtn").addEventListener("click", checkTasks);
+  document.getElementById("helpBtn").addEventListener("click", () => document.getElementById("helpModal").hidden = false);
+  document.getElementById("closeHelp").addEventListener("click", () => document.getElementById("helpModal").hidden = true);
+  document.getElementById("nextStepBtn").addEventListener("click", nextStep);
+  document.getElementById("panelToggle").addEventListener("click", togglePanel);
+  document.getElementById("contextBtn").addEventListener("click", onContextAction);
 
-  document.getElementById("panelToggle").addEventListener("click", ()=>{
-    state.panelCollapsed = !state.panelCollapsed;
-    document.getElementById("panel").setAttribute("data-collapsed", String(state.panelCollapsed));
-    document.getElementById("panelToggle").textContent = state.panelCollapsed ? "Aufgaben ▼" : "Aufgaben ▲";
-  });
-
-  document.getElementById("helpBtn").addEventListener("click", ()=> document.getElementById("helpModal").hidden = false);
-  document.getElementById("closeHelp").addEventListener("click", ()=> document.getElementById("helpModal").hidden = true);
-
-  document.getElementById("actionBtnA").addEventListener("click", primaryAction);
-  document.getElementById("actionBtnB").addEventListener("click", secondaryAction);
+  const stage = document.getElementById("stage");
+  stage.addEventListener("pointerdown", onDown);
+  stage.addEventListener("pointermove", onMove);
+  stage.addEventListener("pointerup", onUp);
+  stage.addEventListener("pointercancel", onUp);
 }
 
-function setStep(index){
-  state.stepIndex = index;
-  document.getElementById("taskFeedback").hidden = true;
-  document.getElementById("taskFeedback").textContent = "";
-  updateStepper();
-  renderStep();
+function render() {
+  renderTabs();
+  renderStepper();
+  renderPanel();
+  renderScene();
+  renderStatus();
+  renderContextButton();
 }
 
-function updateStepper(){
-  const stepper = document.getElementById("stepper");
-  stepper.innerHTML = "";
-  steps.forEach((step, i)=>{
+function renderTabs() {
+  const tabs = document.getElementById("experimentTabs");
+  tabs.innerHTML = "";
+  Object.entries(EXPERIMENTS).forEach(([key, exp]) => {
     const btn = document.createElement("button");
-    btn.className = `step ${i===state.stepIndex ? "active" : ""}`;
-    btn.textContent = `${i+1}. ${step.title}`;
-    btn.addEventListener("click", ()=>setStep(i));
-    stepper.appendChild(btn);
+    btn.className = `step ${state.experiment === key ? "active" : ""}`;
+    btn.textContent = exp.title;
+    btn.addEventListener("click", () => {
+      state.experiment = key;
+      state.stepIndex = 0;
+      state.feedback = "";
+      render();
+    });
+    tabs.appendChild(btn);
   });
-  document.getElementById("subtitle").textContent = `Schritt ${state.stepIndex + 1} von ${steps.length}`;
 }
 
-function renderStep(){
-  const step = steps[state.stepIndex];
-  document.getElementById("stageHint").textContent = step.hint;
+function renderStepper() {
+  const steps = EXPERIMENTS[state.experiment].steps;
+  const done = state[state.experiment].stepDone;
+  const el = document.getElementById("stepper");
+  el.innerHTML = "";
+  steps.forEach((s, i) => {
+    const btn = document.createElement("button");
+    btn.className = `step ${i === state.stepIndex ? "active" : ""}`;
+    btn.textContent = `${i + 1}${done[i] ? " ✓" : ""}`;
+    btn.addEventListener("click", () => {
+      if (i <= maxUnlockedStep()) {
+        state.stepIndex = i;
+        render();
+      }
+    });
+    el.appendChild(btn);
+  });
+  document.getElementById("subtitle").textContent = `${EXPERIMENTS[state.experiment].title} · Schritt ${state.stepIndex + 1}`;
+}
 
+function renderPanel() {
+  document.getElementById("panel").setAttribute("data-collapsed", String(state.panelCollapsed));
+  document.getElementById("panelToggle").textContent = state.panelCollapsed ? "Aufgaben ▼" : "Aufgaben ▲";
   const m = document.getElementById("materials");
   m.innerHTML = "";
-  step.materials.forEach(item=>{
+  EXPERIMENTS[state.experiment].materials.forEach((item) => {
     const li = document.createElement("li");
     li.textContent = item;
     m.appendChild(li);
   });
 
-  const cl = document.getElementById("checklist");
-  cl.innerHTML = "";
-  step.checklist.forEach(item=>{
-    const row = document.createElement("label");
-    row.className = "checkitem";
-    const box = document.createElement("input");
-    box.type = "checkbox";
-    row.append(box, document.createTextNode(item));
-    cl.appendChild(row);
-  });
-
-  renderTasks();
-  renderScene();
-  updateActionButtons();
-}
-
-function renderTasks(){
-  const tasks = steps[state.stepIndex].tasks;
-  const target = document.getElementById("tasks");
-  target.innerHTML = "";
-
-  tasks.forEach(task=>{
-    const wrap = document.createElement("div");
-    wrap.className = "task";
-    const p = document.createElement("div");
-    p.style.fontWeight = "700";
-    p.style.marginTop = "10px";
-    p.textContent = task.prompt;
-    wrap.appendChild(p);
-
-    if(task.type === "text" || task.type === "textcheck"){
-      const ta = document.createElement("textarea");
-      ta.placeholder = task.placeholder || "";
-      ta.value = state.answers[task.id] || "";
-      ta.addEventListener("input", ()=>state.answers[task.id] = ta.value);
-      wrap.appendChild(ta);
-    }
-
-    if(task.type === "mcq"){
-      const box = document.createElement("div");
-      box.className = "choiceGrid";
-      task.options.forEach((opt, idx)=>{
-        const b = document.createElement("button");
-        b.className = "btn";
-        b.textContent = opt;
-        b.addEventListener("click", ()=>{
-          state.answers[task.id] = idx;
-          b.style.borderColor = "rgba(37,99,235,.4)";
-        });
-        box.appendChild(b);
-      });
-      wrap.appendChild(box);
-    }
-
-    target.appendChild(wrap);
+  const ins = document.getElementById("instructions");
+  ins.innerHTML = "";
+  EXPERIMENTS[state.experiment].steps.forEach((text, i) => {
+    const row = document.createElement("div");
+    row.className = `check ${state[state.experiment].stepDone[i] ? "done" : ""}`;
+    row.textContent = `Schritt ${i + 1}: ${text}`;
+    ins.appendChild(row);
   });
 }
 
-function checkTasks(){
-  const tasks = steps[state.stepIndex].tasks;
-  let correct = 0;
-  let total = 0;
-
-  tasks.forEach(task=>{
-    if(task.type === "mcq"){
-      total += 1;
-      if(state.answers[task.id] === task.correct) correct += 1;
-    }
-    if(task.type === "textcheck"){
-      total += 1;
-      const len = (state.answers[task.id] || "").trim().length;
-      if(len >= (task.minChars || 20)) correct += 1;
-    }
-  });
-
-  const feedback = document.getElementById("taskFeedback");
-  feedback.hidden = false;
-  feedback.textContent = total === 0
-    ? "Deine Beobachtung ist gespeichert. Vergleiche sie mit dem Modell der Elementarmagnete."
-    : `Ergebnis: ${correct}/${total} passend. Tipp: Beziehe dich auf geordnete bzw. ungeordnete Elementarmagnete.`;
+function renderStatus() {
+  document.getElementById("statusText").textContent = state.feedback || "Führe den aktuellen Schritt auf der Bühne aus.";
+  document.getElementById("stageFeedback").textContent = state.feedback || "";
 }
 
-function updateActionButtons(){
-  const a = document.getElementById("actionBtnA");
-  const b = document.getElementById("actionBtnB");
+function renderContextButton() {
+  const btn = document.getElementById("contextBtn");
+  btn.hidden = true;
+  if (state.experiment === "A" && state.stepIndex === 5) {
+    btn.hidden = false;
+    btn.textContent = "Auf Tisch schlagen";
+  }
+  if (state.experiment === "B" && state.stepIndex === 0) {
+    btn.hidden = false;
+    btn.textContent = "Draht in der Mitte durchschneiden";
+  }
+}
 
-  if(state.stepIndex === 0){
-    a.hidden = false; b.hidden = false;
-    a.textContent = "Nadel magnetisieren";
-    b.textContent = "Büroklammer testen";
-  } else if(state.stepIndex === 1){
-    a.hidden = false; b.hidden = false;
-    a.textContent = "Nadel erhitzen";
-    b.textContent = "Erneut prüfen";
-  } else if(state.stepIndex === 2){
-    a.hidden = false; b.hidden = false;
-    a.textContent = "Neu magnetisieren";
-    b.textContent = "Nadel auf Tisch schlagen";
+function maxUnlockedStep() {
+  const done = state[state.experiment].stepDone;
+  let idx = 0;
+  while (idx < done.length && done[idx]) idx += 1;
+  return Math.min(idx, done.length - 1);
+}
+
+function nextStep() {
+  const done = state[state.experiment].stepDone;
+  if (!done[state.stepIndex]) {
+    state.feedback = "Dieser Schritt ist noch nicht erfüllt.";
+    renderStatus();
+    return;
+  }
+  if (state.stepIndex < done.length - 1) {
+    state.stepIndex += 1;
+    state.feedback = "";
+    render();
   } else {
-    a.hidden = false; b.hidden = false;
-    a.textContent = "Draht teilen";
-    b.textContent = "Pole zusammenführen";
+    state.feedback = "Experiment abgeschlossen. Du kannst jetzt Beobachtungen notieren oder resetten.";
+    renderStatus();
   }
 }
 
-function primaryAction(){
-  if(state.stepIndex === 0){
-    state.model.needleMagnetization = Math.min(100, state.model.needleMagnetization + 35);
-    stageMessage("Die Elementarmagnete richten sich stärker aus.");
+function onContextAction() {
+  if (state.experiment === "A" && state.stepIndex === 5) {
+    const a = state.A;
+    a.hitCount += 1;
+    a.magnetization = Math.max(0, a.magnetization - 25);
+    state.feedback = `Schlag ${a.hitCount}/3 ausgeführt.`;
+    if (a.hitCount >= 3) {
+      a.stepDone[5] = true;
+      a.clipAttached = false;
+      state.feedback = "Durch Erschütterung ist die Nadel deutlich entmagnetisiert.";
+    }
   }
-  if(state.stepIndex === 1){
-    state.model.heated = true;
-    state.model.needleMagnetization = Math.max(0, state.model.needleMagnetization - 55);
-    stageMessage("Durch Wärme verlieren viele Bereiche ihre gemeinsame Ausrichtung.");
+  if (state.experiment === "B" && state.stepIndex === 0) {
+    const b = state.B;
+    if (b.magnetized < 55) {
+      state.feedback = "Magnetisiere den Draht zuerst durch mehrfaches Streichen.";
+    } else {
+      b.wireCut = true;
+      b.stepDone[0] = true;
+      state.feedback = "Draht wurde geteilt: Es sind zwei kleinere Magnete entstanden.";
+    }
   }
-  if(state.stepIndex === 2){
-    state.model.needleMagnetization = 85;
-    state.model.struck = false;
-    stageMessage("Die Nadel ist wieder deutlich magnetisiert.");
-  }
-  if(state.stepIndex === 3){
-    state.model.splitMagnet = true;
-    stageMessage("Aus dem Draht sind zwei kleinere Magnete entstanden.");
-  }
+  render();
+}
+
+function onDown(evt) {
+  const target = evt.target.closest("[data-drag]");
+  if (!target) return;
+  const key = target.dataset.drag;
+  const pos = getPos(key);
+  if (!pos) return;
+  const p = svgPoint(evt);
+  state.dragging = { key, dx: pos.x - p.x, dy: pos.y - p.y, pointerId: evt.pointerId };
+  target.setPointerCapture(evt.pointerId);
+}
+
+function onMove(evt) {
+  if (!state.dragging) return;
+  const p = svgPoint(evt);
+  const key = state.dragging.key;
+  const pos = getPos(key);
+  pos.x = clamp(p.x + state.dragging.dx, 80, 920);
+  pos.y = clamp(p.y + state.dragging.dy, 90, 550);
+  applyPhysics();
   renderScene();
 }
 
-function secondaryAction(){
-  if(state.stepIndex === 0){
-    state.model.clipAttraction = state.model.needleMagnetization;
-    stageMessage(state.model.clipAttraction > 40 ? "Die Büroklammer wird angezogen." : "Noch schwach: streiche öfter in einer Richtung.");
-  }
-  if(state.stepIndex === 1){
-    state.model.clipAttraction = state.model.needleMagnetization;
-    stageMessage(state.model.clipAttraction < 35 ? "Nach dem Erhitzen ist die Anziehung deutlich kleiner." : "Es wirkt noch etwas Magnetismus.");
-  }
-  if(state.stepIndex === 2){
-    state.model.struck = true;
-    state.model.needleMagnetization = Math.max(10, state.model.needleMagnetization - 50);
-    stageMessage("Durch Erschütterung wird die Ordnung wieder gestört.");
-  }
-  if(state.stepIndex === 3){
-    state.model.nailForce = state.model.splitMagnet ? 95 : 20;
-    stageMessage(state.model.splitMagnet ? "An der Berührungsstelle ist die Wirkung auf den Nagel stark." : "Teile zuerst den Draht für zwei Pole.");
-  }
-  renderScene();
+function onUp() {
+  if (!state.dragging) return;
+  state.dragging = null;
+  applyPhysics();
+  render();
 }
 
-function stageMessage(text){
-  document.getElementById("stageFeedback").textContent = text;
+function applyPhysics() {
+  if (state.experiment === "A") updateA();
+  else updateB();
 }
 
-function renderScene(){
+function updateA() {
+  const a = state.A;
+  const step = state.stepIndex;
+
+  if (step === 0) {
+    if (a.magnet.x > 640 && Math.abs(a.magnet.y - a.needle.y) < 30) {
+      a.strokes += 1;
+      a.magnetization = Math.min(100, a.magnetization + 14);
+      a.magnet.x = 240;
+      state.feedback = `Streichbewegung ${a.strokes}/4.`;
+      if (a.strokes >= 4) {
+        a.stepDone[0] = true;
+        state.feedback = "Die Nadel ist nun magnetisiert.";
+      }
+    }
+  }
+
+  const nearClip = distance(a.needle, a.clip) < 90;
+  if ((step === 1 || step === 4) && nearClip && a.magnetization > 45) {
+    a.clipAttached = true;
+    a.clip.x = a.needle.x - 70;
+    a.clip.y = a.needle.y + 20;
+    if (step === 1) a.stepDone[1] = true;
+    if (step === 4) a.stepDone[4] = true;
+    state.feedback = "Die Büroklammer wird angezogen.";
+  }
+
+  if (step === 3 && nearClip) {
+    if (a.magnetization < 35) {
+      a.clipAttached = false;
+      a.stepDone[3] = true;
+      state.feedback = "Nach dem Erhitzen ist die Anziehung fast verschwunden.";
+    } else {
+      state.feedback = "Die Nadel ist noch zu stark magnetisiert. Erhitze länger.";
+    }
+  }
+
+  if (step === 2) {
+    const inFlame = a.needle.x > 710 && a.needle.x < 810 && a.needle.y > 250 && a.needle.y < 430;
+    const now = performance.now();
+    if (!a.lastHeatTick) a.lastHeatTick = now;
+    if (inFlame) {
+      a.holdMs += now - a.lastHeatTick;
+      a.magnetization = Math.max(0, a.magnetization - 0.06 * (now - a.lastHeatTick));
+      state.feedback = `Erhitzen läuft: ${Math.min(100, Math.round((a.holdMs / 1800) * 100))}%`;
+      if (a.holdMs >= 1800) {
+        a.stepDone[2] = true;
+        state.feedback = "Erhitzen abgeschlossen. Die Nadel ist weitgehend entmagnetisiert.";
+      }
+    }
+    a.lastHeatTick = now;
+  }
+
+  if (a.clipAttached && step === 5 && a.magnetization < 30) {
+    a.clipAttached = false;
+  }
+}
+
+function updateB() {
+  const b = state.B;
+  const step = state.stepIndex;
+
+  if (step === 0 && !b.wireCut && b.magnetTool.x > 620 && Math.abs(b.magnetTool.y - b.wire.y) < 28) {
+    b.magnetized = Math.min(100, b.magnetized + 12);
+    b.magnetTool.x = 240;
+    state.feedback = `Draht magnetisiert: ${Math.round(b.magnetized)}%.`;
+  }
+
+  if (step === 1 && b.wireCut) {
+    if (distance(b.wireLeft, b.clipLeft) < 90) {
+      b.clipLeftAttached = true;
+      b.clipLeft.x = b.wireLeft.x - 55;
+      b.clipLeft.y = b.wireLeft.y + 20;
+    }
+    if (distance(b.wireRight, b.clipRight) < 90) {
+      b.clipRightAttached = true;
+      b.clipRight.x = b.wireRight.x - 55;
+      b.clipRight.y = b.wireRight.y + 20;
+    }
+    if (b.clipLeftAttached && b.clipRightAttached) {
+      b.stepDone[1] = true;
+      state.feedback = "Beide Drahtstücke wirken wie Magnete und ziehen Büroklammern an.";
+    }
+  }
+
+  if (step === 2) {
+    const contact = Math.abs(b.barA.x + 100 - (b.barB.x - 100)) < 22 && Math.abs(b.barA.y - b.barB.y) < 16;
+    b.contactBuilt = contact;
+    if (contact) {
+      b.stepDone[2] = true;
+      state.feedback = "Nord- und Südpol berühren sich.";
+    }
+  }
+
+  if (step === 3 && b.contactBuilt) {
+    const contactPoint = { x: (b.barA.x + b.barB.x) / 2, y: b.barA.y };
+    if (distance(b.nail, contactPoint) < 80) {
+      b.nailAttached = true;
+      b.nail.x = contactPoint.x;
+      b.nail.y = contactPoint.y - 110;
+      b.stepDone[3] = true;
+      state.feedback = "Der Nagel wird an der Berührungsstelle stark angezogen.";
+    }
+  }
+}
+
+function renderScene() {
   const g = document.getElementById("scene");
   g.innerHTML = "";
-  drawLabel(g, steps[state.stepIndex].title);
+  if (state.experiment === "A") drawSceneA(g);
+  else drawSceneB(g);
+}
 
-  if(state.stepIndex < 3){
-    drawNeedleScene(g);
+function drawSceneA(g) {
+  const a = state.A;
+  g.appendChild(svg("text", { x: 40, y: 52, class: "stageText" })).textContent = `A · Schritt ${state.stepIndex + 1}`;
+  g.appendChild(svg("rect", { x: 0, y: 500, width: 1000, height: 100, fill: "#d6c6ad" }));
+
+  g.appendChild(svg("rect", { x: 720, y: 320, width: 90, height: 160, rx: 36, fill: "#e76f51" }));
+  g.appendChild(svg("polygon", { points: "765,250 740,320 790,320", fill: "#fbbf24" }));
+  g.appendChild(svg("text", { x: 708, y: 520, class: "label" })).textContent = "Kerze";
+
+  const needle = group("needle", a.needle.x, a.needle.y);
+  needle.appendChild(svg("line", { x1: -170, y1: 0, x2: 170, y2: 0, stroke: "#64748b", "stroke-width": 10, "stroke-linecap": "round" }));
+  needle.appendChild(svg("circle", { cx: -170, cy: 0, r: 10, fill: "#94a3b8" }));
+  g.appendChild(needle);
+
+  const magnet = group("magnet", a.magnet.x, a.magnet.y);
+  magnet.appendChild(svg("rect", { x: -75, y: -25, width: 150, height: 50, rx: 10, fill: "#2563eb" }));
+  magnet.appendChild(svg("text", { x: -18, y: 6, class: "label", fill: "white" })).textContent = "Magnet";
+  g.appendChild(magnet);
+
+  const clip = group("clip", a.clip.x, a.clip.y);
+  clip.appendChild(svg("rect", { x: -18, y: -18, width: 36, height: 36, rx: 7, fill: "#9ca3af" }));
+  g.appendChild(clip);
+
+  g.appendChild(svg("text", { x: 40, y: 92, class: "label" })).textContent = `Magnetisierung der Nadel: ${Math.round(a.magnetization)}%`;
+}
+
+function drawSceneB(g) {
+  const b = state.B;
+  g.appendChild(svg("text", { x: 40, y: 52, class: "stageText" })).textContent = `B · Schritt ${state.stepIndex + 1}`;
+  g.appendChild(svg("rect", { x: 0, y: 500, width: 1000, height: 100, fill: "#d6c6ad" }));
+
+  if (!b.wireCut) {
+    const wire = group("wire", b.wire.x, b.wire.y);
+    wire.appendChild(svg("line", { x1: -180, y1: 0, x2: 180, y2: 0, stroke: "#64748b", "stroke-width": 10, "stroke-linecap": "round" }));
+    g.appendChild(wire);
   } else {
-    drawSplitScene(g);
+    const left = group("wireLeft", b.wireLeft.x, b.wireLeft.y);
+    left.appendChild(svg("line", { x1: -120, y1: 0, x2: 30, y2: 0, stroke: "#64748b", "stroke-width": 10, "stroke-linecap": "round" }));
+    g.appendChild(left);
+    const right = group("wireRight", b.wireRight.x, b.wireRight.y);
+    right.appendChild(svg("line", { x1: -30, y1: 0, x2: 120, y2: 0, stroke: "#64748b", "stroke-width": 10, "stroke-linecap": "round" }));
+    g.appendChild(right);
   }
+
+  const tool = group("magnetTool", b.magnetTool.x, b.magnetTool.y);
+  tool.appendChild(svg("rect", { x: -75, y: -25, width: 150, height: 50, rx: 10, fill: "#2563eb" }));
+  g.appendChild(tool);
+
+  const barA = group("barA", b.barA.x, b.barA.y);
+  barA.appendChild(svg("rect", { x: -100, y: -25, width: 200, height: 50, fill: "#22c55e" }));
+  barA.appendChild(svg("text", { x: -80, y: 7, class: "label" })).textContent = "N";
+  barA.appendChild(svg("text", { x: 60, y: 7, class: "label" })).textContent = "S";
+  g.appendChild(barA);
+
+  const barB = group("barB", b.barB.x, b.barB.y);
+  barB.appendChild(svg("rect", { x: -100, y: -25, width: 200, height: 50, fill: "#f97316" }));
+  barB.appendChild(svg("text", { x: -80, y: 7, class: "label" })).textContent = "N";
+  barB.appendChild(svg("text", { x: 60, y: 7, class: "label" })).textContent = "S";
+  g.appendChild(barB);
+
+  const nail = group("nail", b.nail.x, b.nail.y);
+  nail.appendChild(svg("line", { x1: 0, y1: -80, x2: 0, y2: 40, stroke: "#475569", "stroke-width": 11, "stroke-linecap": "round" }));
+  g.appendChild(nail);
+
+  const clipLeft = group("clipLeft", b.clipLeft.x, b.clipLeft.y);
+  clipLeft.appendChild(svg("rect", { x: -16, y: -16, width: 32, height: 32, rx: 6, fill: "#9ca3af" }));
+  g.appendChild(clipLeft);
+  const clipRight = group("clipRight", b.clipRight.x, b.clipRight.y);
+  clipRight.appendChild(svg("rect", { x: -16, y: -16, width: 32, height: 32, rx: 6, fill: "#9ca3af" }));
+  g.appendChild(clipRight);
+
+  g.appendChild(svg("text", { x: 40, y: 92, class: "label" })).textContent = `Magnetisierung Draht: ${Math.round(b.magnetized)}%`;
 }
 
-function drawLabel(g, text){
-  const t = svg("text", { x: 44, y: 54, class: "stageLabel" });
-  t.textContent = text;
-  g.appendChild(t);
+function getPos(key) {
+  const a = state.A;
+  const b = state.B;
+  const map = { needle: a.needle, magnet: a.magnet, clip: a.clip, wire: b.wire, wireLeft: b.wireLeft, wireRight: b.wireRight, magnetTool: b.magnetTool, barA: b.barA, barB: b.barB, nail: b.nail, clipLeft: b.clipLeft, clipRight: b.clipRight };
+  return map[key];
 }
 
-function drawNeedleScene(g){
-  g.appendChild(svg("rect", { x: 70, y: 380, width: 260, height: 70, rx: 12, fill: "#d1d5db" }));
-  g.appendChild(svg("text", { x: 86, y: 425, class: "stageValue" })).textContent = "Büroklammern";
-
-  const level = state.model.needleMagnetization;
-  g.appendChild(svg("rect", { x: 220, y: 190, width: 560, height: 22, rx: 11, fill: "#475569" }));
-  g.appendChild(svg("circle", { cx: 780, cy: 201, r: 14, fill: "#94a3b8" }));
-
-  g.appendChild(svg("text", { x: 220, y: 160, class: "stageValue" })).textContent = `Magnetisierung: ${Math.round(level)}%`;
-  g.appendChild(svg("rect", { x: 220, y: 230, width: 5 * level, height: 20, rx: 8, fill: "#2563eb" }));
-  g.appendChild(svg("text", { x: 220, y: 275, class: "stageValue" })).textContent = `Anziehung Büroklammer: ${Math.round(state.model.clipAttraction)}%`;
-
-  if(state.stepIndex === 1){
-    g.appendChild(svg("rect", { x: 700, y: 300, width: 90, height: 150, rx: 30, fill: "#f97316" }));
-    g.appendChild(svg("polygon", { points: "745,220 720,300 770,300", fill: "#facc15" }));
-    g.appendChild(svg("text", { x: 690, y: 485, class: "stageValue" })).textContent = "Kerze";
-  }
+function togglePanel() {
+  state.panelCollapsed = !state.panelCollapsed;
+  renderPanel();
 }
 
-function drawSplitScene(g){
-  const left = state.model.splitMagnet ? "#22c55e" : "#9ca3af";
-  const right = state.model.splitMagnet ? "#f97316" : "#9ca3af";
-
-  g.appendChild(svg("rect", { x: 160, y: 300, width: 220, height: 64, fill: left }));
-  g.appendChild(svg("rect", { x: 380, y: 300, width: 220, height: 64, fill: right }));
-  g.appendChild(svg("rect", { x: 600, y: 300, width: 220, height: 64, fill: left }));
-
-  g.appendChild(svg("text", { x: 170, y: 290, class: "stageValue" })).textContent = "N";
-  g.appendChild(svg("text", { x: 585, y: 290, class: "stageValue" })).textContent = "S";
-  g.appendChild(svg("line", { x1: 600, y1: 200, x2: 600, y2: 300, stroke: "#334155", "stroke-width": 5 }));
-  g.appendChild(svg("text", { x: 552, y: 190, class: "stageValue" })).textContent = "Nagel";
-  g.appendChild(svg("text", { x: 160, y: 420, class: "stageValue" })).textContent = `Anziehung am Kontaktpunkt: ${Math.round(state.model.nailForce)}%`;
+function resetAll() {
+  state.experiment = "A";
+  state.stepIndex = 0;
+  state.feedback = "Alles wurde zurückgesetzt.";
+  Object.assign(state.A, {
+    magnetization: 0, strokes: 0, heated: false, clipAttached: false, hitCount: 0, stepDone: [false, false, false, false, false, false], holdMs: 0, lastHeatTick: 0,
+    needle: { x: 560, y: 210 }, magnet: { x: 240, y: 210 }, clip: { x: 260, y: 450 }
+  });
+  Object.assign(state.B, {
+    magnetized: 0, wireCut: false, clipLeftAttached: false, clipRightAttached: false, contactBuilt: false, nailAttached: false,
+    stepDone: [false, false, false, false], wire: { x: 520, y: 230 }, wireLeft: { x: 470, y: 230 }, wireRight: { x: 570, y: 230 },
+    magnetTool: { x: 240, y: 210 }, barA: { x: 350, y: 470 }, barB: { x: 650, y: 470 }, nail: { x: 500, y: 130 }, clipLeft: { x: 300, y: 440 }, clipRight: { x: 720, y: 440 }
+  });
+  render();
 }
 
-function svg(tag, attrs){
+function svgPoint(evt) {
+  const stage = document.getElementById("stage");
+  const pt = stage.createSVGPoint();
+  pt.x = evt.clientX;
+  pt.y = evt.clientY;
+  return pt.matrixTransform(stage.getScreenCTM().inverse());
+}
+
+function group(key, x, y) {
+  const g = svg("g", { transform: `translate(${x} ${y})`, "data-drag": key, style: "cursor: grab;" });
+  return g;
+}
+
+function svg(tag, attrs) {
   const el = document.createElementNS(NS, tag);
-  Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k, v));
+  Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
   return el;
 }
 
-function resetAll(){
-  state.stepIndex = 0;
-  state.answers = {};
-  state.model = {
-    needleMagnetization: 0,
-    clipAttraction: 0,
-    heated: false,
-    struck: false,
-    splitMagnet: false,
-    nailForce: 0
-  };
-  stageMessage("Simulation zurückgesetzt.");
-  updateStepper();
-  renderStep();
+function distance(a, b) {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function clamp(v, min, max) {
+  return Math.max(min, Math.min(max, v));
 }
 
 init();

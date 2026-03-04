@@ -9,67 +9,62 @@
 <body>
   <header class="topbar">
     <div class="brand">
-      <div class="title" id="title">Wie lässt sich Magnetismus erklären?</div>
-      <div class="muted" id="subtitle">Schritt 1 von 4</div>
+      <div class="title">Wie lässt sich Magnetismus erklären?</div>
+      <div class="muted" id="subtitle"></div>
     </div>
     <div class="actions">
-      <a class="btn ghost" href="../../../index.html" aria-label="Zurück zur Übersicht">← Übersicht</a>
-      <button class="btn ghost" id="helpBtn" title="Hilfe">?</button>
-      <button class="btn primary" id="resetBtn" title="Alles zurücksetzen">Reset</button>
+      <a class="btn ghost" href="../../../index.html">← Übersicht</a>
+      <button class="btn ghost" id="helpBtn">?</button>
+      <button class="btn primary" id="resetBtn">Reset</button>
     </div>
   </header>
 
-  <nav class="stepper" id="stepper" aria-label="Schritte"></nav>
+  <nav class="experimentTabs" id="experimentTabs" aria-label="Experimente"></nav>
+  <nav class="stepper" id="stepper" aria-label="Durchführungsschritte"></nav>
 
   <main class="layout">
-    <section class="stageWrap card" aria-label="Experimentierfläche">
-      <svg id="stage" viewBox="0 0 1000 600" role="img" aria-label="Magnetismus-Experiment">
+    <section class="card stageWrap">
+      <svg id="stage" viewBox="0 0 1000 600" aria-label="Interaktive Experimentierfläche">
         <rect x="0" y="0" width="1000" height="600" rx="26" class="tableBg"/>
         <g id="scene"></g>
       </svg>
-      <div class="muted small" id="stageHint"></div>
-      <div class="rowBtns">
-        <button class="btn" id="actionBtnA"></button>
-        <button class="btn" id="actionBtnB"></button>
-      </div>
       <div class="note" id="stageFeedback"></div>
+      <div class="rowBtns">
+        <button class="btn" id="contextBtn" hidden></button>
+      </div>
     </section>
 
-    <aside class="panel" id="panel" aria-label="Aufgaben">
+    <aside class="panel" id="panel" data-collapsed="false">
       <div class="panelHandle">
-        <button class="panelToggle btn ghost" id="panelToggle" aria-expanded="true">Aufgaben ▲</button>
+        <button class="btn ghost panelToggle" id="panelToggle">Aufgaben ▲</button>
       </div>
       <div class="panelBody">
         <section class="card soft">
           <h2>Material</h2>
           <ul class="bullets" id="materials"></ul>
         </section>
-
         <section class="card soft">
           <h2>Durchführung</h2>
-          <div id="checklist"></div>
+          <div id="instructions"></div>
         </section>
-
         <section class="card soft">
-          <h2>Aufgaben</h2>
-          <div id="tasks"></div>
+          <h2>Status</h2>
+          <p id="statusText" class="muted"></p>
           <div class="rowBtns">
-            <button class="btn" id="checkBtn">Check</button>
-            <button class="btn primary" id="nextStep">Weiter</button>
+            <button class="btn primary" id="nextStepBtn">Nächster Schritt</button>
           </div>
-          <div id="taskFeedback" class="note" hidden></div>
         </section>
       </div>
     </aside>
   </main>
 
   <div class="modal" id="helpModal" hidden>
-    <div class="modalCard card">
+    <div class="card modalCard">
       <h2>Bedienung</h2>
       <ul class="bullets">
-        <li>Nutze die Aktionsknöpfe unter der Bühne, um die Versuche durchzuführen.</li>
-        <li>Beobachte, wie sich die Anziehung der Büroklammern ändert.</li>
-        <li>Mit <b>Reset</b> startest du jederzeit neu.</li>
+        <li>Objekte auf der Bühne lassen sich ziehen (Magnet, Nadel, Draht, Nagel).</li>
+        <li>Ein Schritt wird erst freigegeben, wenn du ihn wirklich ausgeführt hast.</li>
+        <li>Nutze Reset, um beide Experimente neu zu starten.</li>
       </ul>
       <button class="btn primary" id="closeHelp">OK</button>
     </div>
