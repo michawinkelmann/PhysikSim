@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>PhysikSim-Lab: Stabmagnet (Klasse 5)</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="title" id="title">Stabmagnet entdecken</div>
+      <div class="muted" id="subtitle">Schritt 1 von 4</div>
+    </div>
+    <div class="actions">
+      <a class="btn ghost" href="../../../index.html" aria-label="Zurück zur Übersicht">← Übersicht</a>
+<button class="btn ghost" id="helpBtn" title="Hilfe">?</button>
+      <button class="btn primary" id="resetBtn" title="Alles zurücksetzen">Reset</button>
+    </div>
+  </header>
+
+  <nav class="stepper" id="stepper" aria-label="Schritte"></nav>
+
+  <main class="layout">
+    
+    <div class="leftCol">
+      <section class="stageWrap card" aria-label="Experimentierfläche">
+      <div class="stageHeader">
+        <div class="stageHint" id="stageHint">Ziehe den Magneten zu den Büroklammern.</div>
+        <div class="stageMiniBtns">
+          <button class="btn" id="nudgeBtn" hidden>Anstoßen</button>
+          <button class="btn" id="flipBtn" hidden>Magnet drehen</button>
+        </div>
+      </div>
+
+      <svg id="stage" viewBox="0 0 1000 600" role="img" aria-label="Tisch">
+        <defs>
+          <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="3" stdDeviation="4" flood-opacity=".18"/>
+          </filter>
+        </defs>
+
+        <rect x="0" y="0" width="1000" height="600" rx="26" class="tableBg"/>
+        <g id="grid"></g>
+        <g id="overlays"></g>
+        <g id="objects"></g>
+      </svg>
+
+      <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    </section>
+      <section class="card soft learnCard" id="learnCard" aria-label="Was lernst du?">
+        <h2 id="learnTitle">Was lernst du?</h2>
+        <ul class="bullets" id="learnList"></ul>
+      </section>
+    </div>
+
+
+    <aside class="panel" id="panel" aria-label="Aufgaben">
+      <div class="panelHandle">
+        <button class="panelToggle btn ghost" id="panelToggle">Aufgaben ▲</button>
+      </div>
+      <div class="panelBody">
+<section class="card soft">
+          <h2>Material</h2>
+          <ul class="bullets" id="materials">
+            <!-- filled by JS -->
+          </ul>
+        </section>
+
+        <section class="card soft">
+          <h2>Durchführung</h2>
+          <div id="checklist"></div>
+        </section>
+
+        <section class="card soft">
+          <h2>Aufgaben</h2>
+          <div id="tasks"></div>
+          <div class="rowBtns">
+            <button class="btn" id="checkBtn">Check</button>
+            <button class="btn primary" id="nextStep">Weiter</button>
+          </div>
+          <div id="taskFeedback" class="note" hidden></div>
+        </section>
+
+        <section class="card soft">
+          <h2>Merksatz</h2>
+          <div class="note" id="merksatz"></div>
+          <div class="muted small" id="modelNote"></div>
+        </section>
+      </div>
+    </aside>
+  </main>
+
+  <div class="modal" id="helpModal" hidden>
+    <div class="modalCard card">
+      <h2>Bedienung</h2>
+      <ul class="bullets">
+        <li><b>Ziehen:</b> Tippe ein Objekt an und ziehe es.</li>
+        <li><b>Drehen:</b> Tippe bei einem Magneten auf „Magnet drehen“ (oben).</li>
+        <li><b>Einrasten:</b> Lege Block/Magnet auf die Bleistifte – sie rasten ein.</li>
+        <li><b>Reset:</b> Setzt Aufbau, Häkchen und Antworten zurück.</li>
+      </ul>
+      <button class="btn primary" id="closeHelp">OK</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
