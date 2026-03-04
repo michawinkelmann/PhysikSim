@@ -2,8 +2,27 @@ const state = {
   tab: "A",
   A: { rows: [], magneticMaterials: new Set(), active: null },
   B: { rows: [], magneticMetals: new Set(), active: null },
-  C: { trial: 1, threshold: randomThreshold(), rows: [] },
+  C: { trial: 1, threshold: randomThreshold(), rows: [], distance: 10 },
   D: { rows: [], pass: 0, shield: 0 }
+};
+
+const objectIcons = {
+  Büroklammer: "📎",
+  Münze: "🪙",
+  Radiergummi: "🧽",
+  Schraube: "🔩",
+  Holzstab: "🪵",
+  Alufolie: "🥫",
+  Nagel: "📌",
+  Glasmurmel: "🔮",
+  Unterlegscheibe: "⚙️",
+  Bleistift: "✏️",
+  Eisennagel: "📌",
+  Stahlschraube: "🔩",
+  Kupferdraht: "🧵",
+  Messingschraube: "🔩",
+  Alublech: "🥫",
+  Silberkette: "⛓️"
 };
 
 const objectsA = [
@@ -52,12 +71,13 @@ function init() {
   document.getElementById("bObjectSelect").addEventListener("change", () => setActiveObject("B"));
   document.getElementById("aTestBtn").addEventListener("click", testA);
   document.getElementById("bTestBtn").addEventListener("click", testB);
-  document.getElementById("cDistance").addEventListener("input", updateDistanceLabel);
+  document.getElementById("cDistance").addEventListener("input", updateDistanceFromSlider);
   document.getElementById("cMoveBtn").addEventListener("click", testC);
   document.getElementById("cTrialBtn").addEventListener("click", nextTrialC);
   document.getElementById("dTestBtn").addEventListener("click", testD);
   document.getElementById("resetBtn").addEventListener("click", resetAll);
 
+  bindCMagnetDrag();
   setActiveObject("A");
   setActiveObject("B");
 }
@@ -71,7 +91,7 @@ function createDraggableObjects(tab, objects, containerId, field) {
     el.type = "button";
     el.dataset.tab = tab;
     el.dataset.index = String(index);
-    el.innerHTML = `${item.name}<small>${item[field]}</small>`;
+    el.innerHTML = `<span class="icon">${objectIcons[item.name] || "🔹"}</span><span class="name">${item.name}</span><small>${item[field]}</small>`;
     el.style.left = `${16 + (index % 3) * 29}%`;
     el.style.top = `${16 + Math.floor(index / 3) * 18}%`;
     bindDrag(el, layer);
@@ -89,12 +109,12 @@ function bindDrag(el, container) {
     event.preventDefault();
     el.setPointerCapture(event.pointerId);
     const box = container.getBoundingClientRect();
-    const obj = el.getBoundingClientRect();
-    const offsetX = event.clientX - obj.left;
-    const offsetY = event.clientY - obj.top;
+    const offsetX = event.clientX - el.getBoundingClientRect().left;
+    const offsetY = event.clientY - el.getBoundingClientRect().top;
     el.style.cursor = "grabbing";
 
     const move = (e) => {
+      const obj = el.getBoundingClientRect();
       const left = clamp(e.clientX - box.left - offsetX, 6, box.width - obj.width - 6);
       const top = clamp(e.clientY - box.top - offsetY, 8, box.height - obj.height - 8);
       el.style.left = `${(left / box.width) * 100}%`;
@@ -172,32 +192,102 @@ function testB() {
 
 function animateObjectResult(tab, index, magnetic) {
   const el = document.querySelector(`.obj[data-tab='${tab}'][data-index='${index}']`);
-  if (!el) return;
+  const scene = document.getElementById(tab === "A" ? "sceneA" : "sceneB");
+  const magnet = scene.querySelector(".magnet");
+  if (!el || !magnet) return;
+
+  const sceneRect = scene.getBoundingClientRect();
+  const magnetRect = magnet.getBoundingClientRect();
+  const targetLeft = ((magnetRect.left - sceneRect.left - 74) / sceneRect.width) * 100;
+  const nearTop = ((magnetRect.bottom - sceneRect.top + 8) / sceneRect.height) * 100;
+
+  el.classList.remove("drop");
   if (magnetic) {
-    el.style.left = "71%";
-    el.style.top = "68%";
+    el.style.left = `${clamp(targetLeft, 4, 82)}%`;
+    el.style.top = `${clamp(nearTop, 10, 58)}%`;
   } else {
-    el.classList.remove("bad-shake");
-    void el.offsetWidth;
-    el.classList.add("bad-shake");
+    el.style.left = `${clamp(targetLeft, 4, 82)}%`;
+    el.style.top = `${clamp(nearTop, 10, 58)}%`;
+    setTimeout(() => {
+      el.classList.add("drop");
+      el.style.top = "64%";
+      el.classList.remove("bad-shake");
+      void el.offsetWidth;
+      el.classList.add("bad-shake");
+    }, 220);
   }
 }
 
-function updateDistanceLabel() {
-  const distance = Number(document.getElementById("cDistance").value);
+function updateDistanceFromSlider() {
+  state.C.distance = Number(document.getElementById("cDistance").value);
+  updateCDistanceUI();
+}
+
+function updateCDistanceUI() {
+  const distance = state.C.distance;
+  const scene = document.getElementById("sceneC");
+  const magnet = document.getElementById("cMagnet");
+  const clip = document.getElementById("cClip");
+  const line = document.getElementById("cDistanceLine");
+
+  const leftPercent = 14 + (15 - distance) * 3.1;
+  magnet.style.left = `${leftPercent}%`;
   document.getElementById("cDistanceValue").textContent = distance.toFixed(1);
-  document.getElementById("cMagnet").style.left = `${8 + (15 - distance) * 4.4}%`;
+
+  const sceneRect = scene.getBoundingClientRect();
+  const magnetRect = magnet.getBoundingClientRect();
+  const clipRect = clip.getBoundingClientRect();
+  const lineLeft = magnetRect.right - sceneRect.left;
+  const lineWidth = Math.max(10, clipRect.left - magnetRect.right - 6);
+  line.style.left = `${lineLeft}px`;
+  line.style.width = `${lineWidth}px`;
+}
+
+function bindCMagnetDrag() {
+  const scene = document.getElementById("sceneC");
+  const magnet = document.getElementById("cMagnet");
+  const slider = document.getElementById("cDistance");
+
+  magnet.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    magnet.setPointerCapture(event.pointerId);
+    magnet.classList.add("dragging");
+    const sceneRect = scene.getBoundingClientRect();
+    const offsetX = event.clientX - magnet.getBoundingClientRect().left;
+
+    const move = (e) => {
+      const clip = document.getElementById("cClip").getBoundingClientRect();
+      const magnetRect = magnet.getBoundingClientRect();
+      const minLeftPx = sceneRect.width * 0.12;
+      const maxLeftPx = clip.left - sceneRect.left - magnetRect.width - 18;
+      const leftPx = clamp(e.clientX - sceneRect.left - offsetX, minLeftPx, maxLeftPx);
+      const leftPercent = (leftPx / sceneRect.width) * 100;
+      state.C.distance = clamp((57 - leftPercent) / 3.1, 0, 15);
+      slider.value = state.C.distance.toFixed(1);
+      updateCDistanceUI();
+    };
+
+    const up = () => {
+      magnet.classList.remove("dragging");
+      magnet.removeEventListener("pointermove", move);
+      magnet.removeEventListener("pointerup", up);
+      magnet.removeEventListener("pointercancel", up);
+    };
+
+    magnet.addEventListener("pointermove", move);
+    magnet.addEventListener("pointerup", up);
+    magnet.addEventListener("pointercancel", up);
+  });
 }
 
 function testC() {
-  const distance = Number(document.getElementById("cDistance").value);
+  const distance = state.C.distance;
   const attracted = distance <= state.C.threshold;
   const clip = document.getElementById("cClip");
   const msg = attracted
     ? `Büroklammer wird angezogen bei ${distance.toFixed(1)} cm.`
     : `Noch keine Anziehung bei ${distance.toFixed(1)} cm. Näher heran bewegen.`;
   setResult("cResult", `${msg} (Versuch ${state.C.trial}/3)`, attracted);
-
   clip.classList.toggle("clip-pull", attracted);
 
   if (attracted) {
@@ -302,6 +392,7 @@ function resetAll() {
   state.B.magneticMetals = new Set();
   state.C.rows = [];
   state.C.trial = 1;
+  state.C.distance = 10;
   state.C.threshold = randomThreshold();
   state.D.rows = [];
   state.D.pass = 0;
@@ -335,9 +426,9 @@ function resetAll() {
   setActiveObject("A");
   setActiveObject("B");
 
-  updateDistanceLabel();
+  updateCDistanceUI();
   setTab("A");
 }
 
 init();
-updateDistanceLabel();
+updateCDistanceUI();
