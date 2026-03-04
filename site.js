@@ -38,26 +38,6 @@ const EXPERIMENTS = [
     path: "experiments/magnetismus/magnetwirkung-sichtbar-machen/index.html",
     status: "ready"
   },
-  {
-    id: "freier-fall",
-    title: "Freier Fall – Zeit & Strecke (Vorbereitung)",
-    topic: "Mechanik",
-    grade: "Klasse 7",
-    teaser: "Untersuche, wie sich Zeit und Fallstrecke zueinander verhalten (Modell).",
-    tags: ["Fall", "Beschleunigung", "Diagramm"],
-    path: "experiments/mechanik/freier-fall/index.html",
-    status: "coming-soon"
-  },
-  {
-    id: "linse",
-    title: "Sammellinse – Bildweite (Vorbereitung)",
-    topic: "Optik",
-    grade: "Klasse 8",
-    teaser: "Verschiebe Gegenstand & Linse und beobachte die Bildentstehung (Modell).",
-    tags: ["Linse", "Brennweite", "Bild"],
-    path: "experiments/optik/sammellinse/index.html",
-    status: "coming-soon"
-  }
 ];
 
 const ui = {
