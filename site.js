@@ -30,10 +30,10 @@ const EXPERIMENTS = [
   },
   {
     id: "magnetwirkung-sichtbar-machen",
-    title: "Magnetwirkung sichtbar machen",
+    title: "Magnetfelder & Wechselwirkung sichtbar machen",
     topic: "Magnetismus",
     grade: "Klasse 5",
-    teaser: "Feldlinien mit Eisenspänen modellieren und die Wechselwirkung zwischen zwei Magneten untersuchen.",
+    teaser: "Enthält beide Buch-Experimente: Magnetfelder sichtbar machen (A) und Wechselwirkung zwischen zwei Magneten (B).",
     tags: ["Feldlinien", "Eisenspäne", "Pole", "Wechselwirkung"],
     path: "experiments/magnetismus/magnetwirkung-sichtbar-machen/index.html",
     status: "ready"
