@@ -35,6 +35,7 @@ const state = {
   A: {
     magnetization: 0,
     strokes: 0,
+    restrokes: 0,
     heated: false,
     clipAttached: false,
     hitCount: 0,
@@ -196,15 +197,7 @@ function nextStep() {
 
 function onContextAction() {
   if (state.experiment === "A" && state.stepIndex === 5) {
-    const a = state.A;
-    a.hitCount += 1;
-    a.magnetization = Math.max(0, a.magnetization - 25);
-    state.feedback = `Schlag ${a.hitCount}/3 ausgeführt.`;
-    if (a.hitCount >= 3) {
-      a.stepDone[5] = true;
-      a.clipAttached = false;
-      state.feedback = "Durch Erschütterung ist die Nadel deutlich entmagnetisiert.";
-    }
+    applyNeedleHit();
   }
   if (state.experiment === "B" && state.stepIndex === 0) {
     const b = state.B;
@@ -243,6 +236,10 @@ function onMove(evt) {
 
 function onUp() {
   if (!state.dragging) return;
+  if (state.experiment === "A" && state.stepIndex === 5 && state.dragging.key === "needle") {
+    const a = state.A;
+    if (a.needle.y >= 500) applyNeedleHit();
+  }
   state.dragging = null;
   applyPhysics();
   render();
@@ -257,13 +254,19 @@ function updateA() {
   const a = state.A;
   const step = state.stepIndex;
 
-  if (step === 0) {
+  if (step === 0 || step === 4) {
     if (a.magnet.x > 640 && Math.abs(a.magnet.y - a.needle.y) < 30) {
-      a.strokes += 1;
-      a.magnetization = Math.min(100, a.magnetization + 14);
+      const gain = step === 0 ? 14 : 18;
+      a.magnetization = Math.min(100, a.magnetization + gain);
+      if (step === 0) a.strokes += 1;
+      if (step === 4) a.restrokes += 1;
       a.magnet.x = 240;
-      state.feedback = `Streichbewegung ${a.strokes}/4.`;
-      if (a.strokes >= 4) {
+      if (step === 0) {
+        state.feedback = `Streichbewegung ${a.strokes}/4.`;
+      } else {
+        state.feedback = `Erneut magnetisiert: ${a.restrokes}/3 Streichbewegungen.`;
+      }
+      if (step === 0 && a.strokes >= 4) {
         a.stepDone[0] = true;
         state.feedback = "Die Nadel ist nun magnetisiert.";
       }
@@ -276,7 +279,7 @@ function updateA() {
     a.clip.x = a.needle.x - 70;
     a.clip.y = a.needle.y + 20;
     if (step === 1) a.stepDone[1] = true;
-    if (step === 4) a.stepDone[4] = true;
+    if (step === 4 && a.restrokes >= 2) a.stepDone[4] = true;
     state.feedback = "Die Büroklammer wird angezogen.";
   }
 
@@ -381,8 +384,10 @@ function drawSceneA(g) {
   g.appendChild(needle);
 
   const magnet = group("magnet", a.magnet.x, a.magnet.y);
-  magnet.appendChild(svg("rect", { x: -75, y: -25, width: 150, height: 50, rx: 10, fill: "#2563eb" }));
-  magnet.appendChild(svg("text", { x: -18, y: 6, class: "label", fill: "white" })).textContent = "Magnet";
+  magnet.appendChild(svg("rect", { x: -75, y: -25, width: 75, height: 50, rx: 10, fill: "#ef4444" }));
+  magnet.appendChild(svg("rect", { x: 0, y: -25, width: 75, height: 50, rx: 10, fill: "#16a34a" }));
+  magnet.appendChild(svg("text", { x: -38, y: 7, class: "label", fill: "white" })).textContent = "N";
+  magnet.appendChild(svg("text", { x: 38, y: 7, class: "label", fill: "white" })).textContent = "S";
   g.appendChild(magnet);
 
   const clip = group("clip", a.clip.x, a.clip.y);
@@ -411,7 +416,10 @@ function drawSceneB(g) {
   }
 
   const tool = group("magnetTool", b.magnetTool.x, b.magnetTool.y);
-  tool.appendChild(svg("rect", { x: -75, y: -25, width: 150, height: 50, rx: 10, fill: "#2563eb" }));
+  tool.appendChild(svg("rect", { x: -75, y: -25, width: 75, height: 50, rx: 10, fill: "#ef4444" }));
+  tool.appendChild(svg("rect", { x: 0, y: -25, width: 75, height: 50, rx: 10, fill: "#16a34a" }));
+  tool.appendChild(svg("text", { x: -38, y: 7, class: "label", fill: "white" })).textContent = "N";
+  tool.appendChild(svg("text", { x: 38, y: 7, class: "label", fill: "white" })).textContent = "S";
   g.appendChild(tool);
 
   const barA = group("barA", b.barA.x, b.barA.y);
@@ -457,7 +465,7 @@ function resetAll() {
   state.stepIndex = 0;
   state.feedback = "Alles wurde zurückgesetzt.";
   Object.assign(state.A, {
-    magnetization: 0, strokes: 0, heated: false, clipAttached: false, hitCount: 0, stepDone: [false, false, false, false, false, false], holdMs: 0, lastHeatTick: 0,
+    magnetization: 0, strokes: 0, restrokes: 0, heated: false, clipAttached: false, hitCount: 0, stepDone: [false, false, false, false, false, false], holdMs: 0, lastHeatTick: 0,
     needle: { x: 560, y: 210 }, magnet: { x: 240, y: 210 }, clip: { x: 260, y: 450 }
   });
   Object.assign(state.B, {
@@ -493,6 +501,18 @@ function distance(a, b) {
 
 function clamp(v, min, max) {
   return Math.max(min, Math.min(max, v));
+}
+
+function applyNeedleHit() {
+  const a = state.A;
+  a.hitCount += 1;
+  a.magnetization = Math.max(0, a.magnetization - 25);
+  state.feedback = `Schlag ${a.hitCount}/3 ausgeführt.`;
+  if (a.hitCount >= 3) {
+    a.stepDone[5] = true;
+    a.clipAttached = false;
+    state.feedback = "Durch Erschütterung ist die Nadel deutlich entmagnetisiert.";
+  }
 }
 
 init();
