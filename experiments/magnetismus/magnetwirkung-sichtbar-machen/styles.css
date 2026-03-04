@@ -181,3 +181,17 @@ h2{ margin: 0 0 var(--s-2); font: 800 var(--fs-3)/1.15 var(--font); }
 }
 
 .note.warn{ background: rgba(234,179,8,.14); border-color: rgba(234,179,8,.35); }
+
+.sliderRow{
+  display:grid;
+  gap:6px;
+  margin: 2px 0 12px;
+}
+.sliderRow input[type="range"]{ width: min(480px, 100%); }
+.taskItem{
+  margin: 0 0 8px;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(37,99,235,.07);
+  border: 1px solid rgba(37,99,235,.15);
+}
