@@ -28,10 +28,10 @@
   <main class="layout">
     <section class="card" id="panelA">
       <h2>A – Welche Stoffe werden von einem Magneten angezogen?</h2>
-      <p class="muted">Ziehe die Gegenstände auf den Experimentiertisch und teste sie am Magneten.</p>
+      <p class="muted">Ziehe reale Gegenstände ins Feld und teste sie. Der Magnet hängt oben: Beim Loslassen bleibt etwas kleben oder fällt herunter.</p>
       <div class="scene" id="sceneA">
         <div class="desk"></div>
-        <div class="magnet" aria-hidden="true"><span>N</span><span>S</span></div>
+        <div class="magnet hanging" aria-hidden="true"><span>N</span><span>S</span></div>
         <div class="object-layer" id="aObjects"></div>
       </div>
       <div class="row">
@@ -48,10 +48,10 @@
 
     <section class="card hidden" id="panelB">
       <h2>B – Welche Metalle werden von einem Magneten angezogen?</h2>
-      <p class="muted">Bewege die Metallobjekte im Versuchsfeld. Der Test zeigt dir sofort die Magnetwirkung.</p>
+      <p class="muted">Teste die Metallobjekte am hängenden Magneten. Du siehst sofort: klebt oder fällt.</p>
       <div class="scene" id="sceneB">
         <div class="desk"></div>
-        <div class="magnet" aria-hidden="true"><span>N</span><span>S</span></div>
+        <div class="magnet hanging" aria-hidden="true"><span>N</span><span>S</span></div>
         <div class="object-layer" id="bObjects"></div>
       </div>
       <div class="row">
@@ -68,19 +68,20 @@
 
     <section class="card hidden" id="panelC">
       <h2>C – Wie weit reicht die Wirkung von Magneten?</h2>
-      <p class="muted">Schiebe den Magneten entlang des Geodreiecks zur Büroklammer und lies den Abstand ab.</p>
+      <p class="muted">Ziehe den Magneten mit Maus oder Finger entlang des Geodreiecks. Die Abstandslinie zeigt den Abstand zur Büroklammer.</p>
       <div class="scene c-scene" id="sceneC">
         <div class="desk"></div>
         <div class="ruler" aria-hidden="true"></div>
+        <div class="distance-line" id="cDistanceLine" aria-hidden="true"></div>
         <div class="paperclip" id="cClip" aria-hidden="true"></div>
         <div class="magnet moving" id="cMagnet" aria-hidden="true"><span>N</span><span>S</span></div>
       </div>
       <div class="row stackOnSmall">
-        <label for="cDistance">Abstand zum Nullpunkt: <span id="cDistanceValue">10.0</span> cm</label>
+        <label for="cDistance">Abstand zur Büroklammer: <span id="cDistanceValue">10.0</span> cm</label>
         <input id="cDistance" type="range" min="0" max="15" step="0.1" value="10"/>
       </div>
       <div class="row">
-        <button class="btn" id="cMoveBtn">Magnet bewegen</button>
+        <button class="btn" id="cMoveBtn">Anziehung prüfen</button>
         <button class="btn ghost" id="cTrialBtn">Nächster Versuch</button>
       </div>
       <div class="result" id="cResult">Versuch 1 von 3.</div>

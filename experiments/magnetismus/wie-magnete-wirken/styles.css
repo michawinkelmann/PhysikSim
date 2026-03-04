@@ -39,18 +39,26 @@ th{background:#f8fafc}
 .magnet span{flex:1;display:grid;place-items:center;color:#fff;font-weight:800;text-shadow:0 1px 1px rgba(0,0,0,.35)}
 .magnet span:first-child{background:#ef4444}
 .magnet span:last-child{background:#22c55e}
-#sceneA .magnet,#sceneB .magnet{right:34px;bottom:26px}
+#sceneA .magnet,#sceneB .magnet{right:30px;top:30px}
+.magnet.hanging::before{content:"";position:absolute;top:-20px;left:46px;width:4px;height:20px;background:#64748b;border-radius:99px;box-shadow:0 -8px 0 0 #64748b}
 .object-layer{position:absolute;inset:0}
-.obj{position:absolute;min-width:82px;padding:7px 10px;border-radius:10px;background:#fff;border:1px solid #94a3b8;box-shadow:0 4px 10px rgba(15,23,42,.14);cursor:grab;user-select:none;touch-action:none;text-align:center;font-weight:600;font-size:.82rem;transition:transform .25s, left .45s, top .45s, box-shadow .2s}
-.obj small{display:block;color:#64748b;font-size:.7rem}
+.obj{position:absolute;width:96px;height:84px;border-radius:14px;background:linear-gradient(#fff,#f8fafc);border:1px solid #94a3b8;box-shadow:0 4px 10px rgba(15,23,42,.14);cursor:grab;user-select:none;touch-action:none;text-align:center;transition:transform .25s, left .45s, top .45s, box-shadow .2s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px}
+.obj .icon{font-size:1.8rem;line-height:1}
+.obj .name{font-weight:700;font-size:.74rem}
+.obj small{display:block;color:#64748b;font-size:.66rem}
 .obj.active{border-color:#1d4ed8;box-shadow:0 0 0 3px rgba(29,78,216,.2),0 4px 10px rgba(15,23,42,.16)}
 .obj.bad-shake{animation:shake .36s linear}
+.obj.drop{transition:top .45s ease-in, transform .45s ease-in}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 
-.c-scene .ruler{position:absolute;left:18%;top:22%;width:65%;height:54%;clip-path:polygon(50% 0,100% 100%,0 100%);background:rgba(255,255,255,.58);border:2px solid rgba(15,23,42,.32)}
-.c-scene .paperclip{position:absolute;left:51%;bottom:28px;width:34px;height:16px;border:3px solid #6b7280;border-radius:16px}
-.c-scene .moving{bottom:26px;left:15%;transform:translateX(0);transition:left .4s ease}
-.c-scene .clip-pull{transform:translateX(26px);transition:transform .3s ease}
+.c-scene .ruler{position:absolute;left:12%;top:18%;width:72%;height:58%;clip-path:polygon(50% 0,100% 100%,0 100%);background:rgba(255,255,255,.78);border:2px solid rgba(15,23,42,.38)}
+.c-scene .ruler::before{content:"";position:absolute;left:8%;right:8%;bottom:14%;height:1px;background:rgba(15,23,42,.4);box-shadow:0 -10px 0 rgba(15,23,42,.2),0 -20px 0 rgba(15,23,42,.2),0 -30px 0 rgba(15,23,42,.2),0 -40px 0 rgba(15,23,42,.2)}
+.c-scene .paperclip{position:absolute;left:74%;bottom:28px;width:34px;height:16px;border:3px solid #6b7280;border-radius:16px;transition:transform .35s ease}
+.c-scene .moving{bottom:26px;left:22%;transform:translateX(0);touch-action:none;cursor:grab;z-index:2}
+.c-scene .moving.dragging{cursor:grabbing}
+.c-scene .clip-pull{transform:translateX(-22px)}
+.c-scene .distance-line{position:absolute;bottom:68px;height:2px;background:#2563eb;left:0;width:0;opacity:.9}
+.c-scene .distance-line::after{content:"";position:absolute;right:-6px;top:-3px;border-left:6px solid #2563eb;border-top:4px solid transparent;border-bottom:4px solid transparent}
 
 .d-scene .stand{position:absolute;left:58%;top:14%;width:10px;height:67%;background:#64748b;box-shadow:44px 0 0 #64748b,44px 80px 0 0 #64748b}
 .d-scene .clamp{left:40%;top:22%}
