@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>PhysikSim‑Lab – Spannung</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="title">Spannung</div>
+      <div class="muted" id="subtitle">V1 – Stromstärke messen</div>
+    </div>
+    <div class="actions">
+      <a class="btn ghost" href="../../../index.html" aria-label="Zurück zur Übersicht">← Übersicht</a>
+      <button class="btn primary" id="resetBtn">Reset</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="card stageWrap" aria-label="Simulation">
+      <div class="rowBtns" style="margin-top:0; margin-bottom:10px;">
+        <button class="btn" id="modeV1Btn">V1</button>
+        <button class="btn" id="modeV2Btn">V2</button>
+        <button class="btn" id="modeV3Btn">V3</button>
+      </div>
+
+      <div id="modeV1" class="modePanel">
+        <h2>V1: Stromstärke bei Lampen und Quellen</h2>
+        <div class="grid2">
+          <label class="field">Lampe
+            <select id="lampTypeSelect">
+              <option value="0">Lampe A (3 Ω)</option>
+              <option value="1">Lampe B (6 Ω)</option>
+              <option value="2">Lampe C (9 Ω)</option>
+            </select>
+          </label>
+          <label class="field">Quelle (Mignonzellen)
+            <input id="cellsRange" type="range" min="2" max="4" step="1" value="2"/>
+            <span class="small" id="cellsValue">2 Zellen</span>
+          </label>
+        </div>
+        <div class="meterCard">
+          <div class="meterLabel">Amperemeter</div>
+          <div class="meterValue"><span id="ammeterValue">1.00</span> A</div>
+        </div>
+      </div>
+
+      <div id="modeV2" class="modePanel" hidden>
+        <h2>V2: Spannung in einer Reihenschaltung</h2>
+        <div class="grid2">
+          <label class="field">Nennspannung einer Lampe
+            <input id="lampNominalRange" type="range" min="1" max="6" step="0.5" value="3"/>
+            <span class="small" id="lampNominalValue">3.0 V</span>
+          </label>
+          <label class="field">Quellspannung
+            <input id="sourceRange" type="range" min="2" max="12" step="0.5" value="6"/>
+            <span class="small" id="sourceValue">6.0 V</span>
+          </label>
+        </div>
+        <div class="rowBtns">
+          <button class="btn" id="switchBtn">Schalter: offen</button>
+        </div>
+        <div class="meterGrid">
+          <div class="meterCard red"><div class="meterLabel">Voltmeter Quelle</div><div class="meterValue"><span id="vSource">6.0</span> V</div></div>
+          <div class="meterCard"><div class="meterLabel">Voltmeter Lampe 1</div><div class="meterValue"><span id="vLamp1">0.0</span> V</div></div>
+          <div class="meterCard"><div class="meterLabel">Voltmeter Lampe 2</div><div class="meterValue"><span id="vLamp2">0.0</span> V</div></div>
+        </div>
+      </div>
+
+      <div id="modeV3" class="modePanel" hidden>
+        <h2>V3: Teilspannung am Draht</h2>
+        <label class="field">Quellspannung
+          <input id="sourceV3Range" type="range" min="1" max="12" step="0.5" value="6"/>
+          <span class="small" id="sourceV3Value">6.0 V</span>
+        </label>
+        <label class="field">Verschiebbarer Kontakt am Draht
+          <input id="tapRange" type="range" min="0" max="100" step="1" value="50"/>
+          <span class="small" id="tapValue">50 % der Drahtlänge</span>
+        </label>
+        <div class="wireWrap">
+          <div class="wire"></div>
+          <div class="tap" id="tapMarker"></div>
+        </div>
+        <div class="meterCard">
+          <div class="meterLabel">Voltmeter (Teilspannung)</div>
+          <div class="meterValue"><span id="partialValue">3.0</span> V</div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel card soft">
+      <h2>Aufgaben</h2>
+      <div id="tasks"></div>
+      <div class="note" id="note"></div>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
