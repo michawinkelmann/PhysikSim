@@ -58,6 +58,16 @@ const EXPERIMENTS = [
     path: "experiments/magnetismus/wie-magnete-wirken/index.html",
     status: "ready"
   },
+  {
+    id: "elektrische-energie-spannung-stromstaerke",
+    title: "Elektrische Energie, Spannung, Stromstärke",
+    topic: "Elektrischer Strom",
+    grade: "Klasse 7",
+    teaser: "Zwei Versuche (V1/V2): Lampen bei gleicher Stromstärke vergleichen sowie Motoren in Reihen- und Parallelschaltung untersuchen.",
+    tags: ["Spannung", "Stromstärke", "Reihenschaltung", "Parallelschaltung", "Motor"],
+    path: "experiments/elektrischer-strom/elektrische-energie-spannung-stromstaerke/index.html",
+    status: "ready"
+  },
 ];
 
 const ui = {

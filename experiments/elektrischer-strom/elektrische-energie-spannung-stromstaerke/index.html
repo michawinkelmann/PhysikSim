@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>PhysikSim-Lab: Elektrische Energie, Spannung, Stromstärke</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="title" id="title">Elektrische Energie, Spannung, Stromstärke</div>
+      <div class="muted" id="subtitle">Schritt 1 von 2</div>
+    </div>
+    <div class="actions">
+      <a class="btn ghost" href="../../../index.html" aria-label="Zurück zur Übersicht">← Übersicht</a>
+      <button class="btn ghost" id="helpBtn" title="Hilfe">?</button>
+      <button class="btn primary" id="resetBtn" title="Alles zurücksetzen">Reset</button>
+    </div>
+  </header>
+
+  <nav class="stepper" id="stepper" aria-label="Schritte"></nav>
+
+  <main class="layout">
+    <section class="stageWrap card" aria-label="Experimentierfläche">
+      <svg id="stage" viewBox="0 0 1000 600" role="img" aria-label="Elektrisches Experiment">
+        <rect x="0" y="0" width="1000" height="600" rx="26" class="tableBg"/>
+        <g id="grid"></g>
+        <g id="objects"></g>
+        <g id="overlays"></g>
+      </svg>
+      <div class="muted small" id="stageHint"></div>
+    </section>
+
+    <aside class="panel" id="panel" aria-label="Aufgaben und Einstellungen">
+      <div class="panelHandle">
+        <button class="panelToggle btn ghost" id="panelToggle" aria-expanded="true">Aufgaben & Steuerung ▲</button>
+      </div>
+      <div class="panelBody">
+        <section class="card soft">
+          <h2 id="experimentTitle">Experiment</h2>
+          <p class="note" id="experimentText"></p>
+          <div id="controls"></div>
+        </section>
+
+        <section class="card soft">
+          <h2>Aufgaben</h2>
+          <div id="tasks"></div>
+          <div id="taskFeedback" class="note" hidden></div>
+          <div class="rowBtns">
+            <button class="btn" id="prevStep">Zurück</button>
+            <button class="btn primary" id="nextStep">Weiter</button>
+          </div>
+        </section>
+      </div>
+    </aside>
+  </main>
+
+  <div class="modal" id="helpModal" hidden>
+    <div class="modalCard card">
+      <h2>Bedienung</h2>
+      <ul class="bullets">
+        <li>Wähle über die Schritte zwischen den zwei Buch-Experimenten.</li>
+        <li>Nutze Regler und Auswahlfelder, um Spannung und Stromstärke zu verändern.</li>
+        <li>Reset setzt beide Experimente auf die Ausgangswerte zurück.</li>
+      </ul>
+      <button class="btn primary" id="closeHelp">OK</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
