@@ -1,0 +1,38 @@
+:root{
+  --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  --fs-1: 14px; --fs-2: 16px; --fs-3: 18px; --fs-4: 22px;
+  --s-1: 6px; --s-2: 10px; --s-3: 14px; --s-4: 18px;
+  --r-2: 16px; --r-3: 22px;
+  --bg: #f6f7fb; --panel: #fff; --text:#101321; --muted:#5a607a;
+  --border: rgba(16,19,33,.12); --accent:#2563eb; --danger:#ef4444;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font);background:var(--bg);color:var(--text)}
+.topbar{position:sticky;top:0;z-index:20;padding:14px;background:var(--bg);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.title{font:800 var(--fs-4)/1.1 var(--font)}
+.muted{color:var(--muted)}
+.layout{display:grid;gap:14px;padding:0 14px 20px}
+@media (min-width: 950px){.layout{grid-template-columns:2fr 1fr}}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r-3);padding:var(--s-4)}
+.soft{border-radius:var(--r-2)}
+.btn{min-height:42px;padding:0 14px;border-radius:16px;border:1px solid var(--border);background:#fff;font:700 var(--fs-2)/1 var(--font);cursor:pointer}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.ghost{background:transparent}
+.rowBtns{display:flex;gap:10px;flex-wrap:wrap}
+h2{margin:0 0 12px;font:800 var(--fs-3)/1.2 var(--font)}
+.field{display:flex;flex-direction:column;gap:6px;font-weight:700}
+select,input{font:600 var(--fs-2)/1.2 var(--font);padding:10px;border-radius:12px;border:1px solid var(--border)}
+.grid2{display:grid;grid-template-columns:1fr;gap:10px}
+@media (min-width:700px){.grid2{grid-template-columns:1fr 1fr}}
+.small{font-size:13px;color:var(--muted)}
+.meterGrid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+@media (min-width:700px){.meterGrid{grid-template-columns:repeat(3,1fr)}}
+.meterCard{margin-top:12px;padding:12px;border:1px solid var(--border);border-radius:14px;background:rgba(37,99,235,.06)}
+.meterCard.red{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.3)}
+.meterLabel{font-weight:700;color:var(--muted);font-size:13px}
+.meterValue{font-size:30px;font-weight:800;margin-top:4px}
+.note{margin-top:12px;padding:12px;border-radius:12px;border:1px solid var(--border);background:rgba(37,99,235,.08)}
+.taskItem{margin:0 0 8px;padding:10px;border:1px solid rgba(37,99,235,.2);border-radius:10px;background:rgba(37,99,235,.07)}
+.wireWrap{position:relative;margin-top:8px;height:44px}
+.wire{position:absolute;left:0;right:0;top:20px;height:4px;background:#a1a1aa;border-radius:999px}
+.tap{position:absolute;top:10px;width:14px;height:24px;border-radius:7px;background:#ef4444;transform:translateX(-50%)}

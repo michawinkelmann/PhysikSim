@@ -9,6 +9,16 @@
 
 const EXPERIMENTS = [
   {
+    id: "spannung",
+    title: "Spannung",
+    topic: "Elektrischer Strom",
+    grade: "Klasse 7",
+    teaser: "Drei Experimente (V1–V3) zu Stromstärke, Spannungsverteilung in Reihenschaltung und Teilspannung am Draht.",
+    tags: ["Spannung", "Stromstärke", "Voltmeter", "Amperemeter"],
+    path: "experiments/elektrischer-strom/spannung/index.html",
+    status: "ready"
+  },
+  {
     id: "stabmagnet",
     title: "Stabmagnet entdecken",
     topic: "Magnetismus",
