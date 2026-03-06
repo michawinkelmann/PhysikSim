@@ -302,11 +302,12 @@
     vizCard.style.padding = '0';
     vizCard.innerHTML =
       '<div class="compass-setup" id="compass-setup">' +
-        // Stand
+        // Stand (Stativ) – rod on left, horizontal arm to center
         '<div class="cs-stand-base"></div>' +
         '<div class="cs-stand-rod"></div>' +
         '<div class="cs-stand-arm"></div>' +
-        // Thread
+        '<div class="cs-stand-clamp"></div>' +
+        // Thread from end of arm
         '<div class="cs-thread" id="cs-thread"></div>' +
         // Magnet (will rotate via physics)
         '<div class="cs-magnet-wrapper" id="cs-magnet">' +
@@ -422,8 +423,9 @@
     // Pointer interaction: drag to rotate
     function getPointerAngle(e) {
       var rect = setupEl.getBoundingClientRect();
-      var cx = rect.left + rect.width / 2;
-      var cy = rect.top + 123; // pivot point (top of magnet wrapper)
+      // Pivot point: where the thread meets the magnet (center-x of setup, below arm)
+      var cx = rect.left + rect.width * 0.52;
+      var cy = rect.top + 130; // pivot point (top of magnet wrapper)
       var dx = e.clientX - cx;
       var dy = e.clientY - cy;
       return Math.atan2(dx, dy) * 180 / Math.PI; // angle from vertical
