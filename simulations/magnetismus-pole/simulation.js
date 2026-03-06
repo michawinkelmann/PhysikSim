@@ -16,15 +16,15 @@
       id: 'b',
       tab: 'B: Pole bestimmen',
       title: 'B: Die Pole werden bestimmt',
-      instruction: 'Beobachte den frei aufgehängten Magneten. Er richtet sich in Nord-Süd-Richtung aus. Bestimme, welcher Pol nach Norden und welcher nach Süden zeigt.',
+      instruction: 'Stupse den aufgehängten Magneten an oder drehe ihn mit dem Finger. Er richtet sich immer wieder in Nord-Süd-Richtung aus. Bestimme danach, welcher Pol nach Norden zeigt.',
       type: 'compass-align',
-      conclusion: 'Ein frei aufgehängter Magnet richtet sich immer in Nord-Süd-Richtung aus. Das Ende, das nach Norden zeigt, heißt Nordpol (rot). Das Ende, das nach Süden zeigt, heißt Südpol (blau).'
+      conclusion: 'Ein frei aufgehängter Magnet richtet sich immer in Nord-Süd-Richtung aus. Das Ende, das nach Norden zeigt, heißt Nordpol (rot). Das Ende, das nach Süden zeigt, heißt Südpol (grün).'
     },
     c: {
       id: 'c',
       tab: 'C: Gegenseitig',
       title: 'C: Wer wirkt auf wen?',
-      instruction: 'Teste beide Richtungen: Bewege den Magneten zum Eisen und dann das Eisen zum Magneten. Beobachte, was jeweils passiert.',
+      instruction: 'Ziehe den Magneten zum Eisenquader oder den Eisenquader zum Magneten. Beobachte, was jeweils passiert.',
       type: 'mutual-attraction',
       conclusion: 'Die Anziehung zwischen Magnet und Eisen ist gegenseitig. Der Magnet zieht das Eisen an – aber das Eisen zieht auch den Magneten an. Beide wirken aufeinander.'
     },
@@ -32,7 +32,7 @@
       id: 'd',
       tab: 'D: Zwei Magnete',
       title: 'D: Zwei Magnete wirken aufeinander',
-      instruction: 'Bewege den oberen Magneten langsam auf den unteren zu. Teste alle vier Polkombinationen und beobachte, ob sich die Magnete anziehen oder abstoßen.',
+      instruction: 'Wähle eine Polkombination und ziehe den oberen Magneten langsam zum unteren. Beobachte, ob sie sich anziehen oder abstoßen.',
       type: 'pole-interaction',
       conclusion: 'Gleichnamige Pole (Nordpol–Nordpol oder Südpol–Südpol) stoßen sich ab. Ungleichnamige Pole (Nordpol–Südpol) ziehen sich an.'
     }
@@ -91,11 +91,11 @@
     if (exp.type === 'magnet-zones') {
       state = { tested: {}, testing: false };
     } else if (exp.type === 'compass-align') {
-      state = { aligned: false, northIdentified: false, southIdentified: false };
+      state = { angle: 150, angularVel: 0, dragging: false, aligned: false, answered: false };
     } else if (exp.type === 'mutual-attraction') {
-      state = { tested: {}, animating: false };
+      state = { tested: {}, animating: false, dragging: false, currentTest: -1 };
     } else if (exp.type === 'pole-interaction') {
-      state = { tested: {}, animating: false, magnetPos: 0 };
+      state = { tested: {}, dragging: false, currentCombo: 0 };
     }
   }
 
@@ -129,24 +129,8 @@
         '</div>' +
         '<div class="zone-areas" id="zone-areas"></div>' +
         '<div class="zone-clips-container" id="zone-clips"></div>' +
-        '<div class="zone-nail" id="zone-nail">' +
-          '<div class="nail-icon"></div>' +
-          '<span>Eisennagel</span>' +
-        '</div>' +
       '</div>';
     root.appendChild(vizCard);
-
-    // Instruction steps
-    var stepsCard = document.createElement('div');
-    stepsCard.className = 'card';
-    stepsCard.innerHTML =
-      '<div class="steps-list">' +
-        '<div class="step-item"><span class="step-num">Schritt 1:</span> Lege die Büroklammern auf den Tisch.</div>' +
-        '<div class="step-item"><span class="step-num">Schritt 2:</span> Halte den Stabmagneten waagerecht und nähere ihn den Büroklammern.</div>' +
-        '<div class="step-item"><span class="step-num">Schritt 3:</span> Lege den Stabmagneten auf den Tisch.</div>' +
-        '<div class="step-item"><span class="step-num">Schritt 4:</span> Nähere die Spitze des Eisennagels langsam der Mitte des Magneten.</div>' +
-      '</div>';
-    root.appendChild(stepsCard);
 
     // Zone buttons
     var zoneCard = document.createElement('div');
@@ -204,7 +188,6 @@
 
     container.appendChild(root);
 
-    // Build zone hit areas
     buildZoneAreas();
 
     document.getElementById('reset-btn').addEventListener('click', function () {
@@ -230,21 +213,16 @@
     state.testing = true;
 
     var zone = ZONES[index];
-
-    // Highlight zone button
     var btns = document.querySelectorAll('.zone-btn');
     btns[index].classList.add('testing');
 
-    // Highlight zone area on magnet
     var areas = document.querySelectorAll('.zone-area');
     areas[index].classList.add('active');
 
-    // Show clips animation
     var clipsContainer = document.getElementById('zone-clips');
     clipsContainer.innerHTML = '';
 
     setTimeout(function () {
-      // Show clips at this zone position
       for (var c = 0; c < zone.clips; c++) {
         var clip = document.createElement('div');
         clip.className = 'zone-clip';
@@ -262,22 +240,18 @@
         clipsContainer.appendChild(noClip);
       }
 
-      // Record result
       setTimeout(function () {
         state.tested[index] = zone.clips;
         btns[index].classList.remove('testing');
         btns[index].classList.add(zone.clips > 0 ? 'tested-strong' : 'tested-weak');
 
-        // Add result badge
         var badge = document.createElement('span');
         badge.className = 'zone-btn-badge';
         badge.textContent = zone.clips > 0 ? zone.clips + ' Klammern' : 'keine';
         btns[index].appendChild(badge);
 
-        // Update results table
         updateZoneResults();
 
-        // Progress
         var tested = Object.keys(state.tested).length;
         document.getElementById('progress-text').textContent = tested + ' / ' + ZONES.length + ' getestet';
         document.getElementById('progress-fill').style.width = (tested / ZONES.length * 100) + '%';
@@ -312,7 +286,7 @@
     });
   }
 
-  // ==================== B: COMPASS ALIGN ====================
+  // ==================== B: COMPASS ALIGN (Physics-based pendulum) ====================
 
   function renderCompassAlign(container, exp) {
     var root = document.createElement('div');
@@ -334,7 +308,7 @@
         '<div class="cs-stand-arm"></div>' +
         // Thread
         '<div class="cs-thread" id="cs-thread"></div>' +
-        // Magnet (will rotate)
+        // Magnet (will rotate via physics)
         '<div class="cs-magnet-wrapper" id="cs-magnet">' +
           '<div class="cs-magnet">' +
             '<div class="cs-magnet-n" id="cs-pole-n">N</div>' +
@@ -346,23 +320,12 @@
         '<div class="cs-direction cs-south">S</div>' +
         '<div class="cs-direction cs-east">O</div>' +
         '<div class="cs-direction cs-west">W</div>' +
-        // Status
-        '<div class="cs-status" id="cs-status">Der Magnet dreht sich...</div>' +
+        // Hint
+        '<div class="cs-status" id="cs-status">Stupse den Magneten an!</div>' +
       '</div>';
     root.appendChild(vizCard);
 
-    // Instruction steps
-    var stepsCard = document.createElement('div');
-    stepsCard.className = 'card';
-    stepsCard.innerHTML =
-      '<div class="steps-list">' +
-        '<div class="step-item"><span class="step-num">Schritt 1:</span> Hänge den Magneten mit einem Bindfaden an ein Stativ.</div>' +
-        '<div class="step-item"><span class="step-num">Schritt 2:</span> Warte solange, bis der Magnet sich nicht mehr bewegt.</div>' +
-        '<div class="step-item"><span class="step-num">Schritt 3:</span> Bestimme die Himmelsrichtungen, in die die Pole des Magneten zeigen.</div>' +
-      '</div>';
-    root.appendChild(stepsCard);
-
-    // Buttons for identification
+    // Buttons for identification (hidden until first alignment)
     var idCard = document.createElement('div');
     idCard.className = 'card';
     idCard.id = 'identify-card';
@@ -371,7 +334,7 @@
       '<div style="font-weight:600;font-size:0.9rem;margin-bottom:0.75rem">Welcher Pol zeigt nach Norden?</div>' +
       '<div class="btn-row">' +
         '<button class="btn btn-primary" id="btn-n-north">Der rote Pol (N)</button>' +
-        '<button class="btn btn-secondary" id="btn-s-north">Der blaue Pol (S)</button>' +
+        '<button class="btn btn-secondary" id="btn-s-north">Der grüne Pol (S)</button>' +
       '</div>' +
       '<div class="identify-feedback hidden" id="identify-feedback"></div>';
     root.appendChild(idCard);
@@ -391,43 +354,134 @@
 
     container.appendChild(root);
 
-    // Start animation: magnet swings and aligns
-    startCompassAnimation();
+    initCompassPhysics();
 
     document.getElementById('reset-btn').addEventListener('click', function () {
       switchExperiment('b');
     });
   }
 
-  function startCompassAnimation() {
+  function initCompassPhysics() {
     var magnetEl = document.getElementById('cs-magnet');
+    var setupEl = document.getElementById('compass-setup');
     var statusEl = document.getElementById('cs-status');
 
-    // Start with a random rotation
-    var startAngle = 120 + Math.random() * 120;
-    magnetEl.style.transform = 'rotate(' + startAngle + 'deg)';
+    // Physics constants
+    var damping = 0.97;       // friction/air resistance
+    var springK = 0.0008;     // restoring torque toward 0° (north)
+    var angle = 120 + Math.random() * 120; // start angle (degrees)
+    var angularVel = 0;
+    var animId = null;
+    var dragging = false;
+    var lastPointerAngle = 0;
+    var lastTime = 0;
+    var wasNudged = false;
+    var alignedOnce = false;
 
-    // Animate to 0 (aligned N-S) after a delay
-    setTimeout(function () {
-      magnetEl.style.transition = 'transform 3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-      magnetEl.style.transform = 'rotate(0deg)';
+    state.angle = angle;
 
-      setTimeout(function () {
-        state.aligned = true;
-        statusEl.textContent = 'Der Magnet hat sich ausgerichtet.';
-        statusEl.classList.add('aligned');
+    function updateMagnet() {
+      magnetEl.style.transform = 'translateX(-50%) rotate(' + angle + 'deg)';
+    }
 
-        // Show identification question
-        document.getElementById('identify-card').style.display = 'block';
+    updateMagnet();
 
-        document.getElementById('btn-n-north').addEventListener('click', function () {
-          handlePoleAnswer(true);
-        });
-        document.getElementById('btn-s-north').addEventListener('click', function () {
-          handlePoleAnswer(false);
-        });
-      }, 3200);
-    }, 800);
+    // Physics loop
+    function tick() {
+      if (!dragging) {
+        // Restoring torque (toward 0°): torque = -k * sin(angle)
+        var angleRad = angle * Math.PI / 180;
+        var torque = -springK * Math.sin(angleRad) * 180; // convert back to degrees
+        angularVel += torque;
+        angularVel *= damping;
+        angle += angularVel;
+
+        // Normalize angle
+        while (angle > 180) angle -= 360;
+        while (angle < -180) angle += 360;
+
+        updateMagnet();
+
+        // Check if settled (nearly still and near 0)
+        if (wasNudged && Math.abs(angle) < 3 && Math.abs(angularVel) < 0.05) {
+          if (!alignedOnce) {
+            alignedOnce = true;
+            statusEl.textContent = 'Der Magnet hat sich ausgerichtet.';
+            statusEl.classList.add('aligned');
+            // Show question
+            document.getElementById('identify-card').style.display = 'block';
+            setupAnswerListeners();
+          }
+        }
+      }
+      animId = requestAnimationFrame(tick);
+    }
+
+    animId = requestAnimationFrame(tick);
+
+    // Pointer interaction: drag to rotate
+    function getPointerAngle(e) {
+      var rect = setupEl.getBoundingClientRect();
+      var cx = rect.left + rect.width / 2;
+      var cy = rect.top + 123; // pivot point (top of magnet wrapper)
+      var dx = e.clientX - cx;
+      var dy = e.clientY - cy;
+      return Math.atan2(dx, dy) * 180 / Math.PI; // angle from vertical
+    }
+
+    function onPointerDown(e) {
+      if (state.answered) return;
+      dragging = true;
+      wasNudged = true;
+      lastPointerAngle = getPointerAngle(e);
+      lastTime = Date.now();
+      magnetEl.setPointerCapture(e.pointerId);
+      e.preventDefault();
+      statusEl.textContent = 'Drehe den Magneten...';
+      statusEl.classList.remove('aligned');
+    }
+
+    function onPointerMove(e) {
+      if (!dragging) return;
+      var newPointerAngle = getPointerAngle(e);
+      var delta = newPointerAngle - lastPointerAngle;
+      // Handle wrap-around
+      if (delta > 180) delta -= 360;
+      if (delta < -180) delta += 360;
+
+      angle -= delta;
+      var now = Date.now();
+      var dt = Math.max(1, now - lastTime);
+      angularVel = -delta / dt * 16; // Approximate velocity
+
+      lastPointerAngle = newPointerAngle;
+      lastTime = now;
+      updateMagnet();
+    }
+
+    function onPointerUp() {
+      dragging = false;
+      statusEl.textContent = 'Der Magnet schwingt zurück...';
+    }
+
+    magnetEl.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('pointermove', onPointerMove);
+    document.addEventListener('pointerup', onPointerUp);
+
+    cleanupFns.push(function () {
+      cancelAnimationFrame(animId);
+      document.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerup', onPointerUp);
+    });
+  }
+
+  function setupAnswerListeners() {
+    document.getElementById('btn-n-north').addEventListener('click', function () {
+      handlePoleAnswer(true);
+    });
+    document.getElementById('btn-s-north').addEventListener('click', function () {
+      handlePoleAnswer(false);
+    });
   }
 
   function handlePoleAnswer(choseNorth) {
@@ -440,17 +494,18 @@
       document.getElementById('conclusion').classList.remove('hidden');
       document.getElementById('btn-n-north').disabled = true;
       document.getElementById('btn-s-north').disabled = true;
+      state.answered = true;
     } else {
       feedback.className = 'identify-feedback incorrect';
       feedback.textContent = 'Nicht ganz. Schau genau hin: Welches Ende zeigt in Richtung „N" (Norden)?';
     }
   }
 
-  // ==================== C: MUTUAL ATTRACTION ====================
+  // ==================== C: MUTUAL ATTRACTION (Drag-based) ====================
 
   var MUTUAL_TESTS = [
-    { id: 'magnet-to-iron', label: 'Magnet bewegt sich zum Eisen', moverIsLeft: true },
-    { id: 'iron-to-magnet', label: 'Eisen bewegt sich zum Magneten', moverIsLeft: false }
+    { id: 'magnet-to-iron', label: 'Schiebe den Magneten zum Eisen', dragLeft: true },
+    { id: 'iron-to-magnet', label: 'Schiebe das Eisen zum Magneten', dragLeft: false }
   ];
 
   function renderMutualAttraction(container, exp) {
@@ -467,42 +522,24 @@
     vizCard.style.padding = '0';
     vizCard.innerHTML =
       '<div class="mutual-setup" id="mutual-setup">' +
-        // Table surface
         '<div class="mutual-table"></div>' +
-        // Left rollers
         '<div class="mutual-roller mutual-roller-l1"></div>' +
         '<div class="mutual-roller mutual-roller-l2"></div>' +
-        // Right rollers
         '<div class="mutual-roller mutual-roller-r1"></div>' +
         '<div class="mutual-roller mutual-roller-r2"></div>' +
-        // Left object (magnet)
         '<div class="mutual-obj mutual-left" id="mutual-left">' +
           '<div class="mutual-magnet">' +
             '<div class="magnet-n">N</div><div class="magnet-s">S</div>' +
           '</div>' +
           '<span class="mutual-label">Magnet</span>' +
         '</div>' +
-        // Right object (iron block)
         '<div class="mutual-obj mutual-right" id="mutual-right">' +
           '<div class="mutual-iron"></div>' +
           '<span class="mutual-label">Eisenquader</span>' +
         '</div>' +
-        // Status
-        '<div class="mutual-status" id="mutual-status">Wähle einen Versuch</div>' +
+        '<div class="mutual-status" id="mutual-status">Wähle einen Versuch und ziehe</div>' +
       '</div>';
     root.appendChild(vizCard);
-
-    // Instruction steps
-    var stepsCard = document.createElement('div');
-    stepsCard.className = 'card';
-    stepsCard.innerHTML =
-      '<div class="steps-list">' +
-        '<div class="step-item"><span class="step-num">Schritt 1:</span> Lege den Eisenquader auf zwei Bleistifte.</div>' +
-        '<div class="step-item"><span class="step-num">Schritt 2:</span> Bewege den Magneten mit einem Pol langsam auf das Ende des Eisenquaders zu.</div>' +
-        '<div class="step-item"><span class="step-num">Schritt 3:</span> Lege nun den Magneten auf die Bleistifte.</div>' +
-        '<div class="step-item"><span class="step-num">Schritt 4:</span> Bewege das Ende des Eisenquaders langsam auf einen Pol des Magneten zu.</div>' +
-      '</div>';
-    root.appendChild(stepsCard);
 
     // Test buttons
     var testCard = document.createElement('div');
@@ -517,7 +554,7 @@
       btn.setAttribute('data-index', i);
       btn.textContent = test.label;
       btn.addEventListener('click', function () {
-        runMutualTest(i);
+        selectMutualTest(i);
       });
       testGrid.appendChild(btn);
     });
@@ -554,56 +591,125 @@
     });
   }
 
-  function runMutualTest(index) {
-    if (state.animating) return;
-    state.animating = true;
-
+  function selectMutualTest(index) {
     var test = MUTUAL_TESTS[index];
-    var leftEl = document.getElementById('mutual-left');
-    var rightEl = document.getElementById('mutual-right');
-    var statusEl = document.getElementById('mutual-status');
+    state.currentTest = index;
 
     // Reset positions
-    leftEl.classList.remove('moved');
-    rightEl.classList.remove('moved');
+    var leftEl = document.getElementById('mutual-left');
+    var rightEl = document.getElementById('mutual-right');
+    var setupEl = document.getElementById('mutual-setup');
+    var statusEl = document.getElementById('mutual-status');
+
+    leftEl.style.left = '15%';
+    leftEl.style.right = '';
+    rightEl.style.right = '15%';
+    rightEl.style.left = '';
+    leftEl.classList.remove('draggable');
+    rightEl.classList.remove('draggable');
 
     // Highlight button
     var btns = document.querySelectorAll('.mutual-test-btn');
     btns.forEach(function (b) { b.classList.remove('active-test'); });
     btns[index].classList.add('active-test');
 
-    statusEl.textContent = 'Beobachte...';
+    // Make the right element draggable
+    var dragEl = test.dragLeft ? leftEl : rightEl;
+    var otherEl = test.dragLeft ? rightEl : leftEl;
+    dragEl.classList.add('draggable');
 
-    setTimeout(function () {
-      if (test.moverIsLeft) {
-        // Magnet moves toward iron -> iron also rolls toward magnet
-        leftEl.classList.add('moved');
-        setTimeout(function () {
-          rightEl.classList.add('moved');
-          statusEl.textContent = 'Auch das Eisen bewegt sich zum Magneten!';
-          finishMutualTest(index);
-        }, 400);
-      } else {
-        // Iron moves toward magnet -> magnet also rolls toward iron
-        rightEl.classList.add('moved');
-        setTimeout(function () {
-          leftEl.classList.add('moved');
-          statusEl.textContent = 'Auch der Magnet bewegt sich zum Eisen!';
-          finishMutualTest(index);
-        }, 400);
+    statusEl.textContent = test.dragLeft ? 'Ziehe den Magneten →' : '← Ziehe das Eisen';
+
+    // Setup drag
+    initMutualDrag(setupEl, dragEl, otherEl, test.dragLeft, index);
+  }
+
+  function initMutualDrag(setupEl, dragEl, otherEl, dragIsLeft, testIndex) {
+    // Clean up previous drag listeners
+    cleanupFns.forEach(function (fn) { fn(); });
+    cleanupFns = [];
+
+    var dragging = false;
+    var startX = 0;
+    var startLeft = 0;
+    var snapped = false;
+
+    function onPointerDown(e) {
+      if (snapped) return;
+      dragging = true;
+      var rect = setupEl.getBoundingClientRect();
+      startX = e.clientX;
+      startLeft = dragEl.getBoundingClientRect().left - rect.left;
+      dragEl.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    }
+
+    function onPointerMove(e) {
+      if (!dragging || snapped) return;
+      var rect = setupEl.getBoundingClientRect();
+      var dx = e.clientX - startX;
+      var newLeft = startLeft + dx;
+      var pct = (newLeft / rect.width) * 100;
+      pct = Math.max(5, Math.min(80, pct));
+
+      dragEl.style.left = pct + '%';
+      dragEl.style.right = 'auto';
+
+      // Check proximity: snap when close enough
+      var dragRect = dragEl.getBoundingClientRect();
+      var otherRect = otherEl.getBoundingClientRect();
+      var gap = dragIsLeft
+        ? otherRect.left - dragRect.right
+        : dragRect.left - otherRect.right;
+
+      if (gap < 30) {
+        snapped = true;
+        dragging = false;
+        // Snap other element toward the dragged one
+        var otherPct;
+        if (dragIsLeft) {
+          otherPct = pct + 15;
+          otherEl.style.left = otherPct + '%';
+          otherEl.style.right = 'auto';
+          otherEl.style.transition = 'left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        } else {
+          otherPct = pct - 15;
+          otherEl.style.left = otherPct + '%';
+          otherEl.style.right = 'auto';
+          otherEl.style.transition = 'left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        }
+
+        var statusEl = document.getElementById('mutual-status');
+        if (dragIsLeft) {
+          statusEl.textContent = 'Das Eisen rollt zum Magneten!';
+        } else {
+          statusEl.textContent = 'Der Magnet rollt zum Eisen!';
+        }
+
+        finishMutualTest(testIndex);
       }
-    }, 500);
+    }
+
+    function onPointerUp() {
+      dragging = false;
+    }
+
+    dragEl.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('pointermove', onPointerMove);
+    document.addEventListener('pointerup', onPointerUp);
+
+    cleanupFns.push(function () {
+      document.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerup', onPointerUp);
+    });
   }
 
   function finishMutualTest(index) {
     state.tested[index] = true;
-    state.animating = false;
 
-    // Update button
     var btns = document.querySelectorAll('.mutual-test-btn');
     btns[index].classList.add('tested');
 
-    // Update results
     var resCard = document.getElementById('results-card');
     resCard.style.display = 'block';
     var resDiv = document.getElementById('mutual-results');
@@ -613,7 +719,7 @@
       var test = MUTUAL_TESTS[parseInt(k)];
       var item = document.createElement('div');
       item.className = 'mutual-result-item';
-      if (test.moverIsLeft) {
+      if (test.dragLeft) {
         item.innerHTML = '<span class="shield-dot pass"></span> Magnet nähert sich → Eisen rollt auch zum Magneten';
       } else {
         item.innerHTML = '<span class="shield-dot pass"></span> Eisen nähert sich → Magnet rollt auch zum Eisen';
@@ -626,7 +732,7 @@
     }
   }
 
-  // ==================== D: POLE INTERACTION ====================
+  // ==================== D: POLE INTERACTION (Drag-based) ====================
 
   var POLE_COMBOS = [
     { id: 'nn', topPole: 'N', bottomPole: 'N', topLabel: 'Nordpol', bottomLabel: 'Nordpol', attracts: false },
@@ -649,43 +755,26 @@
     vizCard.style.padding = '0';
     vizCard.innerHTML =
       '<div class="pole-setup" id="pole-setup">' +
-        // Table with rollers
         '<div class="pole-table"></div>' +
         '<div class="pole-roller pole-roller-1"></div>' +
         '<div class="pole-roller pole-roller-2"></div>' +
-        // Bottom magnet (stationary, on rollers)
         '<div class="pole-bottom" id="pole-bottom">' +
           '<div class="pole-magnet-h">' +
             '<div class="pole-n" id="bottom-left">N</div>' +
             '<div class="pole-s" id="bottom-right">S</div>' +
           '</div>' +
         '</div>' +
-        // Top magnet (movable)
-        '<div class="pole-top" id="pole-top">' +
+        '<div class="pole-top" id="pole-top" style="left:15%">' +
           '<div class="pole-magnet-h">' +
             '<div class="pole-n" id="top-left">N</div>' +
             '<div class="pole-s" id="top-right">S</div>' +
           '</div>' +
           '<div class="pole-hand">&#9995;</div>' +
         '</div>' +
-        // Result indicator
         '<div class="pole-result-indicator hidden" id="pole-result-indicator"></div>' +
-        // Status
         '<div class="pole-status" id="pole-status">Wähle eine Polkombination</div>' +
       '</div>';
     root.appendChild(vizCard);
-
-    // Instruction steps
-    var stepsCard = document.createElement('div');
-    stepsCard.className = 'card';
-    stepsCard.innerHTML =
-      '<div class="steps-list">' +
-        '<div class="step-item"><span class="step-num">Schritt 1:</span> Lege einen Stabmagneten auf zwei Bleistifte.</div>' +
-        '<div class="step-item"><span class="step-num">Schritt 2:</span> Bewege den zweiten Stabmagneten mit dem Nordpol langsam auf den Nordpol des liegenden Magneten zu.</div>' +
-        '<div class="step-item"><span class="step-num">Schritt 3:</span> Bewege den zweiten Stabmagneten mit dem Südpol langsam auf den Nordpol des liegenden Magneten zu.</div>' +
-        '<div class="step-item"><span class="step-num">Schritt 4:</span> Nähere nun nacheinander die Pole des zweiten Magneten dem Südpol des liegenden Magneten.</div>' +
-      '</div>';
-    root.appendChild(stepsCard);
 
     // Combination selector
     var comboCard = document.createElement('div');
@@ -700,13 +789,13 @@
       btn.setAttribute('data-index', i);
       btn.innerHTML =
         '<span class="combo-poles">' +
-          '<span class="combo-pole ' + (combo.topPole === 'N' ? 'pole-red' : 'pole-blue') + '">' + combo.topPole + '</span>' +
+          '<span class="combo-pole ' + (combo.topPole === 'N' ? 'pole-red' : 'pole-green') + '">' + combo.topPole + '</span>' +
           '<span class="combo-arrow">→</span>' +
-          '<span class="combo-pole ' + (combo.bottomPole === 'N' ? 'pole-red' : 'pole-blue') + '">' + combo.bottomPole + '</span>' +
+          '<span class="combo-pole ' + (combo.bottomPole === 'N' ? 'pole-red' : 'pole-green') + '">' + combo.bottomPole + '</span>' +
         '</span>' +
         '<span class="combo-desc">' + combo.topLabel + ' → ' + combo.bottomLabel + '</span>';
       btn.addEventListener('click', function () {
-        testPoleCombo(i);
+        selectPoleCombo(i);
       });
       comboGrid.appendChild(btn);
     });
@@ -754,73 +843,110 @@
     });
   }
 
-  function testPoleCombo(index) {
-    if (state.animating) return;
-    state.animating = true;
-
+  function selectPoleCombo(index) {
     var combo = POLE_COMBOS[index];
+    state.currentCombo = index;
+
     var topEl = document.getElementById('pole-top');
     var bottomEl = document.getElementById('pole-bottom');
     var statusEl = document.getElementById('pole-status');
     var indicator = document.getElementById('pole-result-indicator');
 
-    // Update magnet labels based on orientation
+    // Reset positions
+    topEl.style.left = '15%';
+    topEl.classList.remove('snap-attract', 'snap-repel');
+    bottomEl.classList.remove('attracted', 'repelled');
+    indicator.classList.add('hidden');
+
+    // Update magnet pole labels
     var topLeft = document.getElementById('top-left');
     var topRight = document.getElementById('top-right');
-
-    // The approaching pole is on the right side of the top magnet
     if (combo.topPole === 'N') {
-      topLeft.textContent = 'S';
-      topLeft.className = 'pole-s';
-      topRight.textContent = 'N';
-      topRight.className = 'pole-n';
+      topLeft.textContent = 'S'; topLeft.className = 'pole-s';
+      topRight.textContent = 'N'; topRight.className = 'pole-n';
     } else {
-      topLeft.textContent = 'N';
-      topLeft.className = 'pole-n';
-      topRight.textContent = 'S';
-      topRight.className = 'pole-s';
+      topLeft.textContent = 'N'; topLeft.className = 'pole-n';
+      topRight.textContent = 'S'; topRight.className = 'pole-s';
     }
 
-    // Bottom magnet: approaching pole is on the left
     var bottomLeft = document.getElementById('bottom-left');
     var bottomRight = document.getElementById('bottom-right');
     if (combo.bottomPole === 'N') {
-      bottomLeft.textContent = 'N';
-      bottomLeft.className = 'pole-n';
-      bottomRight.textContent = 'S';
-      bottomRight.className = 'pole-s';
+      bottomLeft.textContent = 'N'; bottomLeft.className = 'pole-n';
+      bottomRight.textContent = 'S'; bottomRight.className = 'pole-s';
     } else {
-      bottomLeft.textContent = 'S';
-      bottomLeft.className = 'pole-s';
-      bottomRight.textContent = 'N';
-      bottomRight.className = 'pole-n';
+      bottomLeft.textContent = 'S'; bottomLeft.className = 'pole-s';
+      bottomRight.textContent = 'N'; bottomRight.className = 'pole-n';
     }
 
-    // Reset positions
-    topEl.classList.remove('approach', 'repelled');
-    bottomEl.classList.remove('repelled');
-    indicator.classList.add('hidden');
-
-    // Highlight combo button
+    // Highlight button
     var btns = document.querySelectorAll('.combo-btn');
     btns.forEach(function (b) { b.classList.remove('active'); });
     btns[index].classList.add('active');
 
-    statusEl.textContent = 'Magnet nähert sich...';
+    statusEl.textContent = 'Ziehe den oberen Magneten →';
 
-    setTimeout(function () {
-      topEl.classList.add('approach');
+    // Setup drag for top magnet
+    initPoleDrag(index);
+  }
 
-      setTimeout(function () {
+  function initPoleDrag(comboIndex) {
+    // Remove old drag listeners
+    cleanupFns.forEach(function (fn) { fn(); });
+    cleanupFns = [];
+
+    var combo = POLE_COMBOS[comboIndex];
+    var topEl = document.getElementById('pole-top');
+    var bottomEl = document.getElementById('pole-bottom');
+    var setupEl = document.getElementById('pole-setup');
+    var statusEl = document.getElementById('pole-status');
+    var indicator = document.getElementById('pole-result-indicator');
+
+    var dragging = false;
+    var startX = 0;
+    var startLeftPx = 0;
+    var triggered = false;
+
+    function onPointerDown(e) {
+      if (triggered) return;
+      dragging = true;
+      var rect = setupEl.getBoundingClientRect();
+      startX = e.clientX;
+      startLeftPx = topEl.getBoundingClientRect().left - rect.left;
+      topEl.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    }
+
+    function onPointerMove(e) {
+      if (!dragging || triggered) return;
+      var rect = setupEl.getBoundingClientRect();
+      var dx = e.clientX - startX;
+      var newLeft = startLeftPx + dx;
+      var pct = (newLeft / rect.width) * 100;
+      pct = Math.max(5, Math.min(75, pct));
+
+      topEl.style.left = pct + '%';
+
+      // Check proximity to bottom magnet (center is at 50%)
+      var bottomCenter = 50;
+      var distance = Math.abs(pct + 7 - bottomCenter); // +7 for half-width approx
+
+      if (distance < 12) {
+        triggered = true;
+        dragging = false;
+
         if (combo.attracts) {
-          // Attraction: bottom magnet rolls toward top
+          // Snap together
+          topEl.classList.add('snap-attract');
+          topEl.style.left = '38%';
           bottomEl.classList.add('attracted');
           statusEl.textContent = 'Anziehung! Die Magnete ziehen sich an.';
           indicator.textContent = 'Anziehung';
           indicator.className = 'pole-result-indicator attract';
         } else {
-          // Repulsion: bottom magnet rolls away, top bounces back
-          topEl.classList.add('repelled');
+          // Repel
+          topEl.classList.add('snap-repel');
+          topEl.style.left = '10%';
           bottomEl.classList.add('repelled');
           statusEl.textContent = 'Abstoßung! Die Magnete stoßen sich ab.';
           indicator.textContent = 'Abstoßung';
@@ -828,29 +954,37 @@
         }
 
         // Record result
-        setTimeout(function () {
-          if (state.tested[index] === undefined) {
-            state.tested[index] = combo.attracts;
+        if (state.tested[comboIndex] === undefined) {
+          state.tested[comboIndex] = combo.attracts;
 
-            btns[index].classList.add(combo.attracts ? 'tested-attract' : 'tested-repel');
+          var btns = document.querySelectorAll('.combo-btn');
+          btns[comboIndex].classList.add(combo.attracts ? 'tested-attract' : 'tested-repel');
 
-            // Update results table
-            updatePoleResults();
+          updatePoleResults();
 
-            // Progress
-            var tested = Object.keys(state.tested).length;
-            document.getElementById('progress-text').textContent = tested + ' / 4 getestet';
-            document.getElementById('progress-fill').style.width = (tested / 4 * 100) + '%';
+          var tested = Object.keys(state.tested).length;
+          document.getElementById('progress-text').textContent = tested + ' / 4 getestet';
+          document.getElementById('progress-fill').style.width = (tested / 4 * 100) + '%';
 
-            if (tested === 4) {
-              document.getElementById('conclusion').classList.remove('hidden');
-            }
+          if (tested === 4) {
+            document.getElementById('conclusion').classList.remove('hidden');
           }
+        }
+      }
+    }
 
-          state.animating = false;
-        }, 400);
-      }, 800);
-    }, 300);
+    function onPointerUp() {
+      dragging = false;
+    }
+
+    topEl.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('pointermove', onPointerMove);
+    document.addEventListener('pointerup', onPointerUp);
+
+    cleanupFns.push(function () {
+      document.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerup', onPointerUp);
+    });
   }
 
   function updatePoleResults() {

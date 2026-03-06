@@ -226,7 +226,7 @@ main {
 }
 
 .magnet-n { background: var(--red); }
-.magnet-s { background: var(--accent); }
+.magnet-s { background: var(--green); }
 
 /* Test Animation Area */
 .test-area {
