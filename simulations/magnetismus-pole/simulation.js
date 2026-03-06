@@ -32,7 +32,7 @@
       id: 'd',
       tab: 'D: Zwei Magnete',
       title: 'D: Zwei Magnete wirken aufeinander',
-      instruction: 'Wähle eine Polkombination und ziehe den oberen Magneten langsam zum unteren. Beobachte, ob sie sich anziehen oder abstoßen.',
+      instruction: 'Wähle eine Polkombination und ziehe den linken Magneten langsam zum rechten. Beobachte, ob sie sich anziehen oder abstoßen.',
       type: 'pole-interaction',
       conclusion: 'Gleichnamige Pole (Nordpol–Nordpol oder Südpol–Südpol) stoßen sich ab. Ungleichnamige Pole (Nordpol–Südpol) ziehen sich an.'
     }
@@ -226,9 +226,19 @@
       for (var c = 0; c < zone.clips; c++) {
         var clip = document.createElement('div');
         clip.className = 'zone-clip';
-        clip.style.left = (zone.position * 25) + '%';
-        clip.style.animationDelay = (c * 0.08) + 's';
-        clip.style.transform = 'translateX(-50%) rotate(' + (Math.random() * 40 - 20) + 'deg)';
+        var baseLeft = zone.position * 25;
+        // Spread clips visually so count is distinguishable
+        var spread = zone.clips > 1 ? (c - (zone.clips - 1) / 2) * 3.5 : 0;
+        clip.style.left = (baseLeft + spread) + '%';
+        clip.style.animationDelay = (c * 0.1) + 's';
+        var rotation = Math.random() * 30 - 15;
+        clip.style.setProperty('--clip-rotation', rotation + 'deg');
+        // Use SVG paper clip shape
+        clip.innerHTML =
+          '<svg viewBox="0 0 14 32" width="14" height="32" class="clip-svg">' +
+            '<path d="M4,2 C2,2 1,3.5 1,5 L1,24 C1,27.5 3.5,30 7,30 C10.5,30 13,27.5 13,24 L13,8 C13,5.5 11.5,4 9.5,4 C7.5,4 6,5.5 6,8 L6,22 C6,23.5 6.8,24.5 8,24.5 C9.2,24.5 10,23.5 10,22 L10,8" ' +
+              'fill="none" stroke="#78716c" stroke-width="1.5" stroke-linecap="round"/>' +
+          '</svg>';
         clipsContainer.appendChild(clip);
       }
 
@@ -369,8 +379,9 @@
 
     // Physics constants
     var damping = 0.97;       // friction/air resistance
-    var springK = 0.0008;     // restoring torque toward 0° (north)
-    var angle = 120 + Math.random() * 120; // start angle (degrees)
+    var springK = 0.0008;     // restoring torque toward equilibrium
+    var equilibrium = -90;    // N pole (left end) points up = North
+    var angle = 20 + Math.random() * 100; // start angle (degrees), away from equilibrium
     var angularVel = 0;
     var animId = null;
     var dragging = false;
@@ -390,9 +401,9 @@
     // Physics loop
     function tick() {
       if (!dragging) {
-        // Restoring torque (toward 0°): torque = -k * sin(angle)
-        var angleRad = angle * Math.PI / 180;
-        var torque = -springK * Math.sin(angleRad) * 180; // convert back to degrees
+        // Restoring torque toward equilibrium (-90°, N pole points North)
+        var deltaAngle = (angle - equilibrium) * Math.PI / 180;
+        var torque = -springK * Math.sin(deltaAngle) * 180;
         angularVel += torque;
         angularVel *= damping;
         angle += angularVel;
@@ -403,8 +414,8 @@
 
         updateMagnet();
 
-        // Check if settled (nearly still and near 0)
-        if (wasNudged && Math.abs(angle) < 3 && Math.abs(angularVel) < 0.05) {
+        // Check if settled (nearly still and near equilibrium)
+        if (wasNudged && Math.abs(angle - equilibrium) < 3 && Math.abs(angularVel) < 0.05) {
           if (!alignedOnce) {
             alignedOnce = true;
             statusEl.textContent = 'Der Magnet hat sich ausgerichtet.';
@@ -524,20 +535,24 @@
     vizCard.style.padding = '0';
     vizCard.innerHTML =
       '<div class="mutual-setup" id="mutual-setup">' +
-        '<div class="mutual-table"></div>' +
-        '<div class="mutual-roller mutual-roller-l1"></div>' +
-        '<div class="mutual-roller mutual-roller-l2"></div>' +
-        '<div class="mutual-roller mutual-roller-r1"></div>' +
-        '<div class="mutual-roller mutual-roller-r2"></div>' +
+        '<div class="mutual-track"></div>' +
         '<div class="mutual-obj mutual-left" id="mutual-left">' +
           '<div class="mutual-magnet">' +
             '<div class="magnet-n">N</div><div class="magnet-s">S</div>' +
           '</div>' +
           '<span class="mutual-label">Magnet</span>' +
+          '<div class="mutual-rollers">' +
+            '<div class="mutual-wheel" id="wheel-l1"></div>' +
+            '<div class="mutual-wheel" id="wheel-l2"></div>' +
+          '</div>' +
         '</div>' +
         '<div class="mutual-obj mutual-right" id="mutual-right">' +
           '<div class="mutual-iron"></div>' +
           '<span class="mutual-label">Eisenquader</span>' +
+          '<div class="mutual-rollers">' +
+            '<div class="mutual-wheel" id="wheel-r1"></div>' +
+            '<div class="mutual-wheel" id="wheel-r2"></div>' +
+          '</div>' +
         '</div>' +
         '<div class="mutual-status" id="mutual-status">Wähle einen Versuch und ziehe</div>' +
       '</div>';
@@ -603,10 +618,12 @@
     var setupEl = document.getElementById('mutual-setup');
     var statusEl = document.getElementById('mutual-status');
 
+    leftEl.style.transition = 'none';
+    rightEl.style.transition = 'none';
     leftEl.style.left = '15%';
-    leftEl.style.right = '';
-    rightEl.style.right = '15%';
-    rightEl.style.left = '';
+    leftEl.style.right = 'auto';
+    rightEl.style.left = '75%';
+    rightEl.style.right = 'auto';
     leftEl.classList.remove('draggable');
     rightEl.classList.remove('draggable');
 
@@ -635,6 +652,21 @@
     var startX = 0;
     var startLeft = 0;
     var snapped = false;
+    var attractAnimId = null;
+    var otherPos = dragIsLeft ? 75 : 15; // initial position of other element in %
+    var wheelRotation = 0;
+
+    // Set other element to explicit left position
+    otherEl.style.left = otherPos + '%';
+    otherEl.style.right = 'auto';
+
+    function updateWheelRotation(el, delta) {
+      wheelRotation += delta * 8;
+      var wheels = el.querySelectorAll('.mutual-wheel');
+      wheels.forEach(function (w) {
+        w.style.transform = 'rotate(' + wheelRotation + 'deg)';
+      });
+    }
 
     function onPointerDown(e) {
       if (snapped) return;
@@ -652,33 +684,44 @@
       var dx = e.clientX - startX;
       var newLeft = startLeft + dx;
       var pct = (newLeft / rect.width) * 100;
-      pct = Math.max(5, Math.min(80, pct));
+      pct = Math.max(5, Math.min(85, pct));
 
+      var oldPct = parseFloat(dragEl.style.left) || (dragIsLeft ? 15 : 75);
       dragEl.style.left = pct + '%';
       dragEl.style.right = 'auto';
+      updateWheelRotation(dragEl, pct - oldPct);
 
-      // Check proximity: snap when close enough
-      var dragRect = dragEl.getBoundingClientRect();
-      var otherRect = otherEl.getBoundingClientRect();
-      var gap = dragIsLeft
-        ? otherRect.left - dragRect.right
-        : dragRect.left - otherRect.right;
+      // Calculate gap between objects
+      var dragCenter = pct + 5; // approximate half-width in %
+      var otherCenter = otherPos + 5;
+      var gap = Math.abs(otherCenter - dragCenter);
 
-      if (gap < 30) {
+      // Attraction zone: when objects get within ~25% of setup width, other starts moving
+      if (gap < 25 && gap > 3) {
+        // Distance-dependent speed: closer = faster
+        var attractionStrength = (25 - gap) / 25; // 0 to 1
+        var moveStep = attractionStrength * 0.6;
+        if (dragIsLeft) {
+          otherPos -= moveStep; // move left toward magnet
+        } else {
+          otherPos += moveStep; // move right toward iron
+        }
+        otherEl.style.left = otherPos + '%';
+        otherEl.style.right = 'auto';
+        updateWheelRotation(otherEl, dragIsLeft ? -moveStep : moveStep);
+      }
+
+      // Snap when very close
+      if (gap < 4) {
         snapped = true;
         dragging = false;
-        // Snap other element toward the dragged one
-        var otherPct;
+        // Final snap together
         if (dragIsLeft) {
-          otherPct = pct + 15;
-          otherEl.style.left = otherPct + '%';
-          otherEl.style.right = 'auto';
-          otherEl.style.transition = 'left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          otherEl.style.transition = 'left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          otherEl.style.left = (pct + 10) + '%';
         } else {
-          otherPct = pct - 15;
-          otherEl.style.left = otherPct + '%';
-          otherEl.style.right = 'auto';
-          otherEl.style.transition = 'left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          otherEl.style.transition = 'left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          otherEl.style.left = (pct - 10) + '%';
         }
 
         var statusEl = document.getElementById('mutual-status');
@@ -701,6 +744,7 @@
     document.addEventListener('pointerup', onPointerUp);
 
     cleanupFns.push(function () {
+      if (attractAnimId) cancelAnimationFrame(attractAnimId);
       document.removeEventListener('pointermove', onPointerMove);
       document.removeEventListener('pointerup', onPointerUp);
     });
@@ -737,10 +781,10 @@
   // ==================== D: POLE INTERACTION (Drag-based) ====================
 
   var POLE_COMBOS = [
-    { id: 'nn', topPole: 'N', bottomPole: 'N', topLabel: 'Nordpol', bottomLabel: 'Nordpol', attracts: false },
-    { id: 'sn', topPole: 'S', bottomPole: 'N', topLabel: 'Südpol', bottomLabel: 'Nordpol', attracts: true },
-    { id: 'ns', topPole: 'N', bottomPole: 'S', topLabel: 'Nordpol', bottomLabel: 'Südpol', attracts: true },
-    { id: 'ss', topPole: 'S', bottomPole: 'S', topLabel: 'Südpol', bottomLabel: 'Südpol', attracts: false }
+    { id: 'nn', topPole: 'N', bottomPole: 'N', topLabel: 'Nordpol', bottomLabel: 'Nordpol', attracts: false, leftLabel: 'N →', rightLabel: '← N' },
+    { id: 'sn', topPole: 'S', bottomPole: 'N', topLabel: 'Südpol', bottomLabel: 'Nordpol', attracts: true, leftLabel: 'S →', rightLabel: '← N' },
+    { id: 'ns', topPole: 'N', bottomPole: 'S', topLabel: 'Nordpol', bottomLabel: 'Südpol', attracts: true, leftLabel: 'N →', rightLabel: '← S' },
+    { id: 'ss', topPole: 'S', bottomPole: 'S', topLabel: 'Südpol', bottomLabel: 'Südpol', attracts: false, leftLabel: 'S →', rightLabel: '← S' }
   ];
 
   function renderPoleInteraction(container, exp) {
@@ -757,21 +801,27 @@
     vizCard.style.padding = '0';
     vizCard.innerHTML =
       '<div class="pole-setup" id="pole-setup">' +
-        '<div class="pole-table"></div>' +
-        '<div class="pole-roller pole-roller-1"></div>' +
-        '<div class="pole-roller pole-roller-2"></div>' +
-        '<div class="pole-bottom" id="pole-bottom">' +
-          '<div class="pole-magnet-h">' +
-            '<div class="pole-n" id="bottom-left">N</div>' +
-            '<div class="pole-s" id="bottom-right">S</div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="pole-top" id="pole-top" style="left:15%">' +
+        '<div class="pole-track"></div>' +
+        '<div class="pole-left" id="pole-left" style="left:15%">' +
+          '<div class="pole-hand">&#9995;</div>' +
           '<div class="pole-magnet-h">' +
             '<div class="pole-n" id="top-left">N</div>' +
             '<div class="pole-s" id="top-right">S</div>' +
           '</div>' +
-          '<div class="pole-hand">&#9995;</div>' +
+          '<div class="pole-wheels">' +
+            '<div class="pole-wh" id="pw-l1"></div>' +
+            '<div class="pole-wh" id="pw-l2"></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="pole-right" id="pole-right">' +
+          '<div class="pole-magnet-h">' +
+            '<div class="pole-n" id="bottom-left">N</div>' +
+            '<div class="pole-s" id="bottom-right">S</div>' +
+          '</div>' +
+          '<div class="pole-wheels">' +
+            '<div class="pole-wh" id="pw-r1"></div>' +
+            '<div class="pole-wh" id="pw-r2"></div>' +
+          '</div>' +
         '</div>' +
         '<div class="pole-result-indicator hidden" id="pole-result-indicator"></div>' +
         '<div class="pole-status" id="pole-status">Wähle eine Polkombination</div>' +
@@ -849,18 +899,19 @@
     var combo = POLE_COMBOS[index];
     state.currentCombo = index;
 
-    var topEl = document.getElementById('pole-top');
-    var bottomEl = document.getElementById('pole-bottom');
+    var leftEl = document.getElementById('pole-left');
+    var rightEl = document.getElementById('pole-right');
     var statusEl = document.getElementById('pole-status');
     var indicator = document.getElementById('pole-result-indicator');
 
     // Reset positions
-    topEl.style.left = '15%';
-    topEl.classList.remove('snap-attract', 'snap-repel');
-    bottomEl.classList.remove('attracted', 'repelled');
+    leftEl.style.left = '15%';
+    leftEl.style.transition = 'none';
+    rightEl.style.left = '70%';
+    rightEl.style.transition = 'none';
     indicator.classList.add('hidden');
 
-    // Update magnet pole labels
+    // Update magnet pole labels - left magnet: the facing pole (right side) is topPole
     var topLeft = document.getElementById('top-left');
     var topRight = document.getElementById('top-right');
     if (combo.topPole === 'N') {
@@ -871,6 +922,7 @@
       topRight.textContent = 'S'; topRight.className = 'pole-s';
     }
 
+    // Right magnet: the facing pole (left side) is bottomPole
     var bottomLeft = document.getElementById('bottom-left');
     var bottomRight = document.getElementById('bottom-right');
     if (combo.bottomPole === 'N') {
@@ -886,9 +938,9 @@
     btns.forEach(function (b) { b.classList.remove('active'); });
     btns[index].classList.add('active');
 
-    statusEl.textContent = 'Ziehe den oberen Magneten →';
+    statusEl.textContent = 'Ziehe den linken Magneten →';
 
-    // Setup drag for top magnet
+    // Setup drag for left magnet
     initPoleDrag(index);
   }
 
@@ -898,8 +950,8 @@
     cleanupFns = [];
 
     var combo = POLE_COMBOS[comboIndex];
-    var topEl = document.getElementById('pole-top');
-    var bottomEl = document.getElementById('pole-bottom');
+    var leftEl = document.getElementById('pole-left');
+    var rightEl = document.getElementById('pole-right');
     var setupEl = document.getElementById('pole-setup');
     var statusEl = document.getElementById('pole-status');
     var indicator = document.getElementById('pole-result-indicator');
@@ -908,14 +960,24 @@
     var startX = 0;
     var startLeftPx = 0;
     var triggered = false;
+    var rightPos = 70; // initial right magnet position in %
+    var wheelRotation = 0;
+
+    function updateWheels(el, delta) {
+      wheelRotation += delta * 8;
+      var wheels = el.querySelectorAll('.pole-wh');
+      wheels.forEach(function (w) {
+        w.style.transform = 'rotate(' + wheelRotation + 'deg)';
+      });
+    }
 
     function onPointerDown(e) {
       if (triggered) return;
       dragging = true;
       var rect = setupEl.getBoundingClientRect();
       startX = e.clientX;
-      startLeftPx = topEl.getBoundingClientRect().left - rect.left;
-      topEl.setPointerCapture(e.pointerId);
+      startLeftPx = leftEl.getBoundingClientRect().left - rect.left;
+      leftEl.setPointerCapture(e.pointerId);
       e.preventDefault();
     }
 
@@ -925,31 +987,51 @@
       var dx = e.clientX - startX;
       var newLeft = startLeftPx + dx;
       var pct = (newLeft / rect.width) * 100;
-      pct = Math.max(5, Math.min(75, pct));
+      pct = Math.max(5, Math.min(80, pct));
 
-      topEl.style.left = pct + '%';
+      var oldPct = parseFloat(leftEl.style.left) || 15;
+      leftEl.style.left = pct + '%';
+      updateWheels(leftEl, pct - oldPct);
 
-      // Check proximity to bottom magnet (center is at 50%)
-      var bottomCenter = 50;
-      var distance = Math.abs(pct + 7 - bottomCenter); // +7 for half-width approx
+      // Distance between the two magnets (gap in %)
+      var leftRight = pct + 13; // approximate right edge of left magnet
+      var rightLeft = rightPos; // left edge of right magnet
+      var gap = rightLeft - leftRight;
 
-      if (distance < 12) {
+      // Distance-dependent reaction of right magnet
+      if (gap < 25 && gap > 2) {
+        var strength = (25 - gap) / 25; // 0 to 1
+        var moveStep = strength * 0.5;
+        if (combo.attracts) {
+          rightPos -= moveStep; // right magnet moves left toward dragged one
+          updateWheels(rightEl, -moveStep);
+        } else {
+          rightPos += moveStep; // right magnet moves right away from dragged one
+          rightPos = Math.min(88, rightPos);
+          updateWheels(rightEl, moveStep);
+        }
+        rightEl.style.left = rightPos + '%';
+      }
+
+      // Snap when very close
+      if (gap < 3) {
         triggered = true;
         dragging = false;
 
         if (combo.attracts) {
           // Snap together
-          topEl.classList.add('snap-attract');
-          topEl.style.left = '38%';
-          bottomEl.classList.add('attracted');
+          leftEl.style.transition = 'left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          rightEl.style.transition = 'left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          rightEl.style.left = (pct + 14) + '%';
           statusEl.textContent = 'Anziehung! Die Magnete ziehen sich an.';
           indicator.textContent = 'Anziehung';
           indicator.className = 'pole-result-indicator attract';
         } else {
-          // Repel
-          topEl.classList.add('snap-repel');
-          topEl.style.left = '10%';
-          bottomEl.classList.add('repelled');
+          // Repel: push both apart
+          leftEl.style.transition = 'left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          rightEl.style.transition = 'left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          leftEl.style.left = '5%';
+          rightEl.style.left = '85%';
           statusEl.textContent = 'Abstoßung! Die Magnete stoßen sich ab.';
           indicator.textContent = 'Abstoßung';
           indicator.className = 'pole-result-indicator repel';
@@ -979,7 +1061,7 @@
       dragging = false;
     }
 
-    topEl.addEventListener('pointerdown', onPointerDown);
+    leftEl.addEventListener('pointerdown', onPointerDown);
     document.addEventListener('pointermove', onPointerMove);
     document.addEventListener('pointerup', onPointerUp);
 
