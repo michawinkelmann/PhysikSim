@@ -59,7 +59,7 @@
       desc: 'Gleichnamige Pole',
       leftPoles: [{ x: -130, y: 0, q: -1 }, { x: -50, y: 0, q: 1 }],
       rightPoles: [{ x: 50, y: 0, q: 1 }, { x: 130, y: 0, q: -1 }],
-      leftFlip: false,
+      leftFlip: true,
       rightFlip: false
     },
     {
@@ -68,7 +68,7 @@
       desc: 'Ungleichnamige Pole',
       leftPoles: [{ x: -130, y: 0, q: -1 }, { x: -50, y: 0, q: 1 }],
       rightPoles: [{ x: 50, y: 0, q: -1 }, { x: 130, y: 0, q: 1 }],
-      leftFlip: false,
+      leftFlip: true,
       rightFlip: true
     },
     {
@@ -77,7 +77,7 @@
       desc: 'Ungleichnamige Pole',
       leftPoles: [{ x: -130, y: 0, q: 1 }, { x: -50, y: 0, q: -1 }],
       rightPoles: [{ x: 50, y: 0, q: 1 }, { x: 130, y: 0, q: -1 }],
-      leftFlip: true,
+      leftFlip: false,
       rightFlip: false
     },
     {
@@ -86,7 +86,7 @@
       desc: 'Gleichnamige Pole',
       leftPoles: [{ x: -130, y: 0, q: 1 }, { x: -50, y: 0, q: -1 }],
       rightPoles: [{ x: 50, y: 0, q: -1 }, { x: 130, y: 0, q: 1 }],
-      leftFlip: true,
+      leftFlip: false,
       rightFlip: true
     }
   ];
@@ -720,7 +720,7 @@
     var w = canvas.width / dpr;
     var h = canvas.height / dpr;
 
-    var filings = generateFilings(mt.poles, mt.isInside, w, h, 600);
+    var filings = generateFilings(mt.poles, mt.isInside, w, h, 1000);
     state.filings = filings;
 
     var drawFn = MAGNET_DRAW_FNS[state.currentMagnet];
@@ -914,13 +914,13 @@
       return false;
     };
 
-    var filings = generateFilings(allPoles, isInside, w, h, 700);
+    var filings = generateFilings(allPoles, isInside, w, h, 1200);
 
     // For unlike poles, add extra filings in the gap to clearly show
     // field lines running from one magnet to the other
     var isUnlikePoles = (cfg.id === 'ns' || cfg.id === 'sn');
     if (isUnlikePoles) {
-      var gapFilings = generateGapFilings(allPoles, h, 200);
+      var gapFilings = generateGapFilings(allPoles, h, 350);
       filings = filings.concat(gapFilings);
     }
 
