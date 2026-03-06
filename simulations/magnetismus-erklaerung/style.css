@@ -1,0 +1,911 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #f0f2f5;
+  --surface: #ffffff;
+  --text: #1a1a2e;
+  --text-sec: #5a5a7a;
+  --border: #e2e4e9;
+  --accent: #2563eb;
+  --green: #16a34a;
+  --red: #dc2626;
+  --orange: #ea580c;
+  --radius: 12px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+html { font-size: 16px; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+  overflow-x: hidden;
+}
+
+/* Header */
+header {
+  background: var(--surface);
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.back-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.back-link::before {
+  content: '\2190\00a0';
+}
+
+header h1 {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+/* Tabs */
+#tabs {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+#tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  flex: 0 0 auto;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-sec);
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+  min-width: 48px;
+  text-align: center;
+}
+
+.tab:hover { color: var(--text); }
+.tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* Main Container */
+main {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* Experiment Panel */
+.experiment {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.exp-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.exp-instruction {
+  font-size: 0.9rem;
+  color: var(--text-sec);
+  line-height: 1.5;
+}
+
+/* Card */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.25rem;
+}
+
+/* Progress & Results */
+.progress-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--text-sec);
+}
+
+.progress-track {
+  flex: 1;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+/* Conclusion Box */
+.conclusion {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #1e40af;
+}
+
+.conclusion strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1.25rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  user-select: none;
+  -webkit-user-select: none;
+  min-height: 44px;
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+.btn-primary:hover { background: #1d4ed8; }
+.btn-primary:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: var(--border);
+  color: var(--text);
+}
+.btn-secondary:hover { background: #d1d5db; }
+
+.btn-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* ===================== EXPERIMENT A: MAGNET HERSTELLEN ===================== */
+
+/* Visualization area */
+.mag-viz {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+/* Needle */
+.mag-needle {
+  position: absolute;
+  width: 120px;
+  height: 6px;
+  background: linear-gradient(90deg, #94a3b8, #cbd5e1);
+  border-radius: 3px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  transition: background 0.5s;
+}
+
+.mag-needle.magnetized {
+  background: linear-gradient(90deg, #dc2626 0%, #dc2626 10%, #94a3b8 10%, #94a3b8 90%, #16a34a 90%, #16a34a 100%);
+}
+
+.mag-needle-tip {
+  position: absolute;
+  right: -8px;
+  top: -3px;
+  width: 0;
+  height: 0;
+  border-left: 10px solid #cbd5e1;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  transition: border-left-color 0.5s;
+}
+
+.mag-needle.magnetized .mag-needle-tip {
+  border-left-color: #16a34a;
+}
+
+/* Stroking magnet */
+.mag-stroker {
+  position: absolute;
+  width: 60px;
+  height: 24px;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  top: 38%;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.mag-stroker.visible {
+  opacity: 1;
+}
+
+.mag-stroker-n {
+  flex: 1;
+  background: var(--red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.7rem;
+  color: #fff;
+}
+
+.mag-stroker-s {
+  flex: 1;
+  background: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.7rem;
+  color: #fff;
+}
+
+/* Candle flame */
+.mag-flame {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.mag-flame.visible {
+  opacity: 1;
+}
+
+.flame-body {
+  width: 12px;
+  height: 28px;
+  background: linear-gradient(0deg, #f59e0b, #ef4444, #f97316);
+  border-radius: 50% 50% 20% 20%;
+  animation: flicker 0.4s ease-in-out infinite alternate;
+  position: relative;
+}
+
+.flame-body::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 14px;
+  background: linear-gradient(0deg, #fbbf24, #fde68a);
+  border-radius: 50% 50% 20% 20%;
+}
+
+@keyframes flicker {
+  0% { transform: scaleX(1) scaleY(1); }
+  50% { transform: scaleX(0.9) scaleY(1.05); }
+  100% { transform: scaleX(1.1) scaleY(0.95); }
+}
+
+.flame-candle {
+  width: 16px;
+  height: 40px;
+  background: linear-gradient(90deg, #fef3c7, #fde68a, #fef3c7);
+  border-radius: 2px;
+  border: 1px solid #fcd34d;
+}
+
+.flame-wick {
+  width: 2px;
+  height: 6px;
+  background: #1a1a2e;
+  margin: 0 auto;
+}
+
+/* Paperclip test */
+.mag-clip-area {
+  position: absolute;
+  bottom: 30px;
+  left: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.mag-clip-area.visible {
+  opacity: 1;
+}
+
+.mag-clip {
+  width: 20px;
+  height: 40px;
+}
+
+.mag-clip-label {
+  font-size: 0.7rem;
+  color: var(--text-sec);
+  font-weight: 600;
+}
+
+/* Status label */
+.mag-status {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  background: #f1f5f9;
+  color: var(--text-sec);
+  transition: all 0.3s;
+}
+
+.mag-status.magnetized {
+  background: #dcfce7;
+  color: var(--green);
+}
+
+.mag-status.demagnetized {
+  background: #fef2f2;
+  color: var(--red);
+}
+
+.mag-status.heating {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* Attraction indicator */
+.mag-attract-result {
+  position: absolute;
+  bottom: 80px;
+  left: 30px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.3rem 0.75rem;
+  border-radius: 8px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.mag-attract-result.visible {
+  opacity: 1;
+}
+
+.mag-attract-result.yes {
+  background: #dcfce7;
+  color: var(--green);
+}
+
+.mag-attract-result.no {
+  background: #fef2f2;
+  color: var(--red);
+}
+
+/* Hit indicator */
+.mag-hit-area {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.mag-hit-area.visible {
+  opacity: 1;
+}
+
+.mag-table-surface {
+  width: 80px;
+  height: 10px;
+  background: linear-gradient(180deg, #a16207, #92400e);
+  border-radius: 2px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.mag-hit-label {
+  font-size: 0.7rem;
+  color: var(--text-sec);
+  font-weight: 600;
+}
+
+/* Elementary magnet visualization */
+.elem-magnets {
+  position: absolute;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px;
+}
+
+.elem-magnet {
+  width: 14px;
+  height: 10px;
+  border-radius: 2px;
+  overflow: hidden;
+  display: flex;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  transition: transform 0.5s ease;
+}
+
+.elem-n {
+  flex: 1;
+  background: var(--red);
+}
+
+.elem-s {
+  flex: 1;
+  background: var(--green);
+}
+
+/* Steps */
+.step-btn-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.step-btn {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+  user-select: none;
+  -webkit-user-select: none;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.step-btn:active { transform: scale(0.98); }
+
+.step-btn.active {
+  border-color: var(--accent);
+  background: #eff6ff;
+}
+
+.step-btn.completed {
+  border-color: var(--green);
+  background: #f0fdf4;
+}
+
+.step-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.step-btn:disabled:active {
+  transform: none;
+}
+
+.step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--border);
+  color: var(--text-sec);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.step-btn.active .step-num {
+  background: var(--accent);
+  color: #fff;
+}
+
+.step-btn.completed .step-num {
+  background: var(--green);
+  color: #fff;
+}
+
+.step-text {
+  flex: 1;
+}
+
+/* ===================== EXPERIMENT B: AUS ZWEI MACH EINS ===================== */
+
+/* Wire visualization */
+.wire-viz {
+  position: relative;
+  width: 100%;
+  height: 260px;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+/* Magnetized wire */
+.wire-full {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 8px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  transition: all 0.5s;
+}
+
+.wire-full.magnetized {
+  background: linear-gradient(90deg, #dc2626 0%, #dc2626 8%, #94a3b8 8%, #94a3b8 92%, #16a34a 92%, #16a34a 100%);
+}
+
+.wire-full.unmagnetized {
+  background: linear-gradient(90deg, #94a3b8, #cbd5e1);
+}
+
+/* Cut halves */
+.wire-half {
+  position: absolute;
+  top: 45%;
+  width: 90px;
+  height: 8px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  transition: all 0.6s ease;
+  transform: translateY(-50%);
+}
+
+.wire-half-left {
+  left: 15%;
+  background: linear-gradient(90deg, #dc2626 0%, #dc2626 12%, #94a3b8 12%, #94a3b8 84%, #16a34a 84%, #16a34a 100%);
+}
+
+.wire-half-right {
+  right: 15%;
+  background: linear-gradient(90deg, #dc2626 0%, #dc2626 12%, #94a3b8 12%, #94a3b8 84%, #16a34a 84%, #16a34a 100%);
+}
+
+/* Cut line */
+.wire-cut-line {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 30%;
+  background: transparent;
+  transition: background 0.3s;
+}
+
+.wire-cut-line.visible {
+  background: var(--red);
+  box-shadow: 0 0 6px rgba(220, 38, 38, 0.4);
+}
+
+/* Scissors */
+.wire-scissors {
+  position: absolute;
+  top: 25%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.wire-scissors.visible {
+  opacity: 1;
+}
+
+/* Clip test for wire */
+.wire-clip-test {
+  position: absolute;
+  bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: opacity 0.3s;
+}
+
+.wire-clip-left {
+  left: 18%;
+}
+
+.wire-clip-right {
+  right: 18%;
+}
+
+.wire-clip-test .mag-clip-label {
+  font-size: 0.65rem;
+}
+
+/* Wire status */
+.wire-status {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: all 0.3s;
+}
+
+/* Two bar magnets */
+.bar-magnets-area {
+  position: relative;
+  width: 100%;
+  height: 260px;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.bar-magnet {
+  position: absolute;
+  top: 45%;
+  width: 120px;
+  height: 32px;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transform: translateY(-50%);
+  transition: all 0.6s ease;
+}
+
+.bar-magnet-left {
+  left: 12%;
+}
+
+.bar-magnet-right {
+  right: 12%;
+}
+
+.bar-n {
+  flex: 1;
+  background: var(--red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #fff;
+}
+
+.bar-s {
+  flex: 1;
+  background: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #fff;
+}
+
+/* Iron nail */
+.iron-nail {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.6s ease;
+}
+
+.nail-body {
+  width: 60px;
+  height: 6px;
+  background: linear-gradient(90deg, #64748b, #94a3b8, #64748b);
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  position: relative;
+}
+
+.nail-head {
+  position: absolute;
+  left: -3px;
+  top: -4px;
+  width: 6px;
+  height: 14px;
+  background: #64748b;
+  border-radius: 2px;
+}
+
+.nail-point {
+  position: absolute;
+  right: -6px;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-left: 8px solid #94a3b8;
+  border-top: 3px solid transparent;
+  border-bottom: 3px solid transparent;
+}
+
+.nail-label {
+  font-size: 0.7rem;
+  color: var(--text-sec);
+  font-weight: 600;
+}
+
+/* Contact point indicator */
+.contact-indicator {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.contact-indicator.visible {
+  opacity: 1;
+}
+
+/* Elementary magnet model */
+.elem-model {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+}
+
+.elem-row {
+  display: flex;
+  gap: 3px;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.elem-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-sec);
+  text-align: center;
+}
+
+.elem-mini {
+  width: 18px;
+  height: 12px;
+  border-radius: 2px;
+  overflow: hidden;
+  display: flex;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.elem-mini-n {
+  flex: 1;
+  background: var(--red);
+}
+
+.elem-mini-s {
+  flex: 1;
+  background: var(--green);
+}
+
+/* Animation: shake */
+@keyframes shake {
+  0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+  20% { transform: translate(-50%, -50%) rotate(-3deg); }
+  40% { transform: translate(-50%, -50%) rotate(3deg); }
+  60% { transform: translate(-50%, -50%) rotate(-2deg); }
+  80% { transform: translate(-50%, -50%) rotate(2deg); }
+}
+
+.mag-needle.shaking {
+  animation: shake 0.3s ease-in-out 3;
+}
+
+/* Animation: attracted clip */
+@keyframes attractClip {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-30px); }
+}
+
+.mag-clip.attracted svg {
+  animation: attractClip 0.5s ease-out forwards;
+}
+
+/* Stroking animation */
+@keyframes strokeRight {
+  0% { left: 30%; }
+  100% { left: 62%; }
+}
+
+.mag-stroker.stroking {
+  animation: strokeRight 0.8s ease-in-out;
+}
+
+/* Utility */
+.hidden { display: none !important; }
+.text-center { text-align: center; }
+.gap-sm { gap: 0.5rem; }
+.mt-sm { margin-top: 0.5rem; }
+.mt-md { margin-top: 1rem; }
+
+@media (max-width: 480px) {
+  header { padding: 0.75rem 1rem; }
+  header h1 { font-size: 1rem; }
+  main { padding: 0.75rem; }
+  .mag-viz, .wire-viz, .bar-magnets-area { height: 240px; }
+}
