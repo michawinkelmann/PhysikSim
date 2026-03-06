@@ -222,6 +222,43 @@
     return filings;
   }
 
+  // Generate extra filings focused in the gap between two magnets (for unlike poles)
+  function generateGapFilings(poles, canvasH, count) {
+    var filings = [];
+    var maxAttempts = count * 4;
+    var attempts = 0;
+    // Gap region: x from -45 to 45 (between the two bar magnets)
+    var gapLeft = -45, gapRight = 45;
+
+    while (filings.length < count && attempts < maxAttempts) {
+      attempts++;
+      // Concentrate filings along the horizontal axis with some vertical spread
+      var px = gapLeft + Math.random() * (gapRight - gapLeft);
+      // Gaussian-like vertical distribution: most filings near y=0
+      var py = (Math.random() + Math.random() + Math.random() - 1.5) * 60;
+
+      if (Math.abs(py) > canvasH / 2 - 15) continue;
+
+      var b = calcField(px, py, poles);
+      var str = fieldStrength(b);
+      var angle = fieldAngle(b);
+
+      angle += (Math.random() - 0.5) * 0.15;
+
+      filings.push({
+        x: px,
+        y: py,
+        targetAngle: angle,
+        currentAngle: Math.random() * Math.PI * 2,
+        strength: str,
+        delay: Math.random() * 500,
+        opacity: 0,
+        length: 3 + Math.min(str * 400, 5)
+      });
+    }
+    return filings;
+  }
+
   // ==================== CANVAS DRAWING ====================
 
   function roundRect(ctx, x, y, w, h, r) {
@@ -878,6 +915,15 @@
     };
 
     var filings = generateFilings(allPoles, isInside, w, h, 700);
+
+    // For unlike poles, add extra filings in the gap to clearly show
+    // field lines running from one magnet to the other
+    var isUnlikePoles = (cfg.id === 'ns' || cfg.id === 'sn');
+    if (isUnlikePoles) {
+      var gapFilings = generateGapFilings(allPoles, h, 200);
+      filings = filings.concat(gapFilings);
+    }
+
     state.filings = filings;
 
     var cfgCopy = cfg;
