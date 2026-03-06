@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhysikSim – Interaktive Physik-Simulationen</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>PhysikSim</h1>
+    <p class="subtitle">Interaktive Simulationen zu Physikexperimenten</p>
+  </header>
+
+  <main id="content"></main>
+
+  <footer>
+    <p>PhysikSim – Interaktive Physik-Simulationen</p>
+  </footer>
+
+  <script>
+    /*
+     * Simulationsverzeichnis
+     * Um eine neue Simulation hinzuzufügen:
+     * 1. Neuen Ordner unter simulations/ anlegen
+     * 2. Eintrag hier in der passenden Kategorie ergänzen
+     */
+    const categories = [
+      {
+        name: 'Magnetismus',
+        icon: 'M',
+        color: '#2563eb',
+        simulations: [
+          {
+            title: 'Wirkung von Magneten',
+            description: 'Untersuche, welche Stoffe und Metalle von Magneten angezogen werden, wie weit die Wirkung reicht und welche Materialien abschirmen.',
+            path: 'simulations/magnetismus-wirkung/index.html',
+            experiments: 4
+          }
+        ]
+      },
+      // Weitere Kategorien hier ergänzen, z.B.:
+      // {
+      //   name: 'Optik',
+      //   icon: 'O',
+      //   color: '#d97706',
+      //   simulations: []
+      // },
+    ];
+
+    function render() {
+      const content = document.getElementById('content');
+      content.innerHTML = '';
+
+      categories.forEach(cat => {
+        if (cat.simulations.length === 0) return;
+
+        const section = document.createElement('section');
+        section.className = 'category';
+
+        const header = document.createElement('div');
+        header.className = 'category-header';
+        header.innerHTML = `
+          <span class="category-icon" style="background:${cat.color}">${cat.icon}</span>
+          <h2>${cat.name}</h2>
+        `;
+        section.appendChild(header);
+
+        const grid = document.createElement('div');
+        grid.className = 'sim-grid';
+
+        cat.simulations.forEach(sim => {
+          const card = document.createElement('a');
+          card.href = sim.path;
+          card.className = 'sim-card';
+          card.innerHTML = `
+            <div class="sim-card-accent" style="background:${cat.color}"></div>
+            <div class="sim-card-body">
+              <h3>${sim.title}</h3>
+              <p>${sim.description}</p>
+              <span class="sim-badge">${sim.experiments} Experiment${sim.experiments !== 1 ? 'e' : ''}</span>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+
+        section.appendChild(grid);
+        content.appendChild(section);
+      });
+    }
+
+    render();
+  </script>
+</body>
+</html>
