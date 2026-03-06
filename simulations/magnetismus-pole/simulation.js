@@ -380,8 +380,8 @@
     // Physics constants
     var damping = 0.97;       // friction/air resistance
     var springK = 0.0008;     // restoring torque toward equilibrium
-    var equilibrium = -90;    // N pole (left end) points up = North
-    var angle = 20 + Math.random() * 100; // start angle (degrees), away from equilibrium
+    var equilibrium = 90;     // N pole (left end) points up = North
+    var angle = -60 + Math.random() * 100; // start angle (degrees), away from equilibrium
     var angularVel = 0;
     var animId = null;
     var dragging = false;
@@ -654,19 +654,81 @@
     var snapped = false;
     var attractAnimId = null;
     var otherPos = dragIsLeft ? 75 : 15; // initial position of other element in %
+    var dragPos = dragIsLeft ? 15 : 75; // current position of dragged element in %
     var wheelRotation = 0;
+    var otherWheelRotation = 0;
 
     // Set other element to explicit left position
     otherEl.style.left = otherPos + '%';
     otherEl.style.right = 'auto';
 
-    function updateWheelRotation(el, delta) {
-      wheelRotation += delta * 8;
-      var wheels = el.querySelectorAll('.mutual-wheel');
-      wheels.forEach(function (w) {
-        w.style.transform = 'rotate(' + wheelRotation + 'deg)';
-      });
+    function updateWheelRotation(el, delta, isOther) {
+      if (isOther) {
+        otherWheelRotation += delta * 8;
+        var wheels = el.querySelectorAll('.mutual-wheel');
+        wheels.forEach(function (w) {
+          w.style.transform = 'rotate(' + otherWheelRotation + 'deg)';
+        });
+      } else {
+        wheelRotation += delta * 8;
+        var wheels = el.querySelectorAll('.mutual-wheel');
+        wheels.forEach(function (w) {
+          w.style.transform = 'rotate(' + wheelRotation + 'deg)';
+        });
+      }
     }
+
+    // Continuous animation loop for the non-dragged object
+    function attractionLoop() {
+      if (snapped) return;
+
+      var dragCenter = dragPos + 5;
+      var otherCenter = otherPos + 5;
+      var gap = Math.abs(otherCenter - dragCenter);
+
+      if (gap < 25 && gap > 3) {
+        var attractionStrength = (25 - gap) / 25;
+        var moveStep = attractionStrength * 0.4;
+        if (dragIsLeft) {
+          otherPos -= moveStep;
+        } else {
+          otherPos += moveStep;
+        }
+        otherEl.style.left = otherPos + '%';
+        otherEl.style.right = 'auto';
+        updateWheelRotation(otherEl, dragIsLeft ? -moveStep : moveStep, true);
+
+        // Re-check gap after movement for snap
+        otherCenter = otherPos + 5;
+        gap = Math.abs(otherCenter - dragCenter);
+      }
+
+      if (gap <= 3 && gap > 0) {
+        snapped = true;
+        dragging = false;
+        if (dragIsLeft) {
+          otherEl.style.transition = 'left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          otherEl.style.left = (dragPos + 10) + '%';
+        } else {
+          otherEl.style.transition = 'left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          otherEl.style.left = (dragPos - 10) + '%';
+        }
+
+        var statusEl = document.getElementById('mutual-status');
+        if (dragIsLeft) {
+          statusEl.textContent = 'Das Eisen rollt zum Magneten!';
+        } else {
+          statusEl.textContent = 'Der Magnet rollt zum Eisen!';
+        }
+
+        finishMutualTest(testIndex);
+        return;
+      }
+
+      attractAnimId = requestAnimationFrame(attractionLoop);
+    }
+
+    attractAnimId = requestAnimationFrame(attractionLoop);
 
     function onPointerDown(e) {
       if (snapped) return;
@@ -686,53 +748,11 @@
       var pct = (newLeft / rect.width) * 100;
       pct = Math.max(5, Math.min(85, pct));
 
-      var oldPct = parseFloat(dragEl.style.left) || (dragIsLeft ? 15 : 75);
+      var oldPct = dragPos;
+      dragPos = pct;
       dragEl.style.left = pct + '%';
       dragEl.style.right = 'auto';
-      updateWheelRotation(dragEl, pct - oldPct);
-
-      // Calculate gap between objects
-      var dragCenter = pct + 5; // approximate half-width in %
-      var otherCenter = otherPos + 5;
-      var gap = Math.abs(otherCenter - dragCenter);
-
-      // Attraction zone: when objects get within ~25% of setup width, other starts moving
-      if (gap < 25 && gap > 3) {
-        // Distance-dependent speed: closer = faster
-        var attractionStrength = (25 - gap) / 25; // 0 to 1
-        var moveStep = attractionStrength * 0.6;
-        if (dragIsLeft) {
-          otherPos -= moveStep; // move left toward magnet
-        } else {
-          otherPos += moveStep; // move right toward iron
-        }
-        otherEl.style.left = otherPos + '%';
-        otherEl.style.right = 'auto';
-        updateWheelRotation(otherEl, dragIsLeft ? -moveStep : moveStep);
-      }
-
-      // Snap when very close
-      if (gap < 4) {
-        snapped = true;
-        dragging = false;
-        // Final snap together
-        if (dragIsLeft) {
-          otherEl.style.transition = 'left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)';
-          otherEl.style.left = (pct + 10) + '%';
-        } else {
-          otherEl.style.transition = 'left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)';
-          otherEl.style.left = (pct - 10) + '%';
-        }
-
-        var statusEl = document.getElementById('mutual-status');
-        if (dragIsLeft) {
-          statusEl.textContent = 'Das Eisen rollt zum Magneten!';
-        } else {
-          statusEl.textContent = 'Der Magnet rollt zum Eisen!';
-        }
-
-        finishMutualTest(testIndex);
-      }
+      updateWheelRotation(dragEl, pct - oldPct, false);
     }
 
     function onPointerUp() {
@@ -961,15 +981,99 @@
     var startLeftPx = 0;
     var triggered = false;
     var rightPos = 70; // initial right magnet position in %
+    var leftPos = 15; // current left magnet position in %
     var wheelRotation = 0;
+    var rightWheelRotation = 0;
+    var animId = null;
 
-    function updateWheels(el, delta) {
-      wheelRotation += delta * 8;
-      var wheels = el.querySelectorAll('.pole-wh');
-      wheels.forEach(function (w) {
-        w.style.transform = 'rotate(' + wheelRotation + 'deg)';
-      });
+    function updateWheels(el, delta, isRight) {
+      if (isRight) {
+        rightWheelRotation += delta * 8;
+        var wheels = el.querySelectorAll('.pole-wh');
+        wheels.forEach(function (w) {
+          w.style.transform = 'rotate(' + rightWheelRotation + 'deg)';
+        });
+      } else {
+        wheelRotation += delta * 8;
+        var wheels = el.querySelectorAll('.pole-wh');
+        wheels.forEach(function (w) {
+          w.style.transform = 'rotate(' + wheelRotation + 'deg)';
+        });
+      }
     }
+
+    function finishInteraction() {
+      triggered = true;
+      dragging = false;
+
+      if (combo.attracts) {
+        leftEl.style.transition = 'left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        rightEl.style.transition = 'left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        rightEl.style.left = (leftPos + 14) + '%';
+        statusEl.textContent = 'Anziehung! Die Magnete ziehen sich an.';
+        indicator.textContent = 'Anziehung';
+        indicator.className = 'pole-result-indicator attract';
+      } else {
+        leftEl.style.transition = 'left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        rightEl.style.transition = 'left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        leftEl.style.left = '5%';
+        rightEl.style.left = '85%';
+        statusEl.textContent = 'Abstoßung! Die Magnete stoßen sich ab.';
+        indicator.textContent = 'Abstoßung';
+        indicator.className = 'pole-result-indicator repel';
+      }
+
+      if (state.tested[comboIndex] === undefined) {
+        state.tested[comboIndex] = combo.attracts;
+
+        var btns = document.querySelectorAll('.combo-btn');
+        btns[comboIndex].classList.add(combo.attracts ? 'tested-attract' : 'tested-repel');
+
+        updatePoleResults();
+
+        var tested = Object.keys(state.tested).length;
+        document.getElementById('progress-text').textContent = tested + ' / 4 getestet';
+        document.getElementById('progress-fill').style.width = (tested / 4 * 100) + '%';
+
+        if (tested === 4) {
+          document.getElementById('conclusion').classList.remove('hidden');
+        }
+      }
+    }
+
+    // Continuous animation loop for the right magnet
+    function physicsLoop() {
+      if (triggered) return;
+
+      var leftRight = leftPos + 13;
+      var gap = rightPos - leftRight;
+
+      if (gap < 25 && gap > 2) {
+        var strength = (25 - gap) / 25;
+        var moveStep = strength * 0.35;
+        if (combo.attracts) {
+          rightPos -= moveStep;
+          updateWheels(rightEl, -moveStep, true);
+        } else {
+          rightPos += moveStep;
+          rightPos = Math.min(88, rightPos);
+          updateWheels(rightEl, moveStep, true);
+        }
+        rightEl.style.left = rightPos + '%';
+
+        // Re-check gap
+        gap = rightPos - (leftPos + 13);
+      }
+
+      if (gap <= 2 && combo.attracts) {
+        finishInteraction();
+        return;
+      }
+
+      animId = requestAnimationFrame(physicsLoop);
+    }
+
+    animId = requestAnimationFrame(physicsLoop);
 
     function onPointerDown(e) {
       if (triggered) return;
@@ -989,71 +1093,15 @@
       var pct = (newLeft / rect.width) * 100;
       pct = Math.max(5, Math.min(80, pct));
 
-      var oldPct = parseFloat(leftEl.style.left) || 15;
+      var oldPct = leftPos;
+      leftPos = pct;
       leftEl.style.left = pct + '%';
-      updateWheels(leftEl, pct - oldPct);
+      updateWheels(leftEl, pct - oldPct, false);
 
-      // Distance between the two magnets (gap in %)
-      var leftRight = pct + 13; // approximate right edge of left magnet
-      var rightLeft = rightPos; // left edge of right magnet
-      var gap = rightLeft - leftRight;
-
-      // Distance-dependent reaction of right magnet
-      if (gap < 25 && gap > 2) {
-        var strength = (25 - gap) / 25; // 0 to 1
-        var moveStep = strength * 0.5;
-        if (combo.attracts) {
-          rightPos -= moveStep; // right magnet moves left toward dragged one
-          updateWheels(rightEl, -moveStep);
-        } else {
-          rightPos += moveStep; // right magnet moves right away from dragged one
-          rightPos = Math.min(88, rightPos);
-          updateWheels(rightEl, moveStep);
-        }
-        rightEl.style.left = rightPos + '%';
-      }
-
-      // Snap when very close
-      if (gap < 3) {
-        triggered = true;
-        dragging = false;
-
-        if (combo.attracts) {
-          // Snap together
-          leftEl.style.transition = 'left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)';
-          rightEl.style.transition = 'left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)';
-          rightEl.style.left = (pct + 14) + '%';
-          statusEl.textContent = 'Anziehung! Die Magnete ziehen sich an.';
-          indicator.textContent = 'Anziehung';
-          indicator.className = 'pole-result-indicator attract';
-        } else {
-          // Repel: push both apart
-          leftEl.style.transition = 'left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
-          rightEl.style.transition = 'left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
-          leftEl.style.left = '5%';
-          rightEl.style.left = '85%';
-          statusEl.textContent = 'Abstoßung! Die Magnete stoßen sich ab.';
-          indicator.textContent = 'Abstoßung';
-          indicator.className = 'pole-result-indicator repel';
-        }
-
-        // Record result
-        if (state.tested[comboIndex] === undefined) {
-          state.tested[comboIndex] = combo.attracts;
-
-          var btns = document.querySelectorAll('.combo-btn');
-          btns[comboIndex].classList.add(combo.attracts ? 'tested-attract' : 'tested-repel');
-
-          updatePoleResults();
-
-          var tested = Object.keys(state.tested).length;
-          document.getElementById('progress-text').textContent = tested + ' / 4 getestet';
-          document.getElementById('progress-fill').style.width = (tested / 4 * 100) + '%';
-
-          if (tested === 4) {
-            document.getElementById('conclusion').classList.remove('hidden');
-          }
-        }
+      // Check snap for repulsion (needs to happen during drag)
+      var gap = rightPos - (leftPos + 13);
+      if (gap < 3 && !combo.attracts) {
+        finishInteraction();
       }
     }
 
@@ -1066,6 +1114,7 @@
     document.addEventListener('pointerup', onPointerUp);
 
     cleanupFns.push(function () {
+      if (animId) cancelAnimationFrame(animId);
       document.removeEventListener('pointermove', onPointerMove);
       document.removeEventListener('pointerup', onPointerUp);
     });
