@@ -360,27 +360,31 @@ main {
 
 .zone-clips-container {
   position: absolute;
-  bottom: 10px;
+  bottom: 8px;
   left: 10%;
   right: 10%;
   max-width: 400px;
-  height: 40px;
+  height: 50px;
   margin: 0 auto;
 }
 
 .zone-clip {
   position: absolute;
-  width: 4px;
-  height: 18px;
-  background: #64748b;
-  border-radius: 1px;
-  animation: clipAppear 0.3s ease-out forwards;
+  width: 14px;
+  height: 32px;
+  animation: clipAppear 0.35s ease-out forwards;
   opacity: 0;
+  transform-origin: center top;
+}
+
+.zone-clip .clip-svg {
+  display: block;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
 }
 
 @keyframes clipAppear {
-  from { opacity: 0; transform: translateX(-50%) translateY(10px) rotate(0deg); }
-  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  from { opacity: 0; transform: translateX(-50%) translateY(12px) rotate(0deg); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) rotate(var(--clip-rotation, 0deg)); }
 }
 
 .zone-no-clip {
@@ -649,40 +653,25 @@ main {
   overflow: hidden;
 }
 
-.mutual-table {
+.mutual-track {
   position: absolute;
-  bottom: 50px;
-  left: 10%;
-  right: 10%;
-  height: 4px;
-  background: #94a3b8;
+  bottom: 48px;
+  left: 8%;
+  right: 8%;
+  height: 3px;
+  background: linear-gradient(180deg, #9ca3af, #6b7280);
   border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
-
-/* Rollers */
-.mutual-roller {
-  position: absolute;
-  bottom: 44px;
-  width: 16px;
-  height: 16px;
-  background: #fbbf24;
-  border-radius: 50%;
-  border: 2px solid #d97706;
-}
-
-.mutual-roller-l1 { left: 18%; }
-.mutual-roller-l2 { left: 28%; }
-.mutual-roller-r1 { right: 18%; }
-.mutual-roller-r2 { right: 28%; }
 
 /* Objects */
 .mutual-obj {
   position: absolute;
-  bottom: 58px;
+  bottom: 50px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.2rem;
   transition: left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), right 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -701,7 +690,51 @@ main {
 }
 
 .mutual-right {
-  right: 15%;
+  left: 75%;
+  right: auto;
+}
+
+/* Integrated rollers under objects */
+.mutual-rollers {
+  display: flex;
+  gap: 24px;
+  margin-top: -2px;
+}
+
+.mutual-wheel {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #fde68a, #f59e0b);
+  border: 2px solid #d97706;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  position: relative;
+  transition: transform 0.05s linear;
+}
+
+/* Spoke marks on wheels to show rotation */
+.mutual-wheel::before,
+.mutual-wheel::after {
+  content: '';
+  position: absolute;
+  background: #d97706;
+  border-radius: 1px;
+}
+
+.mutual-wheel::before {
+  width: 8px;
+  height: 1.5px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.mutual-wheel::after {
+  width: 1.5px;
+  height: 8px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .mutual-magnet {
@@ -793,74 +826,92 @@ main {
   overflow: hidden;
 }
 
-.pole-table {
+.pole-track {
   position: absolute;
-  bottom: 60px;
-  left: 20%;
-  right: 20%;
-  height: 4px;
-  background: #94a3b8;
+  bottom: 48px;
+  left: 8%;
+  right: 8%;
+  height: 3px;
+  background: linear-gradient(180deg, #9ca3af, #6b7280);
   border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
-.pole-roller {
+/* Left magnet (draggable) */
+.pole-left {
   position: absolute;
-  bottom: 54px;
-  width: 14px;
-  height: 14px;
-  background: #fbbf24;
-  border-radius: 50%;
-  border: 2px solid #d97706;
-}
-
-.pole-roller-1 { left: 30%; }
-.pole-roller-2 { right: 30%; }
-
-/* Bottom magnet (on rollers) */
-.pole-bottom {
-  position: absolute;
-  bottom: 72px;
-  left: 50%;
-  transform: translateX(-50%);
-  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.pole-bottom.attracted {
-  transform: translateX(-50%) translateX(-20px);
-}
-
-.pole-bottom.repelled {
-  transform: translateX(-50%) translateX(30px);
-}
-
-/* Top magnet (hand-held, draggable) */
-.pole-top {
-  position: absolute;
-  top: 40px;
+  bottom: 50px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.15rem;
   cursor: grab;
   touch-action: none;
   z-index: 5;
 }
 
-.pole-top:active {
+.pole-left:active {
   cursor: grabbing;
 }
 
-.pole-top.snap-attract {
-  transition: left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.pole-top.snap-repel {
-  transition: left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
 .pole-hand {
-  font-size: 1.2rem;
+  font-size: 1rem;
   transform: scaleX(-1);
+  line-height: 1;
+  margin-bottom: -2px;
+}
+
+/* Right magnet (reacts to proximity) */
+.pole-right {
+  position: absolute;
+  bottom: 50px;
+  left: 70%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+/* Wheels for both magnets in D */
+.pole-wheels {
+  display: flex;
+  gap: 22px;
+  margin-top: -2px;
+}
+
+.pole-wh {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #fde68a, #f59e0b);
+  border: 2px solid #d97706;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  position: relative;
+  transition: transform 0.05s linear;
+}
+
+.pole-wh::before,
+.pole-wh::after {
+  content: '';
+  position: absolute;
+  background: #d97706;
+  border-radius: 1px;
+}
+
+.pole-wh::before {
+  width: 6px;
+  height: 1.5px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.pole-wh::after {
+  width: 1.5px;
+  height: 6px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 /* Horizontal magnet display */
@@ -1020,5 +1071,5 @@ main {
     grid-template-columns: 1fr;
   }
   .mutual-left { left: 8%; }
-  .mutual-right { right: 8%; }
+  .mutual-right { left: 70%; }
 }
