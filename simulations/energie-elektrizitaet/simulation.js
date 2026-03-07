@@ -220,27 +220,54 @@
 
     // Steam engine
     circuit.innerHTML +=
-      '<div class="steam-engine" id="steam-eng" style="left:8%;top:22%">' +
+      '<div class="steam-engine" id="steam-eng" style="left:5%;top:18%">' +
         '<div class="steam-engine-chimney"></div>' +
         '<div class="steam-puff" style="display:none"></div>' +
         '<div class="steam-puff" style="display:none"></div>' +
         '<div class="steam-puff" style="display:none"></div>' +
-        '<div class="steam-engine-body"><span class="steam-engine-label">Dampf-<br>maschine</span></div>' +
+        '<div class="steam-puff" style="display:none"></div>' +
+        '<div class="steam-engine-body">' +
+          '<span class="steam-engine-label">Dampf-<br>maschine</span>' +
+          '<div class="steam-engine-gauge"></div>' +
+          '<div class="steam-engine-piston">' +
+            '<div class="steam-engine-piston-rod"></div>' +
+            '<div class="steam-engine-piston-cylinder"></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="steam-engine-flywheel"><div class="steam-engine-flywheel-hub"></div></div>' +
+        '<div class="steam-engine-grate"></div>' +
+        '<div class="steam-engine-fire" id="steam-fire">' +
+          '<div class="steam-engine-flame"></div>' +
+          '<div class="steam-engine-flame"></div>' +
+          '<div class="steam-engine-flame"></div>' +
+          '<div class="steam-engine-flame"></div>' +
+        '</div>' +
         '<div class="steam-engine-wheel left"></div>' +
         '<div class="steam-engine-wheel right"></div>' +
       '</div>';
 
+    // Drive belt (SVG)
+    drawWire(svg, [[165,115],[195,115]], '#78716c');
+    drawWire(svg, [[165,125],[195,125]], '#78716c');
+
     // Generator
     circuit.innerHTML +=
-      '<div class="generator" style="left:38%;top:28%">' +
-        '<div class="generator-body"><span class="generator-symbol">G</span></div>' +
+      '<div class="generator" id="v1-gen" style="left:38%;top:26%">' +
+        '<div class="generator-body">' +
+          '<div class="generator-coils"></div>' +
+          '<div class="generator-rotor"></div>' +
+          '<span class="generator-symbol">G</span>' +
+          '<div class="generator-terminal pos"></div>' +
+          '<div class="generator-terminal neg"></div>' +
+        '</div>' +
         '<div class="generator-label">Generator</div>' +
       '</div>';
 
     // Bulb
     circuit.innerHTML +=
-      '<div style="position:absolute;right:12%;top:25%;display:flex;flex-direction:column;align-items:center;gap:4px;z-index:2">' +
+      '<div style="position:absolute;right:12%;top:22%;z-index:2" class="bulb-container">' +
         '<div class="bulb-glass off" id="v1-bulb"></div>' +
+        '<div class="bulb-base"></div>' +
         '<span class="bulb-label">Lampe</span>' +
       '</div>';
 
@@ -251,6 +278,7 @@
     var dispLamp = document.getElementById('disp-lamp');
     var bulb = document.getElementById('v1-bulb');
     var steamEng = document.getElementById('steam-eng');
+    var genEl = document.getElementById('v1-gen');
     var conc = document.getElementById('conclusion');
     var shown = false;
 
@@ -267,10 +295,15 @@
       var puffs = steamEng.querySelectorAll('.steam-puff');
       if (v > 0.05) {
         steamEng.classList.add('steam-spinning');
+        steamEng.classList.add('steam-active');
         steamEng.style.setProperty('--spin-duration', spinDuration(v));
+        genEl.classList.add('generator-spinning');
+        genEl.style.setProperty('--spin-duration', spinDuration(v));
         puffs.forEach(function (p) { p.style.display = ''; });
       } else {
         steamEng.classList.remove('steam-spinning');
+        steamEng.classList.remove('steam-active');
+        genEl.classList.remove('generator-spinning');
         puffs.forEach(function (p) { p.style.display = 'none'; });
       }
 
@@ -319,28 +352,40 @@
       '</div>';
 
     var circuit = document.getElementById('solar-circuit');
+    var W2 = 400, H2 = 260;
+    var svg2 = makeSVG(W2, H2);
+    circuit.appendChild(svg2);
+
+    // Wires: solar cell -> motor -> solar cell
+    drawWire(svg2, [[100,80],[100,50],[300,50],[300,80]], '#dc2626');
+    drawWire(svg2, [[100,150],[100,220],[300,220],[300,150]], '#2563eb');
+
     // Solar panel
     circuit.innerHTML +=
-      '<div class="solar-cell" style="left:8%;top:25%">' +
-        '<div class="solar-panel">' +
+      '<div class="solar-cell" style="left:8%;top:18%">' +
+        '<div class="solar-panel-frame"><div class="solar-panel">' +
           '<div class="solar-segment"></div><div class="solar-segment"></div><div class="solar-segment"></div>' +
           '<div class="solar-segment"></div><div class="solar-segment"></div><div class="solar-segment"></div>' +
-        '</div>' +
+        '</div></div>' +
+        '<div class="solar-stand"></div>' +
         '<div class="solar-label">Solarzelle</div>' +
       '</div>';
 
     // Light rays
     circuit.innerHTML +=
-      '<div id="light-rays" style="position:absolute;left:15%;top:2%;z-index:1;display:none">' +
+      '<div id="light-rays" style="position:absolute;left:13%;top:0%;z-index:1;display:none">' +
         '<div style="width:3px;height:30px;background:linear-gradient(180deg,#fde047,transparent);position:absolute;left:0;transform:rotate(-10deg)"></div>' +
         '<div style="width:3px;height:30px;background:linear-gradient(180deg,#fde047,transparent);position:absolute;left:12px;transform:rotate(0deg)"></div>' +
         '<div style="width:3px;height:30px;background:linear-gradient(180deg,#fde047,transparent);position:absolute;left:24px;transform:rotate(10deg)"></div>' +
+        '<div style="width:2px;height:24px;background:linear-gradient(180deg,#fde047,transparent);position:absolute;left:6px;transform:rotate(-5deg);opacity:0.6"></div>' +
+        '<div style="width:2px;height:24px;background:linear-gradient(180deg,#fde047,transparent);position:absolute;left:18px;transform:rotate(5deg);opacity:0.6"></div>' +
       '</div>';
 
-    // Fan
+    // Fan with guard
     circuit.innerHTML +=
-      '<div class="fan-container" id="fan1" style="right:15%;top:20%">' +
+      '<div class="fan-container" id="fan1" style="right:15%;top:12%">' +
         '<div class="fan-blades">' +
+          '<div class="fan-guard"></div>' +
           '<div class="fan-hub"></div>' +
           '<div class="fan-blade-arm red"></div>' +
           '<div class="fan-blade-arm blue"></div>' +
@@ -352,7 +397,7 @@
 
     // Motor below fan
     circuit.innerHTML +=
-      '<div style="position:absolute;right:17%;top:62%;display:flex;flex-direction:column;align-items:center;z-index:2">' +
+      '<div style="position:absolute;right:17%;top:58%;display:flex;flex-direction:column;align-items:center;z-index:2">' +
         '<div class="motor-body" style="width:36px;height:36px"><span class="motor-symbol" style="font-size:0.8rem">M</span></div>' +
         '<span class="motor-label">Motor</span>' +
       '</div>';
@@ -429,28 +474,40 @@
       '</div>';
 
     var circuit = document.getElementById('solar-circuit2');
+    var W3 = 400, H3 = 280;
+    var svg3 = makeSVG(W3, H3);
+    circuit.appendChild(svg3);
+
+    // Wires: solar -> fan1 motor, solar -> fan2 motor (parallel)
+    drawWire(svg3, [[95,100],[95,40],[230,40],[230,80],[320,80],[320,100]], '#dc2626');
+    drawWire(svg3, [[95,180],[95,240],[230,240],[230,200],[320,200],[320,180]], '#2563eb');
+
     // Solar panel
     circuit.innerHTML +=
-      '<div class="solar-cell" style="left:5%;top:30%">' +
-        '<div class="solar-panel">' +
+      '<div class="solar-cell" style="left:5%;top:24%">' +
+        '<div class="solar-panel-frame"><div class="solar-panel">' +
           '<div class="solar-segment"></div><div class="solar-segment"></div><div class="solar-segment"></div>' +
           '<div class="solar-segment"></div><div class="solar-segment"></div><div class="solar-segment"></div>' +
-        '</div>' +
+        '</div></div>' +
+        '<div class="solar-stand"></div>' +
         '<div class="solar-label">Solarzelle</div>' +
       '</div>';
 
     // Light rays
     circuit.innerHTML +=
-      '<div id="light-rays2" style="position:absolute;left:12%;top:5%;z-index:1;display:none">' +
+      '<div id="light-rays2" style="position:absolute;left:10%;top:2%;z-index:1;display:none">' +
         '<div style="width:3px;height:30px;background:linear-gradient(180deg,#fde047,transparent);position:absolute;left:0;transform:rotate(-10deg)"></div>' +
         '<div style="width:3px;height:30px;background:linear-gradient(180deg,#fde047,transparent);position:absolute;left:12px"></div>' +
         '<div style="width:3px;height:30px;background:linear-gradient(180deg,#fde047,transparent);position:absolute;left:24px;transform:rotate(10deg)"></div>' +
+        '<div style="width:2px;height:24px;background:linear-gradient(180deg,#fde047,transparent);position:absolute;left:6px;transform:rotate(-5deg);opacity:0.6"></div>' +
+        '<div style="width:2px;height:24px;background:linear-gradient(180deg,#fde047,transparent);position:absolute;left:18px;transform:rotate(5deg);opacity:0.6"></div>' +
       '</div>';
 
-    // Fan 1
+    // Fan 1 with guard
     circuit.innerHTML +=
-      '<div class="fan-container" id="fan2a" style="right:35%;top:8%">' +
+      '<div class="fan-container" id="fan2a" style="right:35%;top:4%">' +
         '<div class="fan-blades">' +
+          '<div class="fan-guard"></div>' +
           '<div class="fan-hub"></div>' +
           '<div class="fan-blade-arm red"></div>' +
           '<div class="fan-blade-arm blue"></div>' +
@@ -460,10 +517,11 @@
         '<div class="fan-label">Ventilator 1</div>' +
       '</div>';
 
-    // Fan 2
+    // Fan 2 with guard
     circuit.innerHTML +=
-      '<div class="fan-container" id="fan2b" style="right:8%;top:8%">' +
+      '<div class="fan-container" id="fan2b" style="right:8%;top:4%">' +
         '<div class="fan-blades">' +
+          '<div class="fan-guard"></div>' +
           '<div class="fan-hub"></div>' +
           '<div class="fan-blade-arm green"></div>' +
           '<div class="fan-blade-arm yellow"></div>' +
@@ -475,11 +533,13 @@
 
     // Motors
     circuit.innerHTML +=
-      '<div style="position:absolute;right:37%;top:60%;display:flex;flex-direction:column;align-items:center;z-index:2">' +
+      '<div style="position:absolute;right:37%;top:56%;display:flex;flex-direction:column;align-items:center;z-index:2">' +
         '<div class="motor-body" style="width:32px;height:32px"><span class="motor-symbol" style="font-size:0.7rem">M</span></div>' +
+        '<span class="motor-label">Motor 1</span>' +
       '</div>' +
-      '<div style="position:absolute;right:10%;top:60%;display:flex;flex-direction:column;align-items:center;z-index:2">' +
+      '<div style="position:absolute;right:10%;top:56%;display:flex;flex-direction:column;align-items:center;z-index:2">' +
         '<div class="motor-body" style="width:32px;height:32px"><span class="motor-symbol" style="font-size:0.7rem">M</span></div>' +
+        '<span class="motor-label">Motor 2</span>' +
       '</div>';
 
     var slider = document.getElementById('light-slider2');
@@ -561,45 +621,65 @@
       '</div>';
 
     var circuit = document.getElementById('wind-circuit');
+    var Ww = 400, Hw = 300;
+    var svgw = makeSVG(Ww, Hw);
+    circuit.appendChild(svgw);
+
+    // Wires: generator -> bulb
+    drawWire(svgw, [[268,155],[268,70],[340,70],[340,120]], '#dc2626');
+    drawWire(svgw, [[268,175],[268,250],[340,250],[340,170]], '#2563eb');
 
     // Hairdryer
     circuit.innerHTML +=
-      '<div class="hairdryer" id="wind-dryer" style="left:3%;top:32%">' +
-        '<div class="hairdryer-body"><span class="hairdryer-label">Föhn</span><div class="hairdryer-nozzle"></div></div>' +
+      '<div class="hairdryer" id="wind-dryer" style="left:3%;top:30%">' +
+        '<div class="hairdryer-body">' +
+          '<span class="hairdryer-label">Föhn</span>' +
+          '<div class="hairdryer-switch"></div>' +
+          '<div class="hairdryer-nozzle"></div>' +
+        '</div>' +
         '<div class="hairdryer-handle"></div>' +
       '</div>';
 
     // Wind lines
     circuit.innerHTML +=
-      '<div id="wind-lines" style="position:absolute;left:22%;top:30%;display:none">' +
+      '<div id="wind-lines" style="position:absolute;left:22%;top:28%;display:none">' +
         '<div class="wind-line" style="top:0"></div>' +
-        '<div class="wind-line" style="top:10px;animation-delay:0.2s"></div>' +
-        '<div class="wind-line" style="top:20px;animation-delay:0.4s"></div>' +
+        '<div class="wind-line" style="top:8px;animation-delay:0.15s"></div>' +
+        '<div class="wind-line" style="top:16px;animation-delay:0.3s"></div>' +
+        '<div class="wind-line" style="top:24px;animation-delay:0.45s"></div>' +
       '</div>';
 
-    // Wind turbine
+    // Wind turbine with nacelle
     circuit.innerHTML +=
-      '<div class="wind-turbine" id="wind-turb" style="left:38%;top:5%">' +
+      '<div class="wind-turbine" id="wind-turb" style="left:38%;top:3%">' +
         '<div class="wind-turbine-blades">' +
           '<div class="wind-turbine-hub"></div>' +
           '<div class="wind-blade"></div>' +
           '<div class="wind-blade"></div>' +
           '<div class="wind-blade"></div>' +
         '</div>' +
+        '<div class="wind-turbine-nacelle"></div>' +
         '<div class="wind-turbine-pole"></div>' +
       '</div>';
 
-    // Generator
+    // Generator with rotor
     circuit.innerHTML +=
-      '<div class="generator" style="left:55%;top:40%">' +
-        '<div class="generator-body"><span class="generator-symbol">G</span></div>' +
+      '<div class="generator" id="w-gen" style="left:55%;top:38%">' +
+        '<div class="generator-body">' +
+          '<div class="generator-coils"></div>' +
+          '<div class="generator-rotor"></div>' +
+          '<span class="generator-symbol">G</span>' +
+          '<div class="generator-terminal pos"></div>' +
+          '<div class="generator-terminal neg"></div>' +
+        '</div>' +
         '<div class="generator-label">Generator</div>' +
       '</div>';
 
-    // Bulb
+    // Bulb with base
     circuit.innerHTML +=
-      '<div style="position:absolute;right:10%;top:32%;display:flex;flex-direction:column;align-items:center;gap:4px;z-index:2">' +
+      '<div style="position:absolute;right:10%;top:28%;z-index:2" class="bulb-container">' +
         '<div class="bulb-glass off" id="w-bulb"></div>' +
+        '<div class="bulb-base"></div>' +
         '<span class="bulb-label">Lampe</span>' +
       '</div>';
 
@@ -607,6 +687,7 @@
     var turb = document.getElementById('wind-turb');
     var wLines = document.getElementById('wind-lines');
     var wBulb = document.getElementById('w-bulb');
+    var wGen = document.getElementById('w-gen');
     var dispWind = document.getElementById('disp-wind');
     var dispTurb = document.getElementById('disp-turbine');
     var dispWLamp = document.getElementById('disp-wlamp');
@@ -630,8 +711,11 @@
       if (v > 0) {
         turb.classList.add('wind-spinning');
         turb.style.setProperty('--spin-duration', spinDuration(v));
+        wGen.classList.add('generator-spinning');
+        wGen.style.setProperty('--spin-duration', spinDuration(v));
       } else {
         turb.classList.remove('wind-spinning');
+        wGen.classList.remove('generator-spinning');
       }
 
       tested[level] = true;
@@ -689,31 +773,50 @@
 
     var circuit = document.getElementById('crank-circuit');
     state.twoLamps = false;
+    var Wc = 400, Hc = 280;
+    var svgc = makeSVG(Wc, Hc);
+    circuit.appendChild(svgc);
 
-    // Generator with crank
+    // Wires: generator -> bulb(s)
+    drawWire(svgc, [[120,100],[120,50],[280,50],[280,100]], '#dc2626');
+    drawWire(svgc, [[120,155],[120,240],[280,240],[280,155]], '#2563eb');
+
+    // Generator with crank and rotor
     circuit.innerHTML +=
-      '<div style="position:absolute;left:8%;top:30%;display:flex;flex-direction:column;align-items:center;z-index:2">' +
-        '<div class="generator-body" style="width:55px;height:40px"><span class="generator-symbol">G</span></div>' +
+      '<div class="generator" id="c-gen" style="left:8%;top:28%">' +
+        '<div class="generator-body" style="width:55px;height:40px">' +
+          '<div class="generator-coils"></div>' +
+          '<div class="generator-rotor"></div>' +
+          '<span class="generator-symbol">G</span>' +
+          '<div class="generator-terminal pos"></div>' +
+          '<div class="generator-terminal neg"></div>' +
+        '</div>' +
         '<div class="generator-label">Generator</div>' +
       '</div>';
 
-    // Crank visual
+    // Crank visual with base
     circuit.innerHTML +=
-      '<div class="crank-container" id="crank-vis" style="left:2%;top:22%">' +
-        '<div class="crank-handle"><div class="crank-arm"></div><div class="crank-knob"></div></div>' +
+      '<div class="crank-container" id="crank-vis" style="left:2%;top:20%">' +
+        '<div class="crank-handle">' +
+          '<div class="crank-base"></div>' +
+          '<div class="crank-arm"></div>' +
+          '<div class="crank-knob"></div>' +
+        '</div>' +
       '</div>';
 
-    // Bulb 1
+    // Bulb 1 with base
     circuit.innerHTML +=
-      '<div style="position:absolute;right:25%;top:28%;display:flex;flex-direction:column;align-items:center;gap:4px;z-index:2" id="lamp1-grp">' +
+      '<div style="position:absolute;right:25%;top:24%;z-index:2" class="bulb-container" id="lamp1-grp">' +
         '<div class="bulb-glass off" id="c-bulb1"></div>' +
+        '<div class="bulb-base"></div>' +
         '<span class="bulb-label">Lampe 1</span>' +
       '</div>';
 
-    // Bulb 2 (hidden initially)
+    // Bulb 2 (hidden initially) with base
     circuit.innerHTML +=
-      '<div style="position:absolute;right:8%;top:28%;display:flex;flex-direction:column;align-items:center;gap:4px;z-index:2;display:none" id="lamp2-grp">' +
+      '<div style="position:absolute;right:8%;top:24%;z-index:2;display:none" class="bulb-container" id="lamp2-grp">' +
         '<div class="bulb-glass off" id="c-bulb2"></div>' +
+        '<div class="bulb-base"></div>' +
         '<span class="bulb-label">Lampe 2</span>' +
       '</div>';
 
@@ -728,6 +831,7 @@
     var cl2Box = document.getElementById('cl2-box');
     var lamp2Grp = document.getElementById('lamp2-grp');
     var crankVis = document.getElementById('crank-vis');
+    var cGen = document.getElementById('c-gen');
     var conc = document.getElementById('conclusion-c');
     var btn1 = document.getElementById('crank-1lamp');
     var btn2 = document.getElementById('crank-2lamp');
@@ -744,8 +848,11 @@
       if (v > 0.05) {
         crankVis.classList.add('crank-spinning');
         crankVis.style.setProperty('--spin-duration', spinDuration(v));
+        cGen.classList.add('generator-spinning');
+        cGen.style.setProperty('--spin-duration', spinDuration(v));
       } else {
         crankVis.classList.remove('crank-spinning');
+        cGen.classList.remove('generator-spinning');
       }
 
       if (state.twoLamps) {
@@ -822,30 +929,48 @@
       '</div>';
 
     var circuit = document.getElementById('weight-circuit');
+    var Wwt = 400, Hwt = 320;
+    var svgwt = makeSVG(Wwt, Hwt);
+    circuit.appendChild(svgwt);
 
-    // Generator on stand
+    // Wires: generator -> bulb
+    drawWire(svgwt, [[215,60],[215,40],[310,40],[310,100]], '#dc2626');
+    drawWire(svgwt, [[215,90],[215,280],[310,280],[310,160]], '#2563eb');
+
+    // Thread/rope line (SVG)
+    drawWire(svgwt, [[145,70],[145,250]], '#78716c');
+
+    // Generator on stand with rotor
     circuit.innerHTML +=
-      '<div style="position:absolute;left:35%;top:10%;display:flex;flex-direction:column;align-items:center;z-index:2">' +
-        '<div class="generator-body" style="width:55px;height:40px"><span class="generator-symbol">G</span></div>' +
+      '<div class="generator" id="wt-gen" style="left:35%;top:8%;z-index:2">' +
+        '<div class="generator-body" style="width:55px;height:40px">' +
+          '<div class="generator-coils"></div>' +
+          '<div class="generator-rotor"></div>' +
+          '<span class="generator-symbol">G</span>' +
+          '<div class="generator-terminal pos"></div>' +
+          '<div class="generator-terminal neg"></div>' +
+        '</div>' +
         '<div class="generator-label">Generator</div>' +
       '</div>';
 
-    // Stand
+    // Stand with cross-brace
     circuit.innerHTML +=
-      '<div style="position:absolute;left:38%;top:25%;width:8px;height:55%;background:linear-gradient(180deg,#94a3b8,#64748b);border-radius:2px;z-index:1"></div>';
+      '<div style="position:absolute;left:38%;top:25%;width:8px;height:55%;background:linear-gradient(90deg,#b0bec5,#94a3b8,#78909c);border-radius:2px;z-index:1;box-shadow:1px 0 2px rgba(0,0,0,0.1)"></div>' +
+      '<div style="position:absolute;left:34%;top:50%;width:24px;height:4px;background:linear-gradient(180deg,#94a3b8,#78909c);border-radius:1px;z-index:1"></div>';
 
-    // Thread line
+    // Pulley wheel at top
     circuit.innerHTML +=
-      '<div style="position:absolute;left:30%;top:22%;width:1px;height:50%;background:#475569;z-index:0" id="thread-line"></div>';
+      '<div style="position:absolute;left:31%;top:18%;width:16px;height:16px;border-radius:50%;border:2.5px solid #64748b;background:radial-gradient(circle,#e2e8f0,#cbd5e1);z-index:2;box-shadow:0 1px 2px rgba(0,0,0,0.15)" id="wt-pulley"></div>';
 
     // Weight container
     circuit.innerHTML +=
       '<div id="weight-group" style="position:absolute;left:22%;top:70%;display:flex;flex-direction:column;align-items:center;gap:2px;z-index:2;transition:top 1.5s ease-in"></div>';
 
-    // Bulb
+    // Bulb with base
     circuit.innerHTML +=
-      '<div style="position:absolute;right:15%;top:30%;display:flex;flex-direction:column;align-items:center;gap:4px;z-index:2">' +
+      '<div style="position:absolute;right:15%;top:26%;z-index:2" class="bulb-container">' +
         '<div class="bulb-glass off" id="wt-bulb"></div>' +
+        '<div class="bulb-base"></div>' +
         '<span class="bulb-label">Lampe</span>' +
       '</div>';
 
@@ -857,6 +982,8 @@
     };
     var bulb = document.getElementById('wt-bulb');
     var weightGrp = document.getElementById('weight-group');
+    var wtGen = document.getElementById('wt-gen');
+    var wtPulley = document.getElementById('wt-pulley');
     var conc = document.getElementById('conclusion-wt');
     var tbody = document.getElementById('weight-tbody');
     var tested = {};
@@ -886,6 +1013,14 @@
         animTimer = setTimeout(function () {
           weightGrp.style.top = '72%';
         }, 50);
+        // Spin generator and pulley during fall
+        var fallSpeed = n * 0.3;
+        wtGen.classList.add('generator-spinning');
+        wtGen.style.setProperty('--spin-duration', spinDuration(fallSpeed));
+        wtPulley.style.animation = 'motorSpin ' + spinDuration(fallSpeed) + ' linear infinite';
+      } else {
+        wtGen.classList.remove('generator-spinning');
+        wtPulley.style.animation = 'none';
       }
 
       // Lamp brightness based on weight count
@@ -968,17 +1103,28 @@
       '</div>';
 
     var circuit = document.getElementById('dryer-circuit');
+    var Wd = 400, Hd = 220;
+    var svgd = makeSVG(Wd, Hd);
+    circuit.appendChild(svgd);
 
-    // Hairdryer
+    // Wires: power supply -> hairdryer through meter
+    drawWire(svgd, [[130,80],[130,40],[280,40],[280,70]], '#dc2626');
+    drawWire(svgd, [[130,130],[130,190],[280,190],[280,130]], '#2563eb');
+
+    // Hairdryer with enhanced details
     circuit.innerHTML +=
-      '<div class="hairdryer" style="left:10%;top:30%">' +
-        '<div class="hairdryer-body"><span class="hairdryer-label">Föhn</span><div class="hairdryer-nozzle"></div></div>' +
+      '<div class="hairdryer" style="left:8%;top:26%">' +
+        '<div class="hairdryer-body">' +
+          '<span class="hairdryer-label">Föhn</span>' +
+          '<div class="hairdryer-switch"></div>' +
+          '<div class="hairdryer-nozzle"></div>' +
+        '</div>' +
         '<div class="hairdryer-handle"></div>' +
       '</div>';
 
     // Energy meter
     circuit.innerHTML +=
-      '<div class="energy-meter" style="right:15%;top:25%">' +
+      '<div class="energy-meter" style="right:12%;top:22%">' +
         '<div class="energy-meter-body">' +
           '<div class="energy-meter-display" id="meter-disp">0.0 Wh</div>' +
           '<div class="energy-meter-label">Energiezähler</div>' +

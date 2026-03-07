@@ -317,6 +317,13 @@ main {
 }
 
 /* Lightbulb */
+.bulb-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
 .bulb-glass {
   width: 32px;
   height: 32px;
@@ -325,6 +332,35 @@ main {
   border: 2px solid #9ca3af;
   box-shadow: none;
   transition: background 0.4s, box-shadow 0.4s, border-color 0.4s;
+  position: relative;
+}
+
+/* Filament inside bulb */
+.bulb-glass::before {
+  content: '';
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  width: 10px;
+  height: 8px;
+  border: 1.5px solid #9ca3af;
+  border-top: none;
+  border-radius: 0 0 3px 3px;
+  transform: translate(-50%, -50%);
+  transition: border-color 0.4s;
+}
+
+.bulb-glass::after {
+  content: '';
+  position: absolute;
+  top: 28%;
+  left: 50%;
+  width: 6px;
+  height: 4px;
+  border-bottom: 1.5px solid #9ca3af;
+  transform: translate(-50%, 0);
+  border-radius: 0;
+  transition: border-color 0.4s;
 }
 
 .bulb-glass.off {
@@ -339,10 +375,20 @@ main {
   box-shadow: 0 0 8px rgba(253, 224, 71, 0.35);
 }
 
+.bulb-glass.dim::before,
+.bulb-glass.dim::after {
+  border-color: #b45309;
+}
+
 .bulb-glass.on {
   background: radial-gradient(circle at 40% 35%, #fffbeb, #fde047);
   border-color: #f59e0b;
   box-shadow: 0 0 16px rgba(253, 224, 71, 0.6), 0 0 4px rgba(253, 224, 71, 0.3);
+}
+
+.bulb-glass.on::before,
+.bulb-glass.on::after {
+  border-color: #d97706;
 }
 
 .bulb-glass.bright {
@@ -351,10 +397,63 @@ main {
   box-shadow: 0 0 24px rgba(253, 224, 71, 0.8), 0 0 48px rgba(253, 224, 71, 0.3);
 }
 
+.bulb-glass.bright::before,
+.bulb-glass.bright::after {
+  border-color: #ca8a04;
+}
+
+/* Bulb screw base */
+.bulb-base {
+  width: 16px;
+  height: 10px;
+  background: linear-gradient(180deg, #a8a29e, #78716c);
+  border-radius: 0 0 4px 4px;
+  margin-top: -2px;
+  position: relative;
+  border: 1px solid #57534e;
+  border-top: none;
+}
+
+/* Screw thread lines */
+.bulb-base::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 1px;
+  right: 1px;
+  height: 1px;
+  background: rgba(255,255,255,0.3);
+  box-shadow: 0 3px 0 rgba(255,255,255,0.3);
+}
+
+/* Bulb contact */
+.bulb-base::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 3px;
+  background: #44403c;
+  border-radius: 0 0 2px 2px;
+}
+
 .bulb-label {
   font-size: 0.7rem;
   font-weight: 600;
   color: var(--text-sec);
+  margin-top: 4px;
+}
+
+/* Wire connection points on bulb */
+.bulb-terminal {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #dc2626;
+  border: 1px solid #991b1b;
+  position: absolute;
 }
 
 /* Motor / Fan */
@@ -371,19 +470,44 @@ main {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #64748b, #475569);
+  background: linear-gradient(135deg, #78909c, #64748b, #546e7a);
   border: 3px solid #334155;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.15);
   position: relative;
+}
+
+/* Motor shaft */
+.motor-body::after {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 6px;
+  background: linear-gradient(90deg, #94a3b8, #78909c);
+  border-radius: 1px 1px 0 0;
+}
+
+/* Motor ventilation slots */
+.motor-body::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: repeating-conic-gradient(transparent 0deg, transparent 15deg, rgba(0,0,0,0.05) 15deg, rgba(0,0,0,0.05) 30deg);
 }
 
 .motor-symbol {
   font-size: 1rem;
   font-weight: 700;
   color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  z-index: 1;
 }
 
 @keyframes motorSpin {
@@ -437,12 +561,26 @@ main {
   height: 18px;
   border-radius: 50%;
   background: linear-gradient(135deg, #475569, #334155);
+  border: 1.5px solid #1e293b;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* Hub center */
+.fan-hub::after {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #1e293b;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .fan-blades {
@@ -451,11 +589,24 @@ main {
   position: relative;
 }
 
+/* Fan guard ring */
+.fan-guard {
+  position: absolute;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  border: 1.5px solid #cbd5e1;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
 .fan-blade-arm {
   position: absolute;
   width: 28px;
-  height: 9px;
-  border-radius: 5px;
+  height: 10px;
+  border-radius: 3px 8px 8px 3px;
   top: 50%;
   left: 50%;
   transform-origin: left center;
@@ -467,10 +618,10 @@ main {
 .fan-blade-arm:nth-child(3) { transform: translate(0, -50%) rotate(180deg); }
 .fan-blade-arm:nth-child(4) { transform: translate(0, -50%) rotate(270deg); }
 
-.fan-blade-arm.red { background: linear-gradient(90deg, #ef4444, #dc2626); }
-.fan-blade-arm.blue { background: linear-gradient(90deg, #3b82f6, #2563eb); }
-.fan-blade-arm.green { background: linear-gradient(90deg, #22c55e, #16a34a); }
-.fan-blade-arm.yellow { background: linear-gradient(90deg, #eab308, #ca8a04); }
+.fan-blade-arm.red { background: linear-gradient(90deg, #ef4444 0%, #dc2626 60%, #b91c1c 100%); }
+.fan-blade-arm.blue { background: linear-gradient(90deg, #3b82f6 0%, #2563eb 60%, #1d4ed8 100%); }
+.fan-blade-arm.green { background: linear-gradient(90deg, #22c55e 0%, #16a34a 60%, #15803d 100%); }
+.fan-blade-arm.yellow { background: linear-gradient(90deg, #eab308 0%, #ca8a04 60%, #a16207 100%); }
 
 .fan-spinning .fan-blades {
   animation: motorSpin var(--spin-duration, 2s) linear infinite;
@@ -481,6 +632,27 @@ main {
   font-weight: 600;
   color: var(--text-sec);
   margin-top: 6px;
+}
+
+/* Connection cable styles */
+.cable-connector {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid;
+  z-index: 3;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.cable-connector.red {
+  background: #fca5a5;
+  border-color: #dc2626;
+}
+
+.cable-connector.blue {
+  background: #93c5fd;
+  border-color: #2563eb;
 }
 
 /* Ammeter / Voltmeter */
@@ -531,44 +703,227 @@ main {
 }
 
 .steam-engine-body {
-  width: 84px;
-  height: 48px;
-  background: linear-gradient(180deg, #78716c, #57534e);
+  width: 100px;
+  height: 52px;
+  background: linear-gradient(180deg, #78716c 0%, #6b6560 40%, #57534e 100%);
   border: 2px solid #44403c;
   border-radius: 6px 6px 3px 3px;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+/* Boiler rivets */
+.steam-engine-body::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  right: 6px;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, #8a8580 0px, #8a8580 3px, transparent 3px, transparent 10px);
+  opacity: 0.6;
+}
+
+.steam-engine-body::after {
+  content: '';
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  right: 6px;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, #8a8580 0px, #8a8580 3px, transparent 3px, transparent 10px);
+  opacity: 0.6;
 }
 
 .steam-engine-chimney {
   position: absolute;
-  width: 16px;
-  height: 22px;
+  width: 18px;
+  height: 26px;
   background: linear-gradient(180deg, #57534e, #44403c);
+  border: 1.5px solid #3a3633;
+  border-bottom: none;
   border-radius: 3px 3px 0 0;
-  top: -22px;
-  left: 12px;
+  top: -26px;
+  left: 14px;
+}
+
+/* Chimney top rim */
+.steam-engine-chimney::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -3px;
+  right: -3px;
+  height: 4px;
+  background: #44403c;
+  border-radius: 2px 2px 0 0;
+  border: 1px solid #3a3633;
 }
 
 .steam-engine-label {
-  font-size: 0.55rem;
+  font-size: 0.5rem;
   font-weight: 600;
   color: #fafaf9;
   text-align: center;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+  z-index: 1;
+}
+
+/* Pressure gauge on boiler */
+.steam-engine-gauge {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #f5f5f4, #d6d3d1);
+  border: 1.5px solid #78716c;
+  top: -5px;
+  right: 18px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.steam-engine-gauge::after {
+  content: '';
+  position: absolute;
+  width: 1px;
+  height: 4px;
+  background: #dc2626;
+  top: 1px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-30deg);
+  transform-origin: bottom center;
+}
+
+/* Piston mechanism */
+.steam-engine-piston {
+  position: absolute;
+  right: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 20px;
+}
+
+.steam-engine-piston-rod {
+  position: absolute;
+  width: 12px;
+  height: 4px;
+  background: linear-gradient(180deg, #a8a29e, #78716c);
+  border: 1px solid #57534e;
+  border-radius: 1px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.steam-engine-piston-cylinder {
+  position: absolute;
+  width: 8px;
+  height: 16px;
+  background: linear-gradient(90deg, #6b7280, #4b5563);
+  border: 1px solid #374151;
+  border-radius: 0 2px 2px 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+@keyframes pistonMove {
+  0%, 100% { transform: translateY(-50%) translateX(0); }
+  50% { transform: translateY(-50%) translateX(-5px); }
+}
+
+.steam-spinning .steam-engine-piston-rod {
+  animation: pistonMove var(--spin-duration, 2s) ease-in-out infinite;
+}
+
+/* Flywheel */
+.steam-engine-flywheel {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid #a8a29e;
+  background: radial-gradient(circle at 45% 45%, #e7e5e4, #c8c4c0);
+  right: -20px;
+  bottom: -8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Flywheel spokes */
+.steam-engine-flywheel::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 1.5px;
+  background: #78716c;
+  transform: translate(-50%, -50%);
+}
+
+.steam-engine-flywheel::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.5px;
+  height: 16px;
+  background: #78716c;
+  transform: translate(-50%, -50%);
+}
+
+/* Flywheel hub */
+.steam-engine-flywheel-hub {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.steam-spinning .steam-engine-flywheel {
+  animation: motorSpin var(--spin-duration, 2s) linear infinite;
 }
 
 .steam-engine-wheel {
   position: absolute;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   border: 3px solid #a8a29e;
-  background: linear-gradient(135deg, #e7e5e4, #d6d3d1);
-  bottom: -10px;
+  background: radial-gradient(circle at 45% 45%, #e7e5e4, #d6d3d1);
+  bottom: -11px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+/* Wheel spokes */
+.steam-engine-wheel::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 1.5px;
+  background: #78716c;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.steam-engine-wheel::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 1.5px;
+  background: #78716c;
+  transform: translate(-50%, -50%) rotate(-45deg);
 }
 
 .steam-engine-wheel.left { left: 8px; }
@@ -578,9 +933,62 @@ main {
   animation: motorSpin var(--spin-duration, 2s) linear infinite;
 }
 
+/* Fire under boiler */
+.steam-engine-fire {
+  position: absolute;
+  bottom: -18px;
+  left: 20px;
+  display: flex;
+  gap: 3px;
+  align-items: flex-end;
+}
+
+.steam-engine-flame {
+  width: 6px;
+  border-radius: 50% 50% 20% 20%;
+  background: linear-gradient(180deg, #fde047, #f97316, #dc2626);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.steam-engine-flame:nth-child(1) { height: 10px; }
+.steam-engine-flame:nth-child(2) { height: 14px; }
+.steam-engine-flame:nth-child(3) { height: 12px; }
+.steam-engine-flame:nth-child(4) { height: 9px; }
+
+.steam-active .steam-engine-flame {
+  opacity: 1;
+}
+
+@keyframes flameFlicker {
+  0%, 100% { transform: scaleY(1) scaleX(1); }
+  25% { transform: scaleY(1.15) scaleX(0.9); }
+  50% { transform: scaleY(0.9) scaleX(1.1); }
+  75% { transform: scaleY(1.1) scaleX(0.95); }
+}
+
+.steam-active .steam-engine-flame {
+  animation: flameFlicker 0.4s ease-in-out infinite;
+}
+
+.steam-active .steam-engine-flame:nth-child(2) { animation-delay: 0.1s; }
+.steam-active .steam-engine-flame:nth-child(3) { animation-delay: 0.2s; }
+.steam-active .steam-engine-flame:nth-child(4) { animation-delay: 0.15s; }
+
+/* Fire base/grate */
+.steam-engine-grate {
+  position: absolute;
+  bottom: -5px;
+  left: 15px;
+  width: 40px;
+  height: 4px;
+  background: linear-gradient(180deg, #44403c, #292524);
+  border-radius: 1px;
+}
+
 @keyframes steamPuff {
   0% { opacity: 0.8; transform: translateY(0) scale(1); }
-  100% { opacity: 0; transform: translateY(-24px) scale(1.8); }
+  100% { opacity: 0; transform: translateY(-28px) scale(2); }
 }
 
 .steam-puff {
@@ -588,8 +996,8 @@ main {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: rgba(200,200,200,0.7);
-  top: -30px;
+  background: radial-gradient(circle, rgba(220,220,220,0.8), rgba(200,200,200,0.3));
+  top: -34px;
   left: 14px;
   animation: steamPuff 1.2s ease-out infinite;
 }
@@ -597,11 +1005,22 @@ main {
 .steam-puff:nth-child(2) {
   animation-delay: 0.4s;
   left: 20px;
+  width: 10px;
+  height: 10px;
 }
 
 .steam-puff:nth-child(3) {
   animation-delay: 0.8s;
   left: 10px;
+  width: 14px;
+  height: 14px;
+}
+
+.steam-puff:nth-child(4) {
+  animation-delay: 0.6s;
+  left: 17px;
+  width: 8px;
+  height: 8px;
 }
 
 /* Solar cell */
@@ -610,23 +1029,96 @@ main {
   z-index: 2;
 }
 
-.solar-panel {
-  width: 64px;
-  height: 48px;
-  background: linear-gradient(135deg, #1e3a5f, #2563eb);
-  border: 2px solid #1e40af;
-  border-radius: 4px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap: 1.5px;
-  padding: 4px;
+/* Solar panel frame */
+.solar-panel-frame {
+  padding: 3px;
+  background: linear-gradient(180deg, #94a3b8, #64748b);
+  border-radius: 3px;
   box-shadow: 0 3px 8px rgba(37, 99, 235, 0.25);
   transform: skewY(-5deg);
 }
 
+.solar-panel {
+  width: 68px;
+  height: 50px;
+  background: linear-gradient(135deg, #1e3a5f, #1e40af);
+  border: 1.5px solid #1e40af;
+  border-radius: 2px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 2px;
+  padding: 4px;
+  position: relative;
+}
+
 .solar-segment {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+  border-radius: 1px;
+  position: relative;
+}
+
+/* Grid line on each segment */
+.solar-segment::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 0.5px;
+  background: rgba(255,255,255,0.15);
+}
+
+/* Vertical grid line */
+.solar-segment::after {
+  content: '';
+  position: absolute;
+  left: 45%;
+  top: 0;
+  bottom: 0;
+  width: 0.5px;
+  background: rgba(255,255,255,0.1);
+}
+
+/* Solar cell terminals */
+.solar-terminal {
+  position: absolute;
+  bottom: -6px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  border: 1px solid #475569;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+}
+
+.solar-terminal.pos {
+  left: 25%;
+  background: #dc2626;
+}
+
+.solar-terminal.neg {
+  right: 25%;
+  background: #1e40af;
+}
+
+/* Solar stand/bracket */
+.solar-stand {
+  width: 4px;
+  height: 14px;
+  background: linear-gradient(90deg, #94a3b8, #78909c);
+  margin: 4px auto 0 auto;
+  transform: skewY(5deg);
+  position: relative;
+}
+
+.solar-stand::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: -6px;
+  width: 16px;
+  height: 3px;
+  background: linear-gradient(180deg, #78909c, #64748b);
   border-radius: 1px;
 }
 
@@ -635,7 +1127,7 @@ main {
   font-weight: 600;
   color: var(--text-sec);
   text-align: center;
-  margin-top: 6px;
+  margin-top: 8px;
   transform: skewY(5deg);
 }
 
@@ -665,22 +1157,95 @@ main {
 }
 
 .generator-body {
-  width: 52px;
-  height: 38px;
-  background: linear-gradient(180deg, #f59e0b, #d97706);
+  width: 56px;
+  height: 42px;
+  background: linear-gradient(180deg, #f59e0b 0%, #d97706 60%, #b45309 100%);
   border: 2px solid #92400e;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 3px 8px rgba(217, 119, 6, 0.25);
+  box-shadow: 0 3px 8px rgba(217, 119, 6, 0.25), inset 0 1px 0 rgba(255,255,255,0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Rotor inside generator */
+.generator-rotor {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3);
+  background: radial-gradient(circle, rgba(255,255,255,0.15), transparent);
+}
+
+.generator-rotor::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 3px;
+  background: rgba(255,255,255,0.4);
+  transform: translate(-50%, -50%);
+  border-radius: 1px;
+}
+
+.generator-rotor::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3px;
+  height: 14px;
+  background: rgba(255,255,255,0.4);
+  transform: translate(-50%, -50%);
+  border-radius: 1px;
+}
+
+.generator-spinning .generator-rotor {
+  animation: motorSpin var(--spin-duration, 2s) linear infinite;
+}
+
+/* Generator terminals */
+.generator-terminal {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1.5px solid #92400e;
+  background: #fbbf24;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.generator-terminal.pos {
+  top: -3px;
+  right: 10px;
+}
+
+.generator-terminal.neg {
+  bottom: -3px;
+  right: 10px;
+}
+
+/* Coil lines on generator body */
+.generator-coils {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: 6px;
+  background: repeating-linear-gradient(180deg, transparent 0px, transparent 2px, rgba(255,255,255,0.15) 2px, rgba(255,255,255,0.15) 4px);
+  border-radius: 2px;
 }
 
 .generator-symbol {
   font-size: 0.85rem;
   font-weight: 700;
   color: #fff;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  z-index: 1;
 }
 
 .generator-label {
@@ -691,6 +1256,22 @@ main {
   margin-top: 3px;
 }
 
+/* Drive belt between components */
+.drive-belt {
+  position: absolute;
+  z-index: 1;
+}
+
+.drive-belt-line {
+  stroke-dasharray: 4 3;
+  animation: beltMove 0.6s linear infinite;
+}
+
+@keyframes beltMove {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -7; }
+}
+
 /* Crank */
 .crank-container {
   position: absolute;
@@ -698,32 +1279,74 @@ main {
 }
 
 .crank-handle {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   position: relative;
+}
+
+/* Crank base plate */
+.crank-base {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #94a3b8, #64748b);
+  border: 2px solid #475569;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.crank-base::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #334155;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .crank-arm {
   position: absolute;
-  width: 3px;
-  height: 18px;
-  background: #475569;
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(90deg, #6b7280, #4b5563);
+  border: 0.5px solid #374151;
   top: 50%;
   left: 50%;
   transform-origin: bottom center;
   transform: translate(-50%, -100%);
+  border-radius: 2px;
 }
 
 .crank-knob {
   position: absolute;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: linear-gradient(135deg, #ef4444, #dc2626);
-  top: 0;
+  border: 1.5px solid #b91c1c;
+  top: -2px;
   left: 50%;
   transform: translateX(-50%);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+}
+
+/* Knob grip texture */
+.crank-knob::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  transform: translate(-50%, -50%);
 }
 
 .crank-spinning .crank-handle {
@@ -740,16 +1363,42 @@ main {
 }
 
 .wind-turbine-pole {
-  width: 5px;
+  width: 6px;
   height: 55px;
-  background: linear-gradient(180deg, #94a3b8, #64748b);
+  background: linear-gradient(90deg, #b0bec5, #94a3b8, #78909c);
   border-radius: 3px;
   box-shadow: 1px 0 3px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+/* Pole base/foundation */
+.wind-turbine-pole::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: -5px;
+  width: 16px;
+  height: 5px;
+  background: linear-gradient(180deg, #64748b, #475569);
+  border-radius: 2px;
+}
+
+/* Nacelle (housing at top) */
+.wind-turbine-nacelle {
+  width: 22px;
+  height: 12px;
+  background: linear-gradient(180deg, #e2e8f0, #cbd5e1);
+  border: 1.5px solid #94a3b8;
+  border-radius: 4px 10px 4px 4px;
+  margin-bottom: -2px;
+  z-index: 1;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  position: relative;
 }
 
 .wind-turbine-blades {
-  width: 76px;
-  height: 76px;
+  width: 84px;
+  height: 84px;
   position: relative;
 }
 
@@ -757,26 +1406,41 @@ main {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #475569, #334155);
+  background: linear-gradient(135deg, #64748b, #475569);
+  border: 1.5px solid #334155;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+
+/* Hub center bolt */
+.wind-turbine-hub::after {
+  content: '';
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #334155;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .wind-blade {
   position: absolute;
-  width: 34px;
-  height: 7px;
-  background: linear-gradient(90deg, #e2e8f0, #f1f5f9);
+  width: 36px;
+  height: 8px;
+  background: linear-gradient(180deg, #f1f5f9, #e2e8f0, #cbd5e1);
   border: 1px solid #94a3b8;
-  border-radius: 4px;
+  border-radius: 2px 6px 6px 2px;
   top: 50%;
   left: 50%;
   transform-origin: left center;
   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  clip-path: polygon(0% 30%, 100% 0%, 100% 100%, 0% 70%);
 }
 
 .wind-blade:nth-child(1) { transform: translate(0, -50%) rotate(0deg); }
@@ -794,41 +1458,109 @@ main {
 }
 
 .hairdryer-body {
-  width: 58px;
-  height: 32px;
-  background: linear-gradient(180deg, #f97316, #ea580c);
+  width: 62px;
+  height: 34px;
+  background: linear-gradient(180deg, #fb923c 0%, #f97316 30%, #ea580c 100%);
   border: 2px solid #c2410c;
   border-radius: 5px 16px 16px 5px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 3px 8px rgba(234, 88, 12, 0.25);
+  box-shadow: 0 3px 8px rgba(234, 88, 12, 0.25), inset 0 1px 0 rgba(255,255,255,0.15);
   position: relative;
+}
+
+/* Air intake grill */
+.hairdryer-body::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 6px;
+  bottom: 6px;
+  width: 10px;
+  background: repeating-linear-gradient(180deg, transparent 0px, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px);
+  border-radius: 2px;
+}
+
+/* Power switch */
+.hairdryer-switch {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 5px;
+  background: linear-gradient(180deg, #475569, #334155);
+  border-radius: 2px 2px 0 0;
+  border: 1px solid #1e293b;
+  border-bottom: none;
 }
 
 .hairdryer-nozzle {
   position: absolute;
-  right: -13px;
-  width: 13px;
-  height: 20px;
-  background: linear-gradient(180deg, #9ca3af, #6b7280);
-  border-radius: 0 5px 5px 0;
+  right: -15px;
+  width: 15px;
+  height: 22px;
+  background: linear-gradient(180deg, #b0bec5, #9ca3af, #78909c);
+  border: 1.5px solid #6b7280;
+  border-left: none;
+  border-radius: 0 6px 6px 0;
+}
+
+/* Nozzle opening */
+.hairdryer-nozzle::after {
+  content: '';
+  position: absolute;
+  right: 2px;
+  top: 3px;
+  bottom: 3px;
+  width: 3px;
+  background: #374151;
+  border-radius: 1px;
 }
 
 .hairdryer-handle {
   position: absolute;
-  bottom: -20px;
+  bottom: -22px;
   left: 10px;
-  width: 15px;
-  height: 20px;
-  background: linear-gradient(180deg, #ea580c, #c2410c);
-  border-radius: 0 0 5px 5px;
+  width: 16px;
+  height: 22px;
+  background: linear-gradient(90deg, #ea580c, #dc4e08, #c2410c);
+  border: 1.5px solid #9a3412;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+}
+
+/* Handle grip texture */
+.hairdryer-handle::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 2px;
+  right: 2px;
+  bottom: 4px;
+  background: repeating-linear-gradient(180deg, transparent 0px, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 3px);
+  border-radius: 2px;
+}
+
+/* Power cord */
+.hairdryer-cord {
+  position: absolute;
+  bottom: -20px;
+  left: 14px;
+  width: 20px;
+  height: 10px;
+  border: 2px solid #475569;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
 }
 
 .hairdryer-label {
   font-size: 0.55rem;
   font-weight: 700;
   color: #fff;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+  z-index: 1;
 }
 
 @keyframes windLines {
