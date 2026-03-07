@@ -137,7 +137,8 @@
       btn.setAttribute('role', 'tab');
       btn.setAttribute('data-exp', exp.id);
       tabBar.appendChild(btn);
-      addEvt(btn, 'click', function () { switchExperiment(exp.id); });
+      // Use direct addEventListener (not addEvt) so tab handlers survive cleanup()
+      btn.addEventListener('click', function () { switchExperiment(exp.id); });
     });
   }
 
