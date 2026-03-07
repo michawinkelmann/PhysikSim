@@ -263,12 +263,14 @@
     var clipArea = document.getElementById('mag-clip-area');
     var result = document.getElementById('mag-attract-result');
     var hitArea = document.getElementById('mag-hit-area');
+    var needle = document.getElementById('mag-needle');
 
     if (stroker) stroker.classList.remove('visible', 'stroking');
-    if (flame) flame.classList.remove('visible');
-    if (clipArea) clipArea.classList.remove('visible');
+    if (flame) { flame.classList.remove('visible'); flame.style.right = ''; flame.style.bottom = ''; }
+    if (clipArea) { clipArea.classList.remove('visible'); clipArea.style.bottom = ''; clipArea.style.left = ''; }
     if (result) { result.classList.remove('visible', 'yes', 'no'); }
-    if (hitArea) hitArea.classList.remove('visible');
+    if (hitArea) { hitArea.classList.remove('visible'); hitArea.style.right = ''; hitArea.style.bottom = ''; }
+    if (needle) { needle.classList.remove('heating-glow'); needle.style.transform = 'translate(-50%, -50%)'; }
   }
 
   function animateStroke(stepIndex) {
@@ -316,24 +318,38 @@
     var clipArea = document.getElementById('mag-clip-area');
     var result = document.getElementById('mag-attract-result');
     var clip = document.getElementById('mag-clip');
+    var needle = document.getElementById('mag-needle');
 
     clipArea.classList.add('visible');
 
+    // Move clip area toward needle
+    clipArea.style.transition = 'bottom 0.8s ease, left 0.8s ease';
+    clipArea.style.bottom = '42%';
+    clipArea.style.left = '38%';
+
     setTimeout(function () {
       if (state.isMagnetized) {
-        result.textContent = 'Angezogen!';
+        // Snap clip to needle tip
+        clipArea.style.transition = 'bottom 0.3s ease, left 0.3s ease';
+        clipArea.style.bottom = '46%';
+        clipArea.style.left = '42%';
+        clip.classList.add('sticking');
+        result.textContent = 'Angezogen! Büroklammer haftet an der Nadel.';
         result.className = 'mag-attract-result visible yes';
-        clip.classList.add('attracted');
       } else {
         result.textContent = 'Keine Anziehung';
         result.className = 'mag-attract-result visible no';
       }
 
       setTimeout(function () {
-        clip.classList.remove('attracted');
+        clip.classList.remove('sticking');
+        // Reset clip position
+        clipArea.style.transition = 'opacity 0.3s';
+        clipArea.style.bottom = '';
+        clipArea.style.left = '';
         completeStepA(stepIndex);
-      }, 1200);
-    }, 800);
+      }, 1400);
+    }, 900);
   }
 
   function animateHeat(stepIndex) {
@@ -341,33 +357,49 @@
     var needle = document.getElementById('mag-needle');
     var statusEl = document.getElementById('mag-status');
 
+    // Move flame to center first, then bring needle into it
     flame.classList.add('visible');
+    flame.style.transition = 'right 0.5s ease, bottom 0.5s ease';
+    flame.style.right = '38%';
+    flame.style.bottom = '38%';
+
     statusEl.textContent = 'Erhitzen...';
     statusEl.className = 'mag-status heating';
 
-    // Move needle toward flame
-    needle.style.transition = 'transform 0.6s ease';
-    needle.style.transform = 'translate(-20%, -50%)';
-
+    // Move needle tip into flame
     setTimeout(function () {
-      // Demagnetize
-      state.isMagnetized = false;
-      needle.classList.remove('magnetized');
-      needle.classList.add('shaking');
-      randomizeElementaryMagnets();
+      needle.style.transition = 'transform 0.6s ease';
+      needle.style.transform = 'translate(-30%, -50%)';
 
       setTimeout(function () {
-        needle.classList.remove('shaking');
-        needle.style.transform = 'translate(-50%, -50%)';
-        statusEl.textContent = 'Stricknadel (entmagnetisiert)';
-        statusEl.className = 'mag-status demagnetized';
+        // Needle is now in flame – glow effect
+        needle.classList.add('heating-glow');
 
         setTimeout(function () {
-          flame.classList.remove('visible');
-          completeStepA(stepIndex);
-        }, 500);
-      }, 1000);
-    }, 1500);
+          // Demagnetize
+          state.isMagnetized = false;
+          needle.classList.remove('magnetized');
+          needle.classList.add('shaking');
+          randomizeElementaryMagnets();
+
+          setTimeout(function () {
+            needle.classList.remove('shaking', 'heating-glow');
+            needle.style.transform = 'translate(-50%, -50%)';
+            statusEl.textContent = 'Stricknadel (entmagnetisiert)';
+            statusEl.className = 'mag-status demagnetized';
+
+            // Move flame back
+            flame.style.right = '';
+            flame.style.bottom = '';
+
+            setTimeout(function () {
+              flame.classList.remove('visible');
+              completeStepA(stepIndex);
+            }, 500);
+          }, 1000);
+        }, 800);
+      }, 700);
+    }, 600);
   }
 
   function animateHit(stepIndex) {
@@ -378,42 +410,75 @@
     var result = document.getElementById('mag-attract-result');
     var clip = document.getElementById('mag-clip');
 
-    // First re-magnetize (step 5 already did this)
+    // Show table surface
     hitArea.classList.add('visible');
+    hitArea.style.transition = 'right 0.4s ease, bottom 0.4s ease';
+    hitArea.style.right = '35%';
+    hitArea.style.bottom = '30%';
 
-    // Shake needle to simulate hitting
-    needle.classList.add('shaking');
-
+    // Move needle down toward the table
     setTimeout(function () {
-      needle.classList.remove('shaking');
-      needle.classList.add('shaking');
+      needle.style.transition = 'transform 0.3s ease';
+      needle.style.transform = 'translate(-50%, -50%) rotate(60deg)';
 
       setTimeout(function () {
-        needle.classList.remove('shaking');
+        // Hit! Needle strikes the table
+        needle.style.transition = 'transform 0.1s ease';
+        needle.style.transform = 'translate(-50%, -30%) rotate(60deg)';
+        needle.classList.add('shaking');
 
-        // Demagnetize
-        state.isMagnetized = false;
-        needle.classList.remove('magnetized');
-        randomizeElementaryMagnets();
-        statusEl.textContent = 'Stricknadel (entmagnetisiert)';
-        statusEl.className = 'mag-status demagnetized';
-
-        // Now test clip
         setTimeout(function () {
-          hitArea.classList.remove('visible');
-          clipArea.classList.add('visible');
+          // Second hit
+          needle.style.transform = 'translate(-50%, -50%) rotate(60deg)';
 
           setTimeout(function () {
-            result.textContent = 'Keine Anziehung';
-            result.className = 'mag-attract-result visible no';
+            needle.style.transform = 'translate(-50%, -30%) rotate(60deg)';
+            needle.classList.remove('shaking');
+            needle.classList.add('shaking');
 
             setTimeout(function () {
-              completeStepA(stepIndex);
-            }, 1000);
-          }, 600);
-        }, 600);
-      }, 900);
-    }, 900);
+              needle.classList.remove('shaking');
+
+              // Demagnetize
+              state.isMagnetized = false;
+              needle.classList.remove('magnetized');
+              randomizeElementaryMagnets();
+              statusEl.textContent = 'Stricknadel (entmagnetisiert)';
+              statusEl.className = 'mag-status demagnetized';
+
+              // Return needle to normal position
+              needle.style.transition = 'transform 0.5s ease';
+              needle.style.transform = 'translate(-50%, -50%)';
+
+              // Reset hit area
+              hitArea.style.right = '';
+              hitArea.style.bottom = '';
+
+              // Now test clip - move clip toward needle like in steps 2/4
+              setTimeout(function () {
+                hitArea.classList.remove('visible');
+                clipArea.classList.add('visible');
+                clipArea.style.transition = 'bottom 0.8s ease, left 0.8s ease';
+                clipArea.style.bottom = '42%';
+                clipArea.style.left = '38%';
+
+                setTimeout(function () {
+                  result.textContent = 'Keine Anziehung';
+                  result.className = 'mag-attract-result visible no';
+
+                  setTimeout(function () {
+                    clipArea.style.transition = 'opacity 0.3s';
+                    clipArea.style.bottom = '';
+                    clipArea.style.left = '';
+                    completeStepA(stepIndex);
+                  }, 1000);
+                }, 800);
+              }, 600);
+            }, 500);
+          }, 200);
+        }, 300);
+      }, 300);
+    }, 500);
   }
 
   function completeStepA(stepIndex) {
@@ -456,7 +521,7 @@
 
   var STEPS_B_BARS = [
     { id: 2, label: 'Schritt 3: Zwei Stabmagnete N–S zusammenlegen', action: 'combine' },
-    { id: 3, label: 'Schritt 4: Eisennagel der Berührungsstelle nähern', action: 'test-contact' }
+    { id: 3, label: 'Schritt 4: Eisennägel an Pole und Berührungsstelle nähern', action: 'test-contact' }
   ];
 
   function renderSplitMagnet(container, exp) {
@@ -535,7 +600,15 @@
           '<div class="bar-s">S</div>' +
         '</div>' +
         '<div class="contact-indicator" id="contact-indicator" style="background:#fef3c7;color:#92400e;">Berührungsstelle</div>' +
-        '<div class="iron-nail hidden" id="iron-nail">' +
+        '<div class="iron-nail iron-nail-left hidden" id="iron-nail-left">' +
+          '<div class="nail-body"><div class="nail-head"></div><div class="nail-point"></div></div>' +
+          '<div class="nail-label">Eisennagel</div>' +
+        '</div>' +
+        '<div class="iron-nail iron-nail-center hidden" id="iron-nail-center">' +
+          '<div class="nail-body"><div class="nail-head"></div><div class="nail-point"></div></div>' +
+          '<div class="nail-label">Eisennagel</div>' +
+        '</div>' +
+        '<div class="iron-nail iron-nail-right hidden" id="iron-nail-right">' +
           '<div class="nail-body"><div class="nail-head"></div><div class="nail-point"></div></div>' +
           '<div class="nail-label">Eisennagel</div>' +
         '</div>' +
@@ -762,19 +835,38 @@
   }
 
   function animateTestContact() {
-    var nail = document.getElementById('iron-nail');
+    var nailLeft = document.getElementById('iron-nail-left');
+    var nailCenter = document.getElementById('iron-nail-center');
+    var nailRight = document.getElementById('iron-nail-right');
     var indicator = document.getElementById('contact-indicator');
 
-    nail.classList.remove('hidden');
+    // Show all three nails
+    nailLeft.classList.remove('hidden');
+    nailCenter.classList.remove('hidden');
+    nailRight.classList.remove('hidden');
 
-    // Move nail up toward contact point
+    // Move all nails up toward the magnets
     setTimeout(function () {
-      nail.style.bottom = '55%';
-      nail.style.transform = 'translateX(-50%) translateY(50%)';
+      nailLeft.style.bottom = '55%';
+      nailLeft.style.transform = 'translateX(-50%) translateY(50%)';
+      nailCenter.style.bottom = '55%';
+      nailCenter.style.transform = 'translateX(-50%) translateY(50%)';
+      nailRight.style.bottom = '55%';
+      nailRight.style.transform = 'translateX(-50%) translateY(50%)';
 
       setTimeout(function () {
-        // No attraction at contact point
-        indicator.textContent = 'Keine Anziehung an der Berührungsstelle!';
+        // Pole nails stay attracted (snap closer)
+        nailLeft.style.bottom = '58%';
+        nailLeft.classList.add('attracted');
+        nailRight.style.bottom = '58%';
+        nailRight.classList.add('attracted');
+
+        // Center nail falls back down - no attraction
+        nailCenter.classList.add('falling');
+        nailCenter.style.bottom = '8%';
+        nailCenter.style.transform = 'translateX(-50%) translateY(50%)';
+
+        indicator.textContent = 'Keine Anziehung an der Berührungsstelle – aber an den Polen!';
         indicator.style.background = '#fef2f2';
         indicator.style.color = '#991b1b';
 
@@ -783,7 +875,7 @@
 
         setTimeout(function () {
           completeStepB(3);
-        }, 1000);
+        }, 1200);
       }, 800);
     }, 500);
   }

@@ -751,17 +751,40 @@ main {
   color: #fff;
 }
 
-/* Iron nail */
+/* Iron nails */
 .iron-nail {
   position: absolute;
   bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
   transition: all 0.6s ease;
+}
+
+.iron-nail-left {
+  left: 18%;
+  transform: translateX(-50%);
+}
+
+.iron-nail-center {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.iron-nail-right {
+  left: 82%;
+  transform: translateX(-50%);
+}
+
+.iron-nail.attracted .nail-body {
+  background: linear-gradient(90deg, #16a34a, #22c55e, #16a34a);
+  box-shadow: 0 1px 6px rgba(22, 163, 74, 0.4);
+}
+
+.iron-nail.falling {
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  opacity: 0.6;
 }
 
 .nail-body {
@@ -876,7 +899,7 @@ main {
   animation: shake 0.3s ease-in-out 3;
 }
 
-/* Animation: attracted clip */
+/* Animation: attracted clip (legacy) */
 @keyframes attractClip {
   0% { transform: translateY(0); }
   100% { transform: translateY(-30px); }
@@ -884,6 +907,17 @@ main {
 
 .mag-clip.attracted svg {
   animation: attractClip 0.5s ease-out forwards;
+}
+
+/* Clip sticking to needle */
+.mag-clip.sticking svg {
+  filter: drop-shadow(0 0 4px rgba(22, 163, 74, 0.5));
+}
+
+/* Needle heating glow */
+.mag-needle.heating-glow {
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.6), 0 0 24px rgba(245, 158, 11, 0.4);
+  background: linear-gradient(90deg, #dc2626 0%, #f59e0b 30%, #f97316 70%, #16a34a 90%, #16a34a 100%) !important;
 }
 
 /* Stroking animation */
