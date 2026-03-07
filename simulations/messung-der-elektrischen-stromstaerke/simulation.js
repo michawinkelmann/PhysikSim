@@ -55,6 +55,7 @@
 
     var panel = document.createElement('div');
     panel.className = 'experiment';
+    container.appendChild(panel);
 
     var title = document.createElement('h2');
     title.className = 'exp-title';
@@ -71,8 +72,6 @@
     } else {
       renderV2(panel, exp);
     }
-
-    container.appendChild(panel);
   }
 
   function renderV1(panel, exp) {
