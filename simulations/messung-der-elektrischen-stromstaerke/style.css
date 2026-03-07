@@ -341,71 +341,6 @@ main {
   white-space: nowrap;
 }
 
-/* Switch */
-.switch-container {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  cursor: pointer;
-}
-
-.switch-body {
-  width: 36px;
-  height: 20px;
-  position: relative;
-}
-
-.switch-contact-left,
-.switch-contact-right {
-  position: absolute;
-  bottom: 0;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #6b7280;
-}
-
-.switch-contact-left { left: 2px; }
-.switch-contact-right { right: 2px; }
-
-.switch-lever {
-  position: absolute;
-  bottom: 3px;
-  left: 5px;
-  width: 26px;
-  height: 3px;
-  background: #6b7280;
-  border-radius: 2px;
-  transform-origin: left center;
-  transition: transform 0.3s;
-}
-
-.switch-lever.open {
-  transform: rotate(-35deg);
-}
-
-.switch-lever.closed {
-  transform: rotate(0deg);
-}
-
-.switch-label {
-  font-size: 0.65rem;
-  font-weight: 600;
-  color: var(--text-sec);
-}
-
-/* Wires */
-.wire {
-  position: absolute;
-  background: var(--red);
-  border-radius: 1px;
-}
-
-.wire.blue { background: #2563eb; }
-.wire.red { background: var(--red); }
-
 /* Selection controls */
 .control-row {
   display: flex;
@@ -439,12 +374,6 @@ main {
 }
 
 /* Option buttons */
-.option-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 0.5rem;
-}
-
 .option-btn {
   padding: 0.6rem 0.5rem;
   border: 2px solid var(--border);
@@ -475,67 +404,7 @@ main {
   background: #f0fdf4;
 }
 
-/* V1 specific: Current display */
-.current-display {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  background: #fef9c3;
-  border: 1px solid #fde68a;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #92400e;
-}
-
-.current-display .unit {
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-/* V2 specific: Voltage displays */
-.voltage-row {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.voltage-box {
-  flex: 1;
-  min-width: 120px;
-  padding: 0.75rem;
-  border-radius: 8px;
-  text-align: center;
-  font-weight: 600;
-}
-
-.voltage-box .voltage-label {
-  font-size: 0.7rem;
-  color: var(--text-sec);
-  margin-bottom: 0.25rem;
-}
-
-.voltage-box .voltage-value {
-  font-size: 1.1rem;
-}
-
-.voltage-box.source {
-  background: #fee2e2;
-  border: 1px solid #fecaca;
-}
-
-.voltage-box.source .voltage-value { color: #991b1b; }
-
-.voltage-box.lamp {
-  background: #dbeafe;
-  border: 1px solid #bfdbfe;
-}
-
-.voltage-box.lamp .voltage-value { color: #1e40af; }
-
-/* V3 specific: Slider */
+/* Slider */
 .slider-container {
   display: flex;
   flex-direction: column;
@@ -586,60 +455,45 @@ main {
   text-align: right;
 }
 
-/* Wire/resistor visualization for V3 */
-.wire-viz {
-  position: relative;
-  width: 100%;
-  height: 80px;
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-  border-radius: 10px;
-  border: 1px solid #e5e7eb;
+/* Current display */
+.current-display {
   display: flex;
   align-items: center;
-  padding: 0 1.5rem;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: #fef9c3;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #92400e;
+  flex-wrap: wrap;
 }
 
-.wire-track {
-  width: 100%;
-  height: 6px;
-  background: linear-gradient(90deg, #6b7280, #9ca3af);
-  border-radius: 3px;
-  position: relative;
-}
-
-.wire-marker {
-  position: absolute;
-  top: -18px;
-  width: 2px;
-  height: 42px;
-  background: var(--accent);
-  transform: translateX(-50%);
-  transition: left 0.2s;
-}
-
-.wire-marker::after {
-  content: '';
-  position: absolute;
-  top: -4px;
-  left: -5px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.wire-label-left,
-.wire-label-right {
-  position: absolute;
-  bottom: 8px;
-  font-size: 0.7rem;
+.current-display .unit {
+  font-size: 0.8rem;
   font-weight: 600;
-  color: var(--text-sec);
 }
 
-.wire-label-left { left: 1.5rem; }
-.wire-label-right { right: 1.5rem; }
+.badge-stretch {
+  display: inline-block;
+  margin-left: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+/* Position grid */
+.position-grid {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+}
 
 /* Status badge */
 .status-badge {
@@ -678,188 +532,14 @@ main {
   header h1 { font-size: 1rem; }
   main { padding: 0.75rem; }
   .circuit-viz { height: 280px; }
-  .option-grid {
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  .position-grid {
+    grid-template-columns: 1fr;
   }
-  .voltage-row { flex-direction: column; }
-}
-
-/* ===== Simulation 03: Stromstärke ===== */
-.exp-grid {
-  display: grid;
-  gap: 1rem;
-}
-
-.readout {
-  background: #ecfeff;
-  border: 1px solid #a5f3fc;
-  border-radius: 10px;
-  padding: 0.75rem 1rem;
-  color: #0f766e;
-  font-weight: 600;
-}
-
-.spring-setup,
-.circuit-setup {
-  position: relative;
-  width: 100%;
-  height: 280px;
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.spring {
-  position: absolute;
-  left: 50%;
-  top: 24px;
-  width: 14px;
-  transform: translateX(-50%);
-  background: repeating-linear-gradient(
-    to bottom,
-    #64748b 0,
-    #64748b 4px,
-    #cbd5e1 4px,
-    #cbd5e1 8px
-  );
-  border-radius: 10px;
-}
-
-.magnet {
-  position: absolute;
-  left: 50%;
-  width: 44px;
-  height: 30px;
-  transform: translateX(-50%);
-  border-radius: 6px;
-  border: 1px solid #475569;
-  background: linear-gradient(90deg, #ef4444 0 50%, #3b82f6 50% 100%);
-  box-shadow: 0 5px 8px rgba(15, 23, 42, 0.2);
-}
-
-.coil {
-  position: absolute;
-  left: 50%;
-  bottom: 38px;
-  width: 68px;
-  height: 52px;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  border: 4px solid #f97316;
-  box-shadow: inset 0 0 0 4px #fb923c;
-}
-
-.scale {
-  position: absolute;
-  left: 18px;
-  top: 18px;
-  bottom: 18px;
-  width: 44px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: #fff;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 8px 4px;
-  font-size: 0.68rem;
-  color: #64748b;
-}
-
-.badge-inline {
-  display: inline-block;
-  margin-left: 0.5rem;
-  font-size: 0.8rem;
-  color: #2563eb;
-  font-weight: 600;
-}
-
-.slider-wrap {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.slider-wrap input {
-  width: 100%;
-}
-
-.ammeter {
-  position: absolute;
-  left: 18px;
-  bottom: 18px;
-  width: 78px;
-  height: 78px;
-  border-radius: 50%;
-  border: 3px solid #334155;
-  background: #fff;
-  display: grid;
-  place-items: center;
-  text-align: center;
-  font-size: 0.72rem;
-  font-weight: 700;
-}
-
-.lamp {
-  position: absolute;
-  left: 50%;
-  top: 88px;
-  transform: translateX(-50%);
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  border: 3px solid #334155;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.lamp-label {
-  position: absolute;
-  left: 50%;
-  top: 165px;
-  transform: translateX(-50%);
-  font-size: 0.75rem;
-  color: #475569;
-}
-
-.meter-point {
-  position: absolute;
-  top: 28px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #e2e8f0;
-  border: 2px solid #94a3b8;
-  color: #1e293b;
-  font-weight: 700;
-  display: grid;
-  place-items: center;
-}
-
-.meter-point.left { left: 115px; }
-.meter-point.right { right: 115px; }
-.meter-point.bottom { left: 50%; transform: translateX(-50%); top: 205px; }
-.meter-point.active {
-  background: #dbeafe;
-  border-color: #3b82f6;
-  color: #1d4ed8;
-}
-
-.wire {
-  position: absolute;
-  border: 3px solid #64748b;
-  border-radius: 16px;
-}
-
-.w1 { left: 84px; top: 52px; width: 82px; height: 62px; border-right: none; border-bottom: none; }
-.w2 { right: 84px; top: 52px; width: 82px; height: 62px; border-left: none; border-bottom: none; }
-.w3 { left: 84px; bottom: 40px; width: 320px; height: 54px; border-top: none; }
-
-.position-grid {
-  display: grid;
-  gap: 0.5rem;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-}
-
-@media (max-width: 560px) {
-  .w3 { width: calc(100% - 168px); }
+  .current-display {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .badge-stretch {
+    margin-left: 0;
+  }
 }
