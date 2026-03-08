@@ -392,17 +392,17 @@
 
     // Labels for glow lamp ends
     var nearLabel = document.createElement('span');
-    nearLabel.style.cssText = 'position:absolute; font-size:0.6rem; color:var(--text-sec); z-index:6;';
-    nearLabel.style.left = (lampX - 2) + 'px';
-    nearLabel.style.top = (lampY + 28) + 'px';
-    nearLabel.textContent = '\u25C0 nah';
+    nearLabel.style.cssText = 'position:absolute; font-size:0.55rem; color:var(--text-sec); z-index:6;';
+    nearLabel.style.left = (lampX + 2) + 'px';
+    nearLabel.style.top = (lampY - 14) + 'px';
+    nearLabel.textContent = 'nah';
     container.appendChild(nearLabel);
 
     var farLabel = document.createElement('span');
-    farLabel.style.cssText = 'position:absolute; font-size:0.6rem; color:var(--text-sec); z-index:6;';
-    farLabel.style.left = (lampX + 60) + 'px';
-    farLabel.style.top = (lampY + 28) + 'px';
-    farLabel.textContent = 'fern \u25B6';
+    farLabel.style.cssText = 'position:absolute; font-size:0.55rem; color:var(--text-sec); z-index:6;';
+    farLabel.style.left = (lampX + 62) + 'px';
+    farLabel.style.top = (lampY - 14) + 'px';
+    farLabel.textContent = 'fern';
     container.appendChild(farLabel);
   }
 
@@ -588,7 +588,7 @@
 
     // Strip label 1
     var lbl1 = document.createElement('span');
-    lbl1.style.cssText = 'position:absolute; font-size:0.65rem; font-weight:600; color:var(--text-sec); z-index:4; bottom:30px; left:calc(50% - 62px); text-align:center;';
+    lbl1.style.cssText = 'position:absolute; font-size:0.65rem; font-weight:600; color:var(--text-sec); z-index:4; bottom:30px; left:calc(50% - 70px); text-align:center;';
     lbl1.textContent = 'Streifen 1';
     container.appendChild(lbl1);
 
@@ -618,29 +618,29 @@
 
     // Strip label 2
     var lbl2 = document.createElement('span');
-    lbl2.style.cssText = 'position:absolute; font-size:0.65rem; font-weight:600; color:var(--text-sec); z-index:4; bottom:30px; left:calc(50% + 17px); text-align:center;';
+    lbl2.style.cssText = 'position:absolute; font-size:0.65rem; font-weight:600; color:var(--text-sec); z-index:4; bottom:30px; left:calc(50% + 25px); text-align:center;';
     lbl2.textContent = 'Streifen 2';
     container.appendChild(lbl2);
 
     // Interaction arrows
     if (interaction === 'repel') {
       var arrowL = document.createElement('span');
-      arrowL.style.cssText = 'position:absolute; font-size:1.5rem; color:#ca8a04; z-index:5; top:50%; left:calc(50% - 60px); transform:translateY(-50%);';
+      arrowL.style.cssText = 'position:absolute; font-size:1.5rem; color:#ca8a04; z-index:5; top:50%; left:calc(50% - 68px); transform:translateY(-50%);';
       arrowL.textContent = '\u2190';
       container.appendChild(arrowL);
 
       var arrowR = document.createElement('span');
-      arrowR.style.cssText = 'position:absolute; font-size:1.5rem; color:#ca8a04; z-index:5; top:50%; left:calc(50% + 40px); transform:translateY(-50%);';
+      arrowR.style.cssText = 'position:absolute; font-size:1.5rem; color:#ca8a04; z-index:5; top:50%; left:calc(50% + 48px); transform:translateY(-50%);';
       arrowR.textContent = '\u2192';
       container.appendChild(arrowR);
     } else if (interaction === 'attract') {
       var arrowL2 = document.createElement('span');
-      arrowL2.style.cssText = 'position:absolute; font-size:1.5rem; color:var(--green); z-index:5; top:50%; left:calc(50% - 55px); transform:translateY(-50%);';
+      arrowL2.style.cssText = 'position:absolute; font-size:1.5rem; color:var(--green); z-index:5; top:50%; left:calc(50% - 63px); transform:translateY(-50%);';
       arrowL2.textContent = '\u2192';
       container.appendChild(arrowL2);
 
       var arrowR2 = document.createElement('span');
-      arrowR2.style.cssText = 'position:absolute; font-size:1.5rem; color:var(--green); z-index:5; top:50%; left:calc(50% + 35px); transform:translateY(-50%);';
+      arrowR2.style.cssText = 'position:absolute; font-size:1.5rem; color:var(--green); z-index:5; top:50%; left:calc(50% + 43px); transform:translateY(-50%);';
       arrowR2.textContent = '\u2190';
       container.appendChild(arrowR2);
     }
@@ -1050,27 +1050,29 @@
         btnRow2.className = 'btn-row mt-sm';
 
         var plasticBtn = document.createElement('button');
-        plasticBtn.className = 'btn btn-primary';
-        plasticBtn.textContent = 'Glimmlampe an Kunststofffolie';
         var plasticDischarged = state.plasticTouchCount >= state.plasticMaxTouches;
         if (plasticDischarged) {
           plasticBtn.className = 'btn btn-secondary';
-          plasticBtn.textContent = 'Kunststofffolie entladen';
+          plasticBtn.textContent = 'Kunststofffolie ist entladen';
           plasticBtn.disabled = true;
+        } else {
+          plasticBtn.className = 'btn btn-primary';
+          plasticBtn.textContent = 'Glimmlampe an Kunststofffolie';
         }
 
         var aluBtn = document.createElement('button');
-        aluBtn.className = 'btn btn-danger';
-        aluBtn.textContent = 'Glimmlampe an Aluminiumfolie';
         if (state.aluminumTested) {
           aluBtn.className = 'btn btn-secondary';
-          aluBtn.textContent = 'Aluminiumfolie entladen';
+          aluBtn.textContent = 'Aluminiumfolie ist entladen';
           aluBtn.disabled = true;
+        } else {
+          aluBtn.className = 'btn btn-danger';
+          aluBtn.textContent = 'Glimmlampe an Aluminiumfolie';
         }
 
         var resetBtn = document.createElement('button');
         resetBtn.className = 'btn btn-secondary';
-        resetBtn.textContent = 'Neu starten';
+        resetBtn.textContent = 'Folien erneut pressen';
 
         btnRow2.appendChild(plasticBtn);
         btnRow2.appendChild(aluBtn);
@@ -1092,7 +1094,12 @@
           if (state.plasticTouchCount >= state.plasticMaxTouches) {
             plasticBtn.disabled = true;
             plasticBtn.className = 'btn btn-secondary';
-            plasticBtn.textContent = 'Kunststofffolie entladen';
+            plasticBtn.textContent = 'Kunststofffolie ist entladen';
+
+            var obs2 = document.getElementById('v4-observation');
+            obs2.className = 'observation neutral';
+            obs2.textContent = 'Die Kunststofffolie ist vollständig entladen. Die Glimmlampe leuchtet nicht mehr.';
+            drawV4(viz, 'separated', null, null);
           }
 
           checkV4Conclusion();
@@ -1111,7 +1118,7 @@
 
           aluBtn.disabled = true;
           aluBtn.className = 'btn btn-secondary';
-          aluBtn.textContent = 'Aluminiumfolie entladen';
+          aluBtn.textContent = 'Aluminiumfolie ist entladen';
 
           checkV4Conclusion();
         }
@@ -1140,7 +1147,7 @@
     }
 
     function checkV4Conclusion() {
-      if (state.testedTogether && state.plasticTouchCount >= 2 && state.aluminumTested) {
+      if (state.plasticTouchCount >= 1 && state.aluminumTested) {
         document.getElementById('v4-conclusion').classList.remove('hidden');
       }
     }
