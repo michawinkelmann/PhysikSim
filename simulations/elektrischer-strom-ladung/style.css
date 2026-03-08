@@ -383,8 +383,8 @@ main {
   z-index: 2;
 }
 
-.strip-wrapper.left { left: calc(50% - 20px); }
-.strip-wrapper.right { left: calc(50% + 8px); }
+.strip-wrapper.left { left: calc(50% - 32px); }
+.strip-wrapper.right { left: calc(50% + 20px); }
 
 .aluminum-strip {
   width: 12px;
@@ -396,8 +396,8 @@ main {
 
 .strip-wrapper.repel-left { transform: rotate(-18deg); }
 .strip-wrapper.repel-right { transform: rotate(18deg); }
-.strip-wrapper.attract-left { transform: rotate(6deg); }
-.strip-wrapper.attract-right { transform: rotate(-6deg); }
+.strip-wrapper.attract-left { transform: rotate(4deg); }
+.strip-wrapper.attract-right { transform: rotate(-4deg); }
 .strip-wrapper.neutral { transform: rotate(0deg); }
 
 .strip-charge {

@@ -588,7 +588,7 @@
 
     // Strip label 1
     var lbl1 = document.createElement('span');
-    lbl1.style.cssText = 'position:absolute; font-size:0.65rem; font-weight:600; color:var(--text-sec); z-index:4; bottom:30px; left:calc(50% - 50px); text-align:center;';
+    lbl1.style.cssText = 'position:absolute; font-size:0.65rem; font-weight:600; color:var(--text-sec); z-index:4; bottom:30px; left:calc(50% - 62px); text-align:center;';
     lbl1.textContent = 'Streifen 1';
     container.appendChild(lbl1);
 
@@ -618,7 +618,7 @@
 
     // Strip label 2
     var lbl2 = document.createElement('span');
-    lbl2.style.cssText = 'position:absolute; font-size:0.65rem; font-weight:600; color:var(--text-sec); z-index:4; bottom:30px; left:calc(50% + 15px); text-align:center;';
+    lbl2.style.cssText = 'position:absolute; font-size:0.65rem; font-weight:600; color:var(--text-sec); z-index:4; bottom:30px; left:calc(50% + 17px); text-align:center;';
     lbl2.textContent = 'Streifen 2';
     container.appendChild(lbl2);
 
@@ -717,7 +717,7 @@
       state.selectedPlate = 'minus';
       state.lampApplied = true;
       state.testedPlates.minus = true;
-      drawV3(viz, 'minus', 'near');
+      drawV3(viz, 'minus', 'far');
 
       var obs = document.getElementById('v3-observation');
       obs.className = 'observation glow-near';
@@ -1052,17 +1052,20 @@
         var plasticBtn = document.createElement('button');
         plasticBtn.className = 'btn btn-primary';
         plasticBtn.textContent = 'Glimmlampe an Kunststofffolie';
-        if (state.plasticTouchCount >= state.plasticMaxTouches) {
-          plasticBtn.disabled = true;
+        var plasticDischarged = state.plasticTouchCount >= state.plasticMaxTouches;
+        if (plasticDischarged) {
+          plasticBtn.className = 'btn btn-secondary';
           plasticBtn.textContent = 'Kunststofffolie entladen';
+          plasticBtn.disabled = true;
         }
 
         var aluBtn = document.createElement('button');
         aluBtn.className = 'btn btn-danger';
         aluBtn.textContent = 'Glimmlampe an Aluminiumfolie';
         if (state.aluminumTested) {
-          aluBtn.disabled = true;
+          aluBtn.className = 'btn btn-secondary';
           aluBtn.textContent = 'Aluminiumfolie entladen';
+          aluBtn.disabled = true;
         }
 
         var resetBtn = document.createElement('button');
@@ -1077,7 +1080,7 @@
         function onPlastic() {
           if (state.plasticTouchCount >= state.plasticMaxTouches) return;
           state.plasticTouchCount++;
-          drawV4(viz, 'separated', 'plastic', 'near');
+          drawV4(viz, 'separated', 'plastic', 'far');
 
           var remaining = state.plasticMaxTouches - state.plasticTouchCount;
           document.getElementById('v4-charge-count').textContent = 'Ladung auf Kunststofffolie: ' + remaining + ' Entladung' + (remaining !== 1 ? 'en' : '') + ' möglich';
@@ -1088,6 +1091,7 @@
 
           if (state.plasticTouchCount >= state.plasticMaxTouches) {
             plasticBtn.disabled = true;
+            plasticBtn.className = 'btn btn-secondary';
             plasticBtn.textContent = 'Kunststofffolie entladen';
           }
 
@@ -1097,7 +1101,7 @@
         function onAlu() {
           if (state.aluminumTested) return;
           state.aluminumTested = true;
-          drawV4(viz, 'separated', 'aluminum', 'far');
+          drawV4(viz, 'separated', 'aluminum', 'near');
 
           document.getElementById('v4-charge-count').textContent = 'Aluminiumfolie: entladen nach einer Berührung';
 
@@ -1106,6 +1110,7 @@
           obs.textContent = 'Die Glimmlampe leuchtet am fernen Ende auf – am anderen Ende als bei der Kunststofffolie! Die Aluminiumfolie trägt positive Ladung.';
 
           aluBtn.disabled = true;
+          aluBtn.className = 'btn btn-secondary';
           aluBtn.textContent = 'Aluminiumfolie entladen';
 
           checkV4Conclusion();
