@@ -103,16 +103,38 @@
     svg.appendChild(path);
   }
 
-  function makeSVG(w, h) {
+  function makeSVG(container) {
     var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('width', '100%');
     svg.setAttribute('height', '100%');
-    svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    svg.setAttribute('preserveAspectRatio', 'none');
     svg.style.position = 'absolute';
     svg.style.top = '0';
     svg.style.left = '0';
     svg.style.zIndex = '0';
+    // Set viewBox after layout so SVG coords match pixel positions exactly
+    function setViewBox() {
+      var w = container.offsetWidth || 400;
+      var h = container.offsetHeight || 320;
+      svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    }
+    setViewBox();
+    // Update on resize
+    var resizeTimer;
+    function onResize() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(setViewBox, 100);
+    }
+    window.addEventListener('resize', onResize);
+    cleanupFns.push(function () { window.removeEventListener('resize', onResize); });
     return svg;
+  }
+
+  /* Helper: get connection point of an element relative to a container in SVG coords */
+  function connPt(container, el, dx, dy) {
+    var cx = el.offsetLeft - container.offsetLeft + (dx || 0);
+    var cy = el.offsetTop - container.offsetTop + (dy || 0);
+    return [cx, cy];
   }
 
   /* ===== ENERGY CHAIN ===== */
@@ -210,16 +232,9 @@
       '</div>';
 
     var circuit = document.getElementById('steam-circuit');
-    var W = 400, H = 280;
-    var svg = makeSVG(W, H);
-    circuit.appendChild(svg);
-
-    // Wires
-    drawWire(svg, [[130,130],[130,230],[340,230],[340,130]], '#dc2626');
-    drawWire(svg, [[130,100],[130,50],[340,50],[340,100]], '#2563eb');
 
     // Steam engine
-    circuit.innerHTML +=
+    circuit.innerHTML =
       '<div class="steam-engine" id="steam-eng" style="left:5%;top:18%">' +
         '<div class="steam-engine-chimney"></div>' +
         '<div class="steam-puff" style="display:none"></div>' +
@@ -244,14 +259,8 @@
         '</div>' +
         '<div class="steam-engine-wheel left"></div>' +
         '<div class="steam-engine-wheel right"></div>' +
-      '</div>';
-
-    // Drive belt (SVG)
-    drawWire(svg, [[165,115],[195,115]], '#78716c');
-    drawWire(svg, [[165,125],[195,125]], '#78716c');
-
-    // Generator
-    circuit.innerHTML +=
+      '</div>' +
+      // Generator
       '<div class="generator" id="v1-gen" style="left:38%;top:26%">' +
         '<div class="generator-body">' +
           '<div class="generator-coils"></div>' +
@@ -261,15 +270,54 @@
           '<div class="generator-terminal neg"></div>' +
         '</div>' +
         '<div class="generator-label">Generator</div>' +
-      '</div>';
-
-    // Bulb
-    circuit.innerHTML +=
-      '<div style="position:absolute;right:12%;top:22%;z-index:2" class="bulb-container">' +
+      '</div>' +
+      // Bulb
+      '<div style="position:absolute;right:12%;top:22%;z-index:2" class="bulb-container" id="v1-bulb-grp">' +
         '<div class="bulb-glass off" id="v1-bulb"></div>' +
         '<div class="bulb-base"></div>' +
         '<span class="bulb-label">Lampe</span>' +
       '</div>';
+
+    // Draw wires after components are in DOM so we can measure positions
+    var svg = makeSVG(circuit);
+    circuit.insertBefore(svg, circuit.firstChild);
+
+    requestAnimationFrame(function () {
+      var genEl_ = document.getElementById('v1-gen');
+      var genBody = genEl_ ? genEl_.querySelector('.generator-body') : null;
+      var bulbGrp = document.getElementById('v1-bulb-grp');
+      var steamEng_ = document.getElementById('steam-eng');
+      var flywheel = steamEng_ ? steamEng_.querySelector('.steam-engine-flywheel') : null;
+
+      if (genBody && bulbGrp) {
+        // Generator terminal positions (pos: top-right, neg: bottom-right of body)
+        var genPosX = genBody.offsetLeft + genBody.offsetWidth - 13;
+        var genPosY = genBody.offsetTop - 0;
+        var genNegX = genPosX;
+        var genNegY = genBody.offsetTop + genBody.offsetHeight + 0;
+        // Offset generator position relative to circuit
+        var gOff = connPt(circuit, genEl_, 0, 0);
+        var gPosAbs = [gOff[0] + genPosX, gOff[1] + genPosY];
+        var gNegAbs = [gOff[0] + genNegX, gOff[1] + genNegY];
+
+        // Bulb connection points (top and bottom)
+        var bPt = connPt(circuit, bulbGrp, 16, 0);
+        var bPtBot = connPt(circuit, bulbGrp, 16, 42);
+
+        // Red wire (positive): generator pos → up → across → down to bulb top
+        drawWire(svg, [gPosAbs, [gPosAbs[0], gPosAbs[1] - 30], [bPt[0], gPosAbs[1] - 30], bPt], '#dc2626');
+        // Blue wire (negative): generator neg → down → across → up to bulb bottom
+        drawWire(svg, [gNegAbs, [gNegAbs[0], gNegAbs[1] + 80], [bPtBot[0], gNegAbs[1] + 80], bPtBot], '#2563eb');
+      }
+
+      // Drive belt from flywheel to generator
+      if (flywheel && genEl_) {
+        var fwPt = connPt(circuit, flywheel, 14, 10);
+        var gLeft = connPt(circuit, genEl_, 0, 18);
+        drawWire(svg, [[fwPt[0], fwPt[1]], [gLeft[0], fwPt[1]]], '#78716c');
+        drawWire(svg, [[fwPt[0], fwPt[1] + 8], [gLeft[0], fwPt[1] + 8]], '#78716c');
+      }
+    });
 
     var slider = document.getElementById('fire-slider');
     var fireVal = document.getElementById('fire-value');
@@ -352,37 +400,39 @@
       '</div>';
 
     var circuit = document.getElementById('solar-circuit');
-    var W2 = 400, H2 = 260;
-    var svg2 = makeSVG(W2, H2);
-    circuit.appendChild(svg2);
 
-    // Wires: solar cell -> motor -> solar cell
-    drawWire(svg2, [[100,80],[100,50],[300,50],[300,80]], '#dc2626');
-    drawWire(svg2, [[100,150],[100,220],[300,220],[300,150]], '#2563eb');
-
-    // Solar panel
-    circuit.innerHTML +=
-      '<div class="solar-cell" style="left:8%;top:18%">' +
-        '<div class="solar-panel-frame"><div class="solar-panel">' +
-          '<div class="solar-segment"></div><div class="solar-segment"></div><div class="solar-segment"></div>' +
-          '<div class="solar-segment"></div><div class="solar-segment"></div><div class="solar-segment"></div>' +
-        '</div></div>' +
-        '<div class="solar-stand"></div>' +
-        '<div class="solar-label">Solarzelle</div>' +
-      '</div>';
-
-    // Light rays
-    circuit.innerHTML +=
-      '<div id="light-rays" style="position:absolute;left:13%;top:0%;z-index:1;display:none">' +
+    // Lamp (light source)
+    circuit.innerHTML =
+      '<div id="v2-lamp" style="position:absolute;left:10%;top:2%;z-index:3;display:flex;flex-direction:column;align-items:center">' +
+        '<div class="bulb-glass dim" style="width:24px;height:24px;border-width:1.5px"></div>' +
+        '<div class="bulb-base" style="width:12px;height:7px"></div>' +
+        '<span style="font-size:0.6rem;font-weight:600;color:var(--text-sec);margin-top:2px">Lampe</span>' +
+      '</div>' +
+      // Light rays
+      '<div id="light-rays" style="position:absolute;left:12%;top:22%;z-index:1;display:none">' +
         '<div style="width:3px;height:30px;background:linear-gradient(180deg,#fde047,transparent);position:absolute;left:0;transform:rotate(-10deg)"></div>' +
         '<div style="width:3px;height:30px;background:linear-gradient(180deg,#fde047,transparent);position:absolute;left:12px;transform:rotate(0deg)"></div>' +
         '<div style="width:3px;height:30px;background:linear-gradient(180deg,#fde047,transparent);position:absolute;left:24px;transform:rotate(10deg)"></div>' +
         '<div style="width:2px;height:24px;background:linear-gradient(180deg,#fde047,transparent);position:absolute;left:6px;transform:rotate(-5deg);opacity:0.6"></div>' +
         '<div style="width:2px;height:24px;background:linear-gradient(180deg,#fde047,transparent);position:absolute;left:18px;transform:rotate(5deg);opacity:0.6"></div>' +
-      '</div>';
-
-    // Fan with guard
-    circuit.innerHTML +=
+      '</div>' +
+      // Solar panel
+      '<div class="solar-cell" id="v2-solar" style="left:8%;top:30%">' +
+        '<div class="solar-panel-frame"><div class="solar-panel">' +
+          '<div class="solar-segment"></div><div class="solar-segment"></div><div class="solar-segment"></div>' +
+          '<div class="solar-segment"></div><div class="solar-segment"></div><div class="solar-segment"></div>' +
+        '</div></div>' +
+        '<div class="solar-terminal pos"></div>' +
+        '<div class="solar-terminal neg"></div>' +
+        '<div class="solar-stand"></div>' +
+        '<div class="solar-label">Solarzelle</div>' +
+      '</div>' +
+      // Motor
+      '<div id="v2-motor" style="position:absolute;right:17%;top:58%;display:flex;flex-direction:column;align-items:center;z-index:2">' +
+        '<div class="motor-body" style="width:36px;height:36px"><span class="motor-symbol" style="font-size:0.8rem">M</span></div>' +
+        '<span class="motor-label">Motor</span>' +
+      '</div>' +
+      // Fan with guard
       '<div class="fan-container" id="fan1" style="right:15%;top:12%">' +
         '<div class="fan-blades">' +
           '<div class="fan-guard"></div>' +
@@ -395,12 +445,24 @@
         '<div class="fan-label">Ventilator</div>' +
       '</div>';
 
-    // Motor below fan
-    circuit.innerHTML +=
-      '<div style="position:absolute;right:17%;top:58%;display:flex;flex-direction:column;align-items:center;z-index:2">' +
-        '<div class="motor-body" style="width:36px;height:36px"><span class="motor-symbol" style="font-size:0.8rem">M</span></div>' +
-        '<span class="motor-label">Motor</span>' +
-      '</div>';
+    var svg2 = makeSVG(circuit);
+    circuit.insertBefore(svg2, circuit.firstChild);
+
+    requestAnimationFrame(function () {
+      var solar = document.getElementById('v2-solar');
+      var motor = document.getElementById('v2-motor');
+      if (solar && motor) {
+        // Solar cell right side → wire up to top → across → down to motor top
+        var solarR = connPt(circuit, solar, 70, 20);
+        var solarRBot = connPt(circuit, solar, 70, 45);
+        var motorL = connPt(circuit, motor, 0, 10);
+        var motorLBot = connPt(circuit, motor, 0, 28);
+        // Red wire (top path)
+        drawWire(svg2, [solarR, [solarR[0], solarR[1] - 20], [motorL[0], solarR[1] - 20], motorL], '#dc2626');
+        // Blue wire (bottom path)
+        drawWire(svg2, [solarRBot, [solarRBot[0], solarRBot[1] + 40], [motorLBot[0], solarRBot[1] + 40], motorLBot], '#2563eb');
+      }
+    });
 
     var slider = document.getElementById('light-slider');
     var lightVal = document.getElementById('light-value');
@@ -409,6 +471,8 @@
     var dispSpeed = document.getElementById('disp-speed');
     var fan = document.getElementById('fan1');
     var rays = document.getElementById('light-rays');
+    var v2Lamp = document.getElementById('v2-lamp');
+    var v2LampGlass = v2Lamp ? v2Lamp.querySelector('.bulb-glass') : null;
     var conc = document.getElementById('conclusion');
     var shown = false;
 
@@ -423,6 +487,11 @@
 
       rays.style.display = v > 0.05 ? '' : 'none';
       rays.style.opacity = Math.min(1, v * 1.5);
+
+      // Update lamp appearance
+      if (v2LampGlass) {
+        v2LampGlass.className = 'bulb-glass ' + bulbClass(v);
+      }
 
       if (v > 0.05) {
         fan.classList.add('fan-spinning');
@@ -474,37 +543,45 @@
       '</div>';
 
     var circuit = document.getElementById('solar-circuit2');
-    var W3 = 400, H3 = 280;
-    var svg3 = makeSVG(W3, H3);
-    circuit.appendChild(svg3);
 
-    // Wires: solar -> fan1 motor, solar -> fan2 motor (parallel)
-    drawWire(svg3, [[95,100],[95,40],[230,40],[230,80],[320,80],[320,100]], '#dc2626');
-    drawWire(svg3, [[95,180],[95,240],[230,240],[230,200],[320,200],[320,180]], '#2563eb');
-
-    // Solar panel
-    circuit.innerHTML +=
-      '<div class="solar-cell" style="left:5%;top:24%">' +
-        '<div class="solar-panel-frame"><div class="solar-panel">' +
-          '<div class="solar-segment"></div><div class="solar-segment"></div><div class="solar-segment"></div>' +
-          '<div class="solar-segment"></div><div class="solar-segment"></div><div class="solar-segment"></div>' +
-        '</div></div>' +
-        '<div class="solar-stand"></div>' +
-        '<div class="solar-label">Solarzelle</div>' +
-      '</div>';
-
-    // Light rays
-    circuit.innerHTML +=
-      '<div id="light-rays2" style="position:absolute;left:10%;top:2%;z-index:1;display:none">' +
+    // Components first, then SVG wires
+    circuit.innerHTML =
+      // Lamp (light source)
+      '<div id="v3-lamp" style="position:absolute;left:8%;top:2%;z-index:3;display:flex;flex-direction:column;align-items:center">' +
+        '<div class="bulb-glass dim" style="width:24px;height:24px;border-width:1.5px"></div>' +
+        '<div class="bulb-base" style="width:12px;height:7px"></div>' +
+        '<span style="font-size:0.6rem;font-weight:600;color:var(--text-sec);margin-top:2px">Lampe</span>' +
+      '</div>' +
+      // Light rays
+      '<div id="light-rays2" style="position:absolute;left:10%;top:20%;z-index:1;display:none">' +
         '<div style="width:3px;height:30px;background:linear-gradient(180deg,#fde047,transparent);position:absolute;left:0;transform:rotate(-10deg)"></div>' +
         '<div style="width:3px;height:30px;background:linear-gradient(180deg,#fde047,transparent);position:absolute;left:12px"></div>' +
         '<div style="width:3px;height:30px;background:linear-gradient(180deg,#fde047,transparent);position:absolute;left:24px;transform:rotate(10deg)"></div>' +
         '<div style="width:2px;height:24px;background:linear-gradient(180deg,#fde047,transparent);position:absolute;left:6px;transform:rotate(-5deg);opacity:0.6"></div>' +
         '<div style="width:2px;height:24px;background:linear-gradient(180deg,#fde047,transparent);position:absolute;left:18px;transform:rotate(5deg);opacity:0.6"></div>' +
-      '</div>';
-
-    // Fan 1 with guard
-    circuit.innerHTML +=
+      '</div>' +
+      // Solar panel
+      '<div class="solar-cell" id="v3-solar" style="left:5%;top:30%">' +
+        '<div class="solar-panel-frame"><div class="solar-panel">' +
+          '<div class="solar-segment"></div><div class="solar-segment"></div><div class="solar-segment"></div>' +
+          '<div class="solar-segment"></div><div class="solar-segment"></div><div class="solar-segment"></div>' +
+        '</div></div>' +
+        '<div class="solar-terminal pos"></div>' +
+        '<div class="solar-terminal neg"></div>' +
+        '<div class="solar-stand"></div>' +
+        '<div class="solar-label">Solarzelle</div>' +
+      '</div>' +
+      // Motor 1
+      '<div id="v3-motor1" style="position:absolute;right:37%;top:56%;display:flex;flex-direction:column;align-items:center;z-index:2">' +
+        '<div class="motor-body" style="width:32px;height:32px"><span class="motor-symbol" style="font-size:0.7rem">M</span></div>' +
+        '<span class="motor-label">Motor 1</span>' +
+      '</div>' +
+      // Motor 2
+      '<div id="v3-motor2" style="position:absolute;right:10%;top:56%;display:flex;flex-direction:column;align-items:center;z-index:2">' +
+        '<div class="motor-body" style="width:32px;height:32px"><span class="motor-symbol" style="font-size:0.7rem">M</span></div>' +
+        '<span class="motor-label">Motor 2</span>' +
+      '</div>' +
+      // Fan 1 with guard
       '<div class="fan-container" id="fan2a" style="right:35%;top:4%">' +
         '<div class="fan-blades">' +
           '<div class="fan-guard"></div>' +
@@ -515,10 +592,8 @@
           '<div class="fan-blade-arm blue"></div>' +
         '</div>' +
         '<div class="fan-label">Ventilator 1</div>' +
-      '</div>';
-
-    // Fan 2 with guard
-    circuit.innerHTML +=
+      '</div>' +
+      // Fan 2 with guard
       '<div class="fan-container" id="fan2b" style="right:8%;top:4%">' +
         '<div class="fan-blades">' +
           '<div class="fan-guard"></div>' +
@@ -531,16 +606,30 @@
         '<div class="fan-label">Ventilator 2</div>' +
       '</div>';
 
-    // Motors
-    circuit.innerHTML +=
-      '<div style="position:absolute;right:37%;top:56%;display:flex;flex-direction:column;align-items:center;z-index:2">' +
-        '<div class="motor-body" style="width:32px;height:32px"><span class="motor-symbol" style="font-size:0.7rem">M</span></div>' +
-        '<span class="motor-label">Motor 1</span>' +
-      '</div>' +
-      '<div style="position:absolute;right:10%;top:56%;display:flex;flex-direction:column;align-items:center;z-index:2">' +
-        '<div class="motor-body" style="width:32px;height:32px"><span class="motor-symbol" style="font-size:0.7rem">M</span></div>' +
-        '<span class="motor-label">Motor 2</span>' +
-      '</div>';
+    var svg3 = makeSVG(circuit);
+    circuit.insertBefore(svg3, circuit.firstChild);
+
+    requestAnimationFrame(function () {
+      var solar = document.getElementById('v3-solar');
+      var motor1 = document.getElementById('v3-motor1');
+      var motor2 = document.getElementById('v3-motor2');
+      if (solar && motor1 && motor2) {
+        var solarR = connPt(circuit, solar, 70, 15);
+        var solarRBot = connPt(circuit, solar, 70, 45);
+        var m1L = connPt(circuit, motor1, 0, 8);
+        var m1LBot = connPt(circuit, motor1, 0, 24);
+        var m2L = connPt(circuit, motor2, 0, 8);
+        var m2LBot = connPt(circuit, motor2, 0, 24);
+        // Red wire: solar → junction → motor1 and motor2 (parallel)
+        var juncY = Math.min(solarR[1], m1L[1]) - 15;
+        drawWire(svg3, [solarR, [solarR[0], juncY], [m1L[0], juncY], m1L], '#dc2626');
+        drawWire(svg3, [[m1L[0], juncY], [m2L[0], juncY], m2L], '#dc2626');
+        // Blue wire: solar → junction → motor1 and motor2
+        var juncYBot = Math.max(solarRBot[1], m1LBot[1]) + 15;
+        drawWire(svg3, [solarRBot, [solarRBot[0], juncYBot], [m1LBot[0], juncYBot], m1LBot], '#2563eb');
+        drawWire(svg3, [[m1LBot[0], juncYBot], [m2LBot[0], juncYBot], m2LBot], '#2563eb');
+      }
+    });
 
     var slider = document.getElementById('light-slider2');
     var lightVal = document.getElementById('light-value2');
@@ -550,6 +639,8 @@
     var fanA = document.getElementById('fan2a');
     var fanB = document.getElementById('fan2b');
     var rays = document.getElementById('light-rays2');
+    var v3Lamp = document.getElementById('v3-lamp');
+    var v3LampGlass = v3Lamp ? v3Lamp.querySelector('.bulb-glass') : null;
     var conc = document.getElementById('conclusion2');
     var shown = false;
 
@@ -564,6 +655,11 @@
 
       rays.style.display = v > 0.05 ? '' : 'none';
       rays.style.opacity = Math.min(1, v * 1.5);
+
+      // Update lamp appearance
+      if (v3LampGlass) {
+        v3LampGlass.className = 'bulb-glass ' + bulbClass(v);
+      }
 
       var fanSpeed = v * 0.6;
       if (fanSpeed > 0.03) {
@@ -621,16 +717,10 @@
       '</div>';
 
     var circuit = document.getElementById('wind-circuit');
-    var Ww = 400, Hw = 300;
-    var svgw = makeSVG(Ww, Hw);
-    circuit.appendChild(svgw);
 
-    // Wires: generator -> bulb
-    drawWire(svgw, [[268,155],[268,70],[340,70],[340,120]], '#dc2626');
-    drawWire(svgw, [[268,175],[268,250],[340,250],[340,170]], '#2563eb');
-
-    // Hairdryer
-    circuit.innerHTML +=
+    // Components
+    circuit.innerHTML =
+      // Hairdryer
       '<div class="hairdryer" id="wind-dryer" style="left:3%;top:30%">' +
         '<div class="hairdryer-body">' +
           '<span class="hairdryer-label">Föhn</span>' +
@@ -638,19 +728,15 @@
           '<div class="hairdryer-nozzle"></div>' +
         '</div>' +
         '<div class="hairdryer-handle"></div>' +
-      '</div>';
-
-    // Wind lines
-    circuit.innerHTML +=
+      '</div>' +
+      // Wind lines
       '<div id="wind-lines" style="position:absolute;left:22%;top:28%;display:none">' +
         '<div class="wind-line" style="top:0"></div>' +
         '<div class="wind-line" style="top:8px;animation-delay:0.15s"></div>' +
         '<div class="wind-line" style="top:16px;animation-delay:0.3s"></div>' +
         '<div class="wind-line" style="top:24px;animation-delay:0.45s"></div>' +
-      '</div>';
-
-    // Wind turbine with nacelle
-    circuit.innerHTML +=
+      '</div>' +
+      // Wind turbine with nacelle
       '<div class="wind-turbine" id="wind-turb" style="left:38%;top:3%">' +
         '<div class="wind-turbine-blades">' +
           '<div class="wind-turbine-hub"></div>' +
@@ -660,11 +746,9 @@
         '</div>' +
         '<div class="wind-turbine-nacelle"></div>' +
         '<div class="wind-turbine-pole"></div>' +
-      '</div>';
-
-    // Generator with rotor
-    circuit.innerHTML +=
-      '<div class="generator" id="w-gen" style="left:55%;top:38%">' +
+      '</div>' +
+      // Generator with rotor
+      '<div class="generator" id="w-gen" style="left:52%;top:38%">' +
         '<div class="generator-body">' +
           '<div class="generator-coils"></div>' +
           '<div class="generator-rotor"></div>' +
@@ -673,15 +757,33 @@
           '<div class="generator-terminal neg"></div>' +
         '</div>' +
         '<div class="generator-label">Generator</div>' +
-      '</div>';
-
-    // Bulb with base
-    circuit.innerHTML +=
-      '<div style="position:absolute;right:10%;top:28%;z-index:2" class="bulb-container">' +
+      '</div>' +
+      // Mechanical link: turbine pole to generator
+      '<div id="w-shaft" style="position:absolute;left:44%;top:32%;width:calc(10%);height:3px;background:linear-gradient(90deg,#94a3b8,#78909c);z-index:1;border-radius:1px"></div>' +
+      // Bulb with base
+      '<div style="position:absolute;right:10%;top:28%;z-index:2" class="bulb-container" id="w-bulb-grp">' +
         '<div class="bulb-glass off" id="w-bulb"></div>' +
         '<div class="bulb-base"></div>' +
         '<span class="bulb-label">Lampe</span>' +
       '</div>';
+
+    var svgw = makeSVG(circuit);
+    circuit.insertBefore(svgw, circuit.firstChild);
+
+    requestAnimationFrame(function () {
+      var genEl_ = document.getElementById('w-gen');
+      var bulbGrp = document.getElementById('w-bulb-grp');
+      if (genEl_ && bulbGrp) {
+        var genBody = genEl_.querySelector('.generator-body');
+        var gOff = connPt(circuit, genEl_, 0, 0);
+        var gPosAbs = [gOff[0] + genBody.offsetWidth - 13, gOff[1]];
+        var gNegAbs = [gOff[0] + genBody.offsetWidth - 13, gOff[1] + genBody.offsetHeight];
+        var bPt = connPt(circuit, bulbGrp, 16, 0);
+        var bPtBot = connPt(circuit, bulbGrp, 16, 42);
+        drawWire(svgw, [gPosAbs, [gPosAbs[0], gPosAbs[1] - 25], [bPt[0], gPosAbs[1] - 25], bPt], '#dc2626');
+        drawWire(svgw, [gNegAbs, [gNegAbs[0], gNegAbs[1] + 60], [bPtBot[0], gNegAbs[1] + 60], bPtBot], '#2563eb');
+      }
+    });
 
     var btns = { off: document.getElementById('wind-off'), low: document.getElementById('wind-low'), high: document.getElementById('wind-high') };
     var turb = document.getElementById('wind-turb');
@@ -773,17 +875,21 @@
 
     var circuit = document.getElementById('crank-circuit');
     state.twoLamps = false;
-    var Wc = 400, Hc = 280;
-    var svgc = makeSVG(Wc, Hc);
-    circuit.appendChild(svgc);
 
-    // Wires: generator -> bulb(s)
-    drawWire(svgc, [[120,100],[120,50],[280,50],[280,100]], '#dc2626');
-    drawWire(svgc, [[120,155],[120,240],[280,240],[280,155]], '#2563eb');
-
-    // Generator with crank and rotor
-    circuit.innerHTML +=
-      '<div class="generator" id="c-gen" style="left:8%;top:28%">' +
+    // Components
+    circuit.innerHTML =
+      // Crank visual with base
+      '<div class="crank-container" id="crank-vis" style="left:3%;top:28%">' +
+        '<div class="crank-handle">' +
+          '<div class="crank-base"></div>' +
+          '<div class="crank-arm"></div>' +
+          '<div class="crank-knob"></div>' +
+        '</div>' +
+      '</div>' +
+      // Drive shaft connecting crank to generator
+      '<div id="c-shaft" style="position:absolute;left:calc(3% + 22px);top:calc(28% + 16px);width:calc(15% - 12px);height:4px;background:linear-gradient(90deg,#94a3b8,#78909c,#94a3b8);z-index:1;border-radius:2px;box-shadow:0 1px 2px rgba(0,0,0,0.15)"></div>' +
+      // Generator with rotor
+      '<div class="generator" id="c-gen" style="left:18%;top:26%">' +
         '<div class="generator-body" style="width:55px;height:40px">' +
           '<div class="generator-coils"></div>' +
           '<div class="generator-rotor"></div>' +
@@ -792,33 +898,47 @@
           '<div class="generator-terminal neg"></div>' +
         '</div>' +
         '<div class="generator-label">Generator</div>' +
-      '</div>';
-
-    // Crank visual with base
-    circuit.innerHTML +=
-      '<div class="crank-container" id="crank-vis" style="left:2%;top:20%">' +
-        '<div class="crank-handle">' +
-          '<div class="crank-base"></div>' +
-          '<div class="crank-arm"></div>' +
-          '<div class="crank-knob"></div>' +
-        '</div>' +
-      '</div>';
-
-    // Bulb 1 with base
-    circuit.innerHTML +=
+      '</div>' +
+      // Bulb 1 with base
       '<div style="position:absolute;right:25%;top:24%;z-index:2" class="bulb-container" id="lamp1-grp">' +
         '<div class="bulb-glass off" id="c-bulb1"></div>' +
         '<div class="bulb-base"></div>' +
         '<span class="bulb-label">Lampe 1</span>' +
-      '</div>';
-
-    // Bulb 2 (hidden initially) with base
-    circuit.innerHTML +=
+      '</div>' +
+      // Bulb 2 (hidden initially) with base
       '<div style="position:absolute;right:8%;top:24%;z-index:2;display:none" class="bulb-container" id="lamp2-grp">' +
         '<div class="bulb-glass off" id="c-bulb2"></div>' +
         '<div class="bulb-base"></div>' +
         '<span class="bulb-label">Lampe 2</span>' +
       '</div>';
+
+    var svgc = makeSVG(circuit);
+    circuit.insertBefore(svgc, circuit.firstChild);
+
+    requestAnimationFrame(function () {
+      var genEl_ = document.getElementById('c-gen');
+      var lamp1 = document.getElementById('lamp1-grp');
+      var lamp2 = document.getElementById('lamp2-grp');
+      if (genEl_ && lamp1) {
+        var genBody = genEl_.querySelector('.generator-body');
+        var gOff = connPt(circuit, genEl_, 0, 0);
+        var gPosAbs = [gOff[0] + genBody.offsetWidth - 13, gOff[1]];
+        var gNegAbs = [gOff[0] + genBody.offsetWidth - 13, gOff[1] + genBody.offsetHeight];
+        var b1Pt = connPt(circuit, lamp1, 16, 0);
+        var b1PtBot = connPt(circuit, lamp1, 16, 42);
+        // Red wire: generator → top → across → down to lamp1
+        drawWire(svgc, [gPosAbs, [gPosAbs[0], gPosAbs[1] - 25], [b1Pt[0], gPosAbs[1] - 25], b1Pt], '#dc2626');
+        // Blue wire: generator → bottom → across → up to lamp1
+        drawWire(svgc, [gNegAbs, [gNegAbs[0], gNegAbs[1] + 60], [b1PtBot[0], gNegAbs[1] + 60], b1PtBot], '#2563eb');
+        // Wire extensions to lamp2 (parallel branch)
+        if (lamp2) {
+          var b2Pt = connPt(circuit, lamp2, 16, 0);
+          var b2PtBot = connPt(circuit, lamp2, 16, 42);
+          drawWire(svgc, [[b1Pt[0], gPosAbs[1] - 25], [b2Pt[0], gPosAbs[1] - 25], b2Pt], '#dc2626');
+          drawWire(svgc, [[b1PtBot[0], gNegAbs[1] + 60], [b2PtBot[0], gNegAbs[1] + 60], b2PtBot], '#2563eb');
+        }
+      }
+    });
 
     var slider = document.getElementById('crank-slider');
     var crankVal = document.getElementById('crank-value');
@@ -907,6 +1027,9 @@
             '<button class="btn btn-secondary" id="w2">2 Gewichte</button>' +
             '<button class="btn btn-secondary" id="w3">3 Gewichte</button>' +
           '</div>' +
+          '<div class="btn-row mt-sm">' +
+            '<button class="btn btn-secondary" id="w-reset" style="width:100%">Gewichte hochziehen (Reset)</button>' +
+          '</div>' +
         '</div>' +
         '<div class="card">' +
           '<div class="circuit-viz" id="weight-circuit" style="height:320px"></div>' +
@@ -929,20 +1052,15 @@
       '</div>';
 
     var circuit = document.getElementById('weight-circuit');
-    var Wwt = 400, Hwt = 320;
-    var svgwt = makeSVG(Wwt, Hwt);
-    circuit.appendChild(svgwt);
 
-    // Wires: generator -> bulb
-    drawWire(svgwt, [[215,60],[215,40],[310,40],[310,100]], '#dc2626');
-    drawWire(svgwt, [[215,90],[215,280],[310,280],[310,160]], '#2563eb');
-
-    // Thread/rope line (SVG)
-    drawWire(svgwt, [[145,70],[145,250]], '#78716c');
-
-    // Generator on stand with rotor
-    circuit.innerHTML +=
-      '<div class="generator" id="wt-gen" style="left:35%;top:8%;z-index:2">' +
+    // Components
+    circuit.innerHTML =
+      // Pulley wheel at top
+      '<div style="position:absolute;left:31%;top:14%;width:16px;height:16px;border-radius:50%;border:2.5px solid #64748b;background:radial-gradient(circle,#e2e8f0,#cbd5e1);z-index:2;box-shadow:0 1px 2px rgba(0,0,0,0.15)" id="wt-pulley"></div>' +
+      // Rope from pulley to generator shaft
+      '<div id="wt-rope-horiz" style="position:absolute;left:calc(31% + 16px);top:calc(14% + 7px);width:calc(7%);height:2.5px;background:#78716c;z-index:1;border-radius:1px"></div>' +
+      // Generator on stand with rotor
+      '<div class="generator" id="wt-gen" style="left:38%;top:8%;z-index:2">' +
         '<div class="generator-body" style="width:55px;height:40px">' +
           '<div class="generator-coils"></div>' +
           '<div class="generator-rotor"></div>' +
@@ -951,28 +1069,45 @@
           '<div class="generator-terminal neg"></div>' +
         '</div>' +
         '<div class="generator-label">Generator</div>' +
-      '</div>';
-
-    // Stand with cross-brace
-    circuit.innerHTML +=
-      '<div style="position:absolute;left:38%;top:25%;width:8px;height:55%;background:linear-gradient(90deg,#b0bec5,#94a3b8,#78909c);border-radius:2px;z-index:1;box-shadow:1px 0 2px rgba(0,0,0,0.1)"></div>' +
-      '<div style="position:absolute;left:34%;top:50%;width:24px;height:4px;background:linear-gradient(180deg,#94a3b8,#78909c);border-radius:1px;z-index:1"></div>';
-
-    // Pulley wheel at top
-    circuit.innerHTML +=
-      '<div style="position:absolute;left:31%;top:18%;width:16px;height:16px;border-radius:50%;border:2.5px solid #64748b;background:radial-gradient(circle,#e2e8f0,#cbd5e1);z-index:2;box-shadow:0 1px 2px rgba(0,0,0,0.15)" id="wt-pulley"></div>';
-
-    // Weight container
-    circuit.innerHTML +=
-      '<div id="weight-group" style="position:absolute;left:22%;top:70%;display:flex;flex-direction:column;align-items:center;gap:2px;z-index:2;transition:top 1.5s ease-in"></div>';
-
-    // Bulb with base
-    circuit.innerHTML +=
-      '<div style="position:absolute;right:15%;top:26%;z-index:2" class="bulb-container">' +
+      '</div>' +
+      // Stand with cross-brace
+      '<div style="position:absolute;left:40%;top:25%;width:8px;height:55%;background:linear-gradient(90deg,#b0bec5,#94a3b8,#78909c);border-radius:2px;z-index:1;box-shadow:1px 0 2px rgba(0,0,0,0.1)"></div>' +
+      '<div style="position:absolute;left:36%;top:50%;width:24px;height:4px;background:linear-gradient(180deg,#94a3b8,#78909c);border-radius:1px;z-index:1"></div>' +
+      // Weight container
+      '<div id="weight-group" style="position:absolute;left:22%;top:70%;display:flex;flex-direction:column;align-items:center;gap:2px;z-index:2;transition:top 1.5s ease-in"></div>' +
+      // Bulb with base
+      '<div style="position:absolute;right:15%;top:26%;z-index:2" class="bulb-container" id="wt-bulb-grp">' +
         '<div class="bulb-glass off" id="wt-bulb"></div>' +
         '<div class="bulb-base"></div>' +
         '<span class="bulb-label">Lampe</span>' +
       '</div>';
+
+    var svgwt = makeSVG(circuit);
+    circuit.insertBefore(svgwt, circuit.firstChild);
+
+    // Draw rope and wires after layout
+    requestAnimationFrame(function () {
+      var pulley = document.getElementById('wt-pulley');
+      var wGrp = document.getElementById('weight-group');
+      var genEl_ = document.getElementById('wt-gen');
+      var bulbGrp = document.getElementById('wt-bulb-grp');
+      if (pulley && genEl_ && bulbGrp) {
+        // Rope from pulley down to weight area
+        var pulleyPt = connPt(circuit, pulley, 8, 16);
+        var ropeBottom = [pulleyPt[0], circuit.offsetHeight * 0.75];
+        drawWire(svgwt, [connPt(circuit, pulley, 8, 0), pulleyPt, ropeBottom], '#78716c');
+
+        // Wires from generator to bulb
+        var genBody = genEl_.querySelector('.generator-body');
+        var gOff = connPt(circuit, genEl_, 0, 0);
+        var gPosAbs = [gOff[0] + genBody.offsetWidth - 13, gOff[1]];
+        var gNegAbs = [gOff[0] + genBody.offsetWidth - 13, gOff[1] + genBody.offsetHeight];
+        var bPt = connPt(circuit, bulbGrp, 16, 0);
+        var bPtBot = connPt(circuit, bulbGrp, 16, 42);
+        drawWire(svgwt, [gPosAbs, [gPosAbs[0], gPosAbs[1] - 20], [bPt[0], gPosAbs[1] - 20], bPt], '#dc2626');
+        drawWire(svgwt, [gNegAbs, [gNegAbs[0], circuit.offsetHeight * 0.88], [bPtBot[0], circuit.offsetHeight * 0.88], bPtBot], '#2563eb');
+      }
+    });
 
     var btns = {
       0: document.getElementById('w0'),
@@ -980,6 +1115,7 @@
       2: document.getElementById('w2'),
       3: document.getElementById('w3')
     };
+    var resetBtn = document.getElementById('w-reset');
     var bulb = document.getElementById('wt-bulb');
     var weightGrp = document.getElementById('weight-group');
     var wtGen = document.getElementById('wt-gen');
@@ -988,8 +1124,13 @@
     var tbody = document.getElementById('weight-tbody');
     var tested = {};
     var animTimer = null;
+    var fallTimer = null;
+    var currentWeights = 0;
+    var weightsFallen = false;
 
     function setWeights(n) {
+      currentWeights = n;
+      weightsFallen = false;
       Object.keys(btns).forEach(function (k) {
         btns[k].className = 'btn ' + (parseInt(k) === n ? 'btn-primary' : 'btn-secondary');
       });
@@ -1005,12 +1146,16 @@
       }
       weightGrp.innerHTML = html;
 
-      // Animate falling
-      weightGrp.style.top = '35%';
+      // Start at top
+      weightGrp.style.transition = 'none';
+      weightGrp.style.top = '28%';
       if (animTimer) clearTimeout(animTimer);
+      if (fallTimer) clearTimeout(fallTimer);
 
       if (n > 0) {
+        // Start falling after brief pause
         animTimer = setTimeout(function () {
+          weightGrp.style.transition = 'top 1.5s ease-in';
           weightGrp.style.top = '72%';
         }, 50);
         // Spin generator and pulley during fall
@@ -1018,20 +1163,22 @@
         wtGen.classList.add('generator-spinning');
         wtGen.style.setProperty('--spin-duration', spinDuration(fallSpeed));
         wtPulley.style.animation = 'motorSpin ' + spinDuration(fallSpeed) + ' linear infinite';
-      } else {
-        wtGen.classList.remove('generator-spinning');
-        wtPulley.style.animation = 'none';
-      }
 
-      // Lamp brightness based on weight count
-      var levels = [0, 0.3, 0.6, 0.95];
-      var v = levels[n];
-      bulb.className = 'bulb-glass ' + bulbClass(v);
+        // Lamp brightness based on weight count
+        var levels = [0, 0.3, 0.6, 0.95];
+        var v = levels[n];
+        bulb.className = 'bulb-glass ' + bulbClass(v);
 
-      var names = ['Aus', 'Schwach', 'Mittel', 'Hell'];
-      if (n > 0) {
+        // Stop generator when weights reach bottom (after 1.5s fall animation)
+        fallTimer = setTimeout(function () {
+          weightsFallen = true;
+          wtGen.classList.remove('generator-spinning');
+          wtPulley.style.animation = 'none';
+          bulb.className = 'bulb-glass off';
+        }, 1600);
+
+        var names = ['Aus', 'Schwach', 'Mittel', 'Hell'];
         tested[n] = true;
-        // Add row if not present
         var rowId = 'wr-' + n;
         if (!document.getElementById(rowId)) {
           var tr = document.createElement('tr');
@@ -1039,14 +1186,38 @@
           tr.innerHTML = '<td>' + n + ' Gewicht' + (n > 1 ? 'e' : '') + '</td><td>' + bulbClass(v) + '</td><td>' + names[n] + '</td>';
           tbody.appendChild(tr);
         }
+      } else {
+        wtGen.classList.remove('generator-spinning');
+        wtPulley.style.animation = 'none';
+        bulb.className = 'bulb-glass off';
       }
 
       if (tested[1] && tested[2] && tested[3]) conc.classList.remove('hidden');
     }
 
+    function resetWeights() {
+      if (animTimer) clearTimeout(animTimer);
+      if (fallTimer) clearTimeout(fallTimer);
+      wtGen.classList.remove('generator-spinning');
+      wtPulley.style.animation = 'none';
+      bulb.className = 'bulb-glass off';
+      weightsFallen = false;
+
+      // Animate weights back up
+      weightGrp.style.transition = 'top 1s ease-out';
+      weightGrp.style.top = '28%';
+
+      // Reset button states
+      Object.keys(btns).forEach(function (k) {
+        btns[k].className = 'btn btn-secondary';
+      });
+      currentWeights = 0;
+    }
+
     Object.keys(btns).forEach(function (k) {
       addEvt(btns[k], 'click', function () { setWeights(parseInt(k)); });
     });
+    addEvt(resetBtn, 'click', resetWeights);
     setWeights(0);
   }
 
@@ -1103,33 +1274,41 @@
       '</div>';
 
     var circuit = document.getElementById('dryer-circuit');
-    var Wd = 400, Hd = 220;
-    var svgd = makeSVG(Wd, Hd);
-    circuit.appendChild(svgd);
 
-    // Wires: power supply -> hairdryer through meter
-    drawWire(svgd, [[130,80],[130,40],[280,40],[280,70]], '#dc2626');
-    drawWire(svgd, [[130,130],[130,190],[280,190],[280,130]], '#2563eb');
-
-    // Hairdryer with enhanced details
-    circuit.innerHTML +=
-      '<div class="hairdryer" style="left:8%;top:26%">' +
+    // Components
+    circuit.innerHTML =
+      // Hairdryer with enhanced details
+      '<div class="hairdryer" id="s4-dryer" style="left:8%;top:26%">' +
         '<div class="hairdryer-body">' +
           '<span class="hairdryer-label">Föhn</span>' +
           '<div class="hairdryer-switch"></div>' +
           '<div class="hairdryer-nozzle"></div>' +
         '</div>' +
         '<div class="hairdryer-handle"></div>' +
-      '</div>';
-
-    // Energy meter
-    circuit.innerHTML +=
-      '<div class="energy-meter" style="right:12%;top:22%">' +
+      '</div>' +
+      // Energy meter
+      '<div class="energy-meter" id="s4-meter" style="right:12%;top:22%">' +
         '<div class="energy-meter-body">' +
           '<div class="energy-meter-display" id="meter-disp">0.0 Wh</div>' +
           '<div class="energy-meter-label">Energiezähler</div>' +
         '</div>' +
       '</div>';
+
+    var svgd = makeSVG(circuit);
+    circuit.insertBefore(svgd, circuit.firstChild);
+
+    requestAnimationFrame(function () {
+      var dryer = document.getElementById('s4-dryer');
+      var meter = document.getElementById('s4-meter');
+      if (dryer && meter) {
+        var dryerR = connPt(circuit, dryer, 70, 10);
+        var dryerRBot = connPt(circuit, dryer, 70, 30);
+        var meterL = connPt(circuit, meter, 0, 10);
+        var meterLBot = connPt(circuit, meter, 0, 40);
+        drawWire(svgd, [dryerR, [dryerR[0], dryerR[1] - 20], [meterL[0], dryerR[1] - 20], meterL], '#dc2626');
+        drawWire(svgd, [dryerRBot, [dryerRBot[0], dryerRBot[1] + 30], [meterLBot[0], dryerRBot[1] + 30], meterLBot], '#2563eb');
+      }
+    });
 
     var stufe = 0;
     var dauer = 60;
