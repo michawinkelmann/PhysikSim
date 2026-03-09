@@ -1,0 +1,810 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #f0f2f5;
+  --surface: #ffffff;
+  --text: #1a1a2e;
+  --text-sec: #5a5a7a;
+  --border: #e2e4e9;
+  --accent: #2563eb;
+  --green: #16a34a;
+  --red: #dc2626;
+  --yellow: #ca8a04;
+  --orange: #d97706;
+  --radius: 12px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+html { font-size: 16px; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+  overflow-x: hidden;
+}
+
+/* Header */
+header {
+  background: var(--surface);
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.back-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.back-link::before {
+  content: '\2190\00a0';
+}
+
+header h1 {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+/* Tabs */
+#tabs {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+#tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  flex: 0 0 auto;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-sec);
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+  min-width: 48px;
+  text-align: center;
+}
+
+.tab:hover { color: var(--text); }
+.tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* Main Container */
+main {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* Experiment Panel */
+.experiment {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.exp-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.exp-instruction {
+  font-size: 0.9rem;
+  color: var(--text-sec);
+  line-height: 1.5;
+}
+
+/* Card */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.25rem;
+}
+
+/* Conclusion Box */
+.conclusion {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #1e40af;
+}
+
+.conclusion strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1.25rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  user-select: none;
+  -webkit-user-select: none;
+  min-height: 44px;
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+.btn-primary:hover { background: #1d4ed8; }
+.btn-primary:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: var(--border);
+  color: var(--text);
+}
+.btn-secondary:hover { background: #d1d5db; }
+
+.btn-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Results Table */
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.results-table th {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 2px solid var(--border);
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--text-sec);
+}
+
+.results-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.results-table tr:last-child td { border-bottom: none; }
+
+/* ===================== CIRCUIT VISUALIZATION ===================== */
+
+.circuit-viz {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+/* Ohmmeter */
+.ohmmeter {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 2;
+}
+
+.ohmmeter-body {
+  width: 60px;
+  height: 42px;
+  background: linear-gradient(180deg, #e2e8f0, #cbd5e1);
+  border: 2px solid #94a3b8;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.ohmmeter-display {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #1e40af;
+  background: #dbeafe;
+  padding: 1px 6px;
+  border-radius: 3px;
+  border: 1px solid #93c5fd;
+}
+
+.ohmmeter-symbol {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+/* Lightbulb */
+.bulb-container {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 2;
+}
+
+.bulb-glass {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #e5e7eb, #d1d5db);
+  border: 2px solid #9ca3af;
+  box-shadow: none;
+  transition: background 0.5s, box-shadow 0.5s, border-color 0.5s;
+}
+
+.bulb-glass.off {
+  background: radial-gradient(circle at 40% 35%, #e5e7eb, #d1d5db);
+  border-color: #9ca3af;
+  box-shadow: none;
+}
+
+.bulb-glass.dim {
+  background: radial-gradient(circle at 40% 35%, #fef9c3, #fde68a);
+  border-color: #d97706;
+  box-shadow: 0 0 6px rgba(253, 224, 71, 0.3);
+}
+
+.bulb-glass.on {
+  background: radial-gradient(circle at 40% 35%, #fffbeb, #fde047);
+  border-color: #f59e0b;
+  box-shadow: 0 0 12px rgba(253, 224, 71, 0.6);
+}
+
+.bulb-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-sec);
+}
+
+/* Battery / Power Supply */
+.power-supply {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 2;
+}
+
+.power-supply-body {
+  width: 70px;
+  height: 50px;
+  background: linear-gradient(180deg, #e2e8f0, #cbd5e1);
+  border: 2px solid #94a3b8;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.power-supply-display {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #1e40af;
+  background: #dbeafe;
+  padding: 1px 6px;
+  border-radius: 3px;
+  border: 1px solid #93c5fd;
+}
+
+.power-supply-label {
+  font-size: 0.55rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Switch */
+.switch-container {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 2;
+  cursor: pointer;
+}
+
+.switch-body {
+  width: 40px;
+  height: 20px;
+  position: relative;
+}
+
+.switch-contact-left,
+.switch-contact-right {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #475569;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.switch-contact-left { left: 0; }
+.switch-contact-right { right: 0; }
+
+.switch-arm {
+  position: absolute;
+  width: 36px;
+  height: 3px;
+  background: #475569;
+  left: 2px;
+  top: 50%;
+  transform-origin: left center;
+  transition: transform 0.3s;
+}
+
+.switch-arm.open {
+  transform: translateY(-50%) rotate(-30deg);
+}
+
+.switch-arm.closed {
+  transform: translateY(-50%) rotate(0deg);
+}
+
+.switch-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-sec);
+}
+
+/* Ammeter */
+.meter {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  z-index: 2;
+}
+
+.meter-body {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.meter-body.ammeter {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #d97706;
+}
+
+.meter-body.voltmeter {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #dc2626;
+}
+
+.meter-value {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-sec);
+  white-space: nowrap;
+}
+
+/* Wire / Resistor component */
+.wire-component {
+  position: absolute;
+  z-index: 2;
+}
+
+.wire-resistor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.resistor-body {
+  width: 60px;
+  height: 16px;
+  border-radius: 3px;
+  border: 2px solid #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.resistor-body.iron {
+  background: linear-gradient(180deg, #d1d5db, #9ca3af);
+  border-color: #6b7280;
+}
+
+.resistor-body.constantan {
+  background: linear-gradient(180deg, #fcd34d, #f59e0b);
+  border-color: #d97706;
+}
+
+.resistor-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--text-sec);
+}
+
+/* Flame for heating */
+.flame {
+  position: absolute;
+  z-index: 3;
+  font-size: 1.2rem;
+  transition: opacity 0.3s;
+}
+
+.flame.hidden { opacity: 0; }
+
+/* Water bath */
+.water-bath {
+  position: absolute;
+  border-radius: 0 0 8px 8px;
+  border: 2px solid #7dd3fc;
+  border-top: none;
+  background: linear-gradient(180deg, rgba(186, 230, 253, 0.4), rgba(125, 211, 252, 0.5));
+  z-index: 1;
+}
+
+/* Controls */
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.control-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-sec);
+  white-space: nowrap;
+}
+
+/* Slider */
+.slider-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.slider-input {
+  flex: 1;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--border);
+  border-radius: 3px;
+  outline: none;
+}
+
+.slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.slider-input::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  border: none;
+}
+
+.slider-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+  min-width: 50px;
+  text-align: right;
+}
+
+/* Voltage/Resistance display boxes */
+.voltage-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.voltage-box {
+  flex: 1;
+  min-width: 100px;
+  padding: 0.75rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.voltage-box .voltage-label {
+  font-size: 0.7rem;
+  color: var(--text-sec);
+  margin-bottom: 0.25rem;
+}
+
+.voltage-box .voltage-value {
+  font-size: 1.1rem;
+}
+
+.voltage-box.resistance {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+.voltage-box.resistance .voltage-value { color: #166534; }
+
+.voltage-box.source {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+}
+.voltage-box.source .voltage-value { color: #991b1b; }
+
+.voltage-box.current {
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+}
+.voltage-box.current .voltage-value { color: #92400e; }
+
+.voltage-box.lamp {
+  background: #dbeafe;
+  border: 1px solid #bfdbfe;
+}
+.voltage-box.lamp .voltage-value { color: #1e40af; }
+
+/* Chart */
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  background: var(--surface);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.chart-container svg {
+  width: 100%;
+  height: 100%;
+}
+
+.chart-axis-label {
+  font-size: 0.75rem;
+  fill: var(--text-sec);
+  font-weight: 600;
+}
+
+.chart-tick-label {
+  font-size: 0.65rem;
+  fill: var(--text-sec);
+}
+
+.chart-grid-line {
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+.chart-line {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chart-dot {
+  stroke-width: 2;
+  cursor: pointer;
+}
+
+.chart-dot:hover {
+  r: 6;
+}
+
+/* Legend */
+.chart-legend {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-sec);
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.legend-item:hover {
+  background: var(--bg);
+}
+
+.legend-item.inactive {
+  opacity: 0.4;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+/* Timer display for V1 */
+.timer-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #92400e;
+}
+
+/* Progress bar for V1 heating */
+.heat-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.heat-bar-track {
+  flex: 1;
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.heat-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s, background 0.3s;
+  background: linear-gradient(90deg, #fbbf24, #ef4444);
+}
+
+.heat-bar-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-sec);
+  min-width: 40px;
+  text-align: right;
+}
+
+/* Status badge */
+.status-badge {
+  display: inline-block;
+  padding: 0.35rem 1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-badge.info {
+  background: #eff6ff;
+  color: var(--accent);
+}
+
+.status-badge.success {
+  background: #dcfce7;
+  color: var(--green);
+}
+
+.status-badge.warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* Tooltip for chart */
+.chart-tooltip {
+  position: absolute;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text);
+  box-shadow: var(--shadow);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.chart-tooltip.visible {
+  opacity: 1;
+}
+
+/* Utility */
+.hidden { display: none !important; }
+.text-center { text-align: center; }
+.gap-sm { gap: 0.5rem; }
+.mt-sm { margin-top: 0.5rem; }
+.mt-md { margin-top: 1rem; }
+
+@media (max-width: 480px) {
+  header { padding: 0.75rem 1rem; }
+  header h1 { font-size: 1rem; }
+  main { padding: 0.75rem; }
+  .circuit-viz { height: 280px; }
+  .voltage-row { flex-direction: column; }
+  .chart-container { height: 250px; }
+  .chart-legend { gap: 0.5rem; }
+  .legend-item { font-size: 0.65rem; }
+}
