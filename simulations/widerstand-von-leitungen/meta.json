@@ -1,0 +1,9 @@
+{
+  "category": "Elektrischer Strom",
+  "categoryIcon": "E",
+  "categoryColor": "#d97706",
+  "order": 7,
+  "title": "07 Der Widerstand von Leitungen",
+  "description": "Untersuche, wie der elektrische Widerstand von der L\u00e4nge, dem Querschnitt und dem Material einer Leitung abh\u00e4ngt. Best\u00e4tige die Formel R = \u03c1 \u00b7 l / A mit Messungen an Konstantan-, Eisen- und Chrom-Nickel-Dr\u00e4hten.",
+  "experiments": 3
+}

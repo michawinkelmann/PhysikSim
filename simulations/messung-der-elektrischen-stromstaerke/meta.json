@@ -1,0 +1,9 @@
+{
+  "category": "Elektrischer Strom",
+  "categoryIcon": "E",
+  "categoryColor": "#d97706",
+  "order": 3,
+  "title": "03 Messung der elektrischen Stromst\u00e4rke",
+  "description": "Miss die Stromst\u00e4rke mit einem Elektromagneten und Federdehnung sowie in einem Lampenstromkreis an verschiedenen Messstellen bei ver\u00e4nderbarer Helligkeit.",
+  "experiments": 2
+}

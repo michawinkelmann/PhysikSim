@@ -1,0 +1,9 @@
+{
+  "category": "Elektrischer Strom",
+  "categoryIcon": "E",
+  "categoryColor": "#d97706",
+  "order": 6,
+  "title": "06 Das Ohmsche Gesetz",
+  "description": "Untersuche den temperaturabh\u00e4ngigen Widerstand einer Gl\u00fchlampe, vergleiche Eisendraht und Konstantandraht beim Erw\u00e4rmen und entdecke das Ohmsche Gesetz anhand von U-I-Kennlinien.",
+  "experiments": 3
+}

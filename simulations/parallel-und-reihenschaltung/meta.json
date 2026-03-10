@@ -1,0 +1,9 @@
+{
+  "category": "Elektrischer Strom",
+  "categoryIcon": "E",
+  "categoryColor": "#d97706",
+  "order": 8,
+  "title": "08 Parallel- und Reihenschaltung",
+  "description": "Baue eine Parallelschaltung und eine Reihenschaltung auf. Miss Stromst\u00e4rken und Spannungen und entdecke die Gesetzm\u00e4\u00dfigkeiten: In der Parallelschaltung addieren sich die Str\u00f6me, in der Reihenschaltung teilt sich die Spannung auf.",
+  "experiments": 2
+}

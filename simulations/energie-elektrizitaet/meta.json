@@ -1,0 +1,9 @@
+{
+  "category": "Elektrischer Strom",
+  "categoryIcon": "E",
+  "categoryColor": "#d97706",
+  "order": 1,
+  "title": "01 Energie und Elektrizit\u00e4t",
+  "description": "Untersuche Energieumwandlungen: Dampfmaschine mit Generator, Solarzelle mit Ventilator, Windkraftanlage, Kurbel-Generator, H\u00f6henenergie und Energiemessung beim F\u00f6hn.",
+  "experiments": 7
+}

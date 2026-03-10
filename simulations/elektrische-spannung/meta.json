@@ -1,0 +1,9 @@
+{
+  "category": "Elektrischer Strom",
+  "categoryIcon": "E",
+  "categoryColor": "#d97706",
+  "order": 4,
+  "title": "04 Elektrische Spannung",
+  "description": "Untersuche die Stromst\u00e4rke bei verschiedenen Lampen und Quellen, beobachte die Spannungsaufteilung in Reihenschaltungen und entdecke das Prinzip des Spannungsteilers.",
+  "experiments": 3
+}
