@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#
+# Pre-Commit Hook: Generiert simulations.json neu und staged die Datei,
+# damit das Manifest immer aktuell ist.
+#
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+# Nur ausfuehren wenn meta.json Dateien existieren
+if ls "$REPO_ROOT"/simulations/*/meta.json >/dev/null 2>&1; then
+  "$REPO_ROOT/generate-manifest.sh"
+  git add "$REPO_ROOT/simulations.json"
+fi

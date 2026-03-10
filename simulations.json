@@ -1,0 +1,122 @@
+[
+  {
+    "category": "Elektrischer Strom",
+    "categoryIcon": "E",
+    "categoryColor": "#d97706",
+    "order": 5,
+    "title": "05 Elektrische Energie, Spannung und Stromstärke",
+    "description": "Vergleiche Glühlampen bei gleicher Stromstärke, untersuche Motoren an einstellbarer Spannung und entdecke den Unterschied zwischen Reihen- und Parallelschaltung.",
+    "experiments": 4,
+    "path": "simulations/elektrische-energie/index.html"
+  },
+  {
+    "category": "Elektrischer Strom",
+    "categoryIcon": "E",
+    "categoryColor": "#d97706",
+    "order": 4,
+    "title": "04 Elektrische Spannung",
+    "description": "Untersuche die Stromstärke bei verschiedenen Lampen und Quellen, beobachte die Spannungsaufteilung in Reihenschaltungen und entdecke das Prinzip des Spannungsteilers.",
+    "experiments": 3,
+    "path": "simulations/elektrische-spannung/index.html"
+  },
+  {
+    "category": "Elektrischer Strom",
+    "categoryIcon": "E",
+    "categoryColor": "#d97706",
+    "order": 2,
+    "title": "02 Elektrischer Strom und Ladung",
+    "description": "Lade Kugeln und weise die Ladung mit einer Glimmlampe nach. Untersuche Anziehung und Abstoßung, Ladungsansammlung an Metallplatten und Ladungstrennung durch Reibung.",
+    "experiments": 4,
+    "path": "simulations/elektrischer-strom-ladung/index.html"
+  },
+  {
+    "category": "Elektrischer Strom",
+    "categoryIcon": "E",
+    "categoryColor": "#d97706",
+    "order": 1,
+    "title": "01 Energie und Elektrizität",
+    "description": "Untersuche Energieumwandlungen: Dampfmaschine mit Generator, Solarzelle mit Ventilator, Windkraftanlage, Kurbel-Generator, Höhenenergie und Energiemessung beim Föhn.",
+    "experiments": 7,
+    "path": "simulations/energie-elektrizitaet/index.html"
+  },
+  {
+    "category": "Magnetismus",
+    "categoryIcon": "M",
+    "categoryColor": "#2563eb",
+    "order": 3,
+    "title": "03 Wie lässt sich Magnetismus erklären",
+    "description": "Stelle selbst einen Magneten her, entmagnetisiere ihn wieder und entdecke das Modell der Elementarmagnete. Teile einen Magneten und beobachte, was passiert.",
+    "experiments": 2,
+    "path": "simulations/magnetismus-erklaerung/index.html"
+  },
+  {
+    "category": "Magnetismus",
+    "categoryIcon": "M",
+    "categoryColor": "#2563eb",
+    "order": 2,
+    "title": "02 Magnete haben Pole",
+    "description": "Untersuche die Pole eines Stabmagneten, bestimme Nord- und Südpol, entdecke gegenseitige Anziehung und teste, wie zwei Magnete aufeinander wirken.",
+    "experiments": 4,
+    "path": "simulations/magnetismus-pole/index.html"
+  },
+  {
+    "category": "Magnetismus",
+    "categoryIcon": "M",
+    "categoryColor": "#2563eb",
+    "order": 4,
+    "title": "04 Magnetwirkung sichtbar machen",
+    "description": "Mache Magnetfelder mit Eisenpfeilspänen sichtbar. Untersuche verschiedene Magnetformen und beobachte die Wechselwirkung zwischen zwei Magneten.",
+    "experiments": 2,
+    "path": "simulations/magnetismus-sichtbar/index.html"
+  },
+  {
+    "category": "Magnetismus",
+    "categoryIcon": "M",
+    "categoryColor": "#2563eb",
+    "order": 1,
+    "title": "01 Wirkung von Magneten",
+    "description": "Untersuche, welche Stoffe und Metalle von Magneten angezogen werden, wie weit die Wirkung reicht und welche Materialien abschirmen.",
+    "experiments": 4,
+    "path": "simulations/magnetismus-wirkung/index.html"
+  },
+  {
+    "category": "Elektrischer Strom",
+    "categoryIcon": "E",
+    "categoryColor": "#d97706",
+    "order": 3,
+    "title": "03 Messung der elektrischen Stromstärke",
+    "description": "Miss die Stromstärke mit einem Elektromagneten und Federdehnung sowie in einem Lampenstromkreis an verschiedenen Messstellen bei veränderbarer Helligkeit.",
+    "experiments": 2,
+    "path": "simulations/messung-der-elektrischen-stromstaerke/index.html"
+  },
+  {
+    "category": "Elektrischer Strom",
+    "categoryIcon": "E",
+    "categoryColor": "#d97706",
+    "order": 6,
+    "title": "06 Das Ohmsche Gesetz",
+    "description": "Untersuche den temperaturabhängigen Widerstand einer Glühlampe, vergleiche Eisendraht und Konstantandraht beim Erwärmen und entdecke das Ohmsche Gesetz anhand von U-I-Kennlinien.",
+    "experiments": 3,
+    "path": "simulations/ohmsches-gesetz/index.html"
+  },
+  {
+    "category": "Elektrischer Strom",
+    "categoryIcon": "E",
+    "categoryColor": "#d97706",
+    "order": 8,
+    "title": "08 Parallel- und Reihenschaltung",
+    "description": "Baue eine Parallelschaltung und eine Reihenschaltung auf. Miss Stromstärken und Spannungen und entdecke die Gesetzmäßigkeiten: In der Parallelschaltung addieren sich die Ströme, in der Reihenschaltung teilt sich die Spannung auf.",
+    "experiments": 2,
+    "path": "simulations/parallel-und-reihenschaltung/index.html"
+  },
+  {
+    "category": "Elektrischer Strom",
+    "categoryIcon": "E",
+    "categoryColor": "#d97706",
+    "order": 7,
+    "title": "07 Der Widerstand von Leitungen",
+    "description": "Untersuche, wie der elektrische Widerstand von der Länge, dem Querschnitt und dem Material einer Leitung abhängt. Bestätige die Formel R = ρ · l / A mit Messungen an Konstantan-, Eisen- und Chrom-Nickel-Drähten.",
+    "experiments": 3,
+    "path": "simulations/widerstand-von-leitungen/index.html"
+  }
+]

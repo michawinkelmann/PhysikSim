@@ -1,0 +1,9 @@
+{
+  "category": "Elektrischer Strom",
+  "categoryIcon": "E",
+  "categoryColor": "#d97706",
+  "order": 5,
+  "title": "05 Elektrische Energie, Spannung und Stromst\u00e4rke",
+  "description": "Vergleiche Gl\u00fchlampen bei gleicher Stromst\u00e4rke, untersuche Motoren an einstellbarer Spannung und entdecke den Unterschied zwischen Reihen- und Parallelschaltung.",
+  "experiments": 4
+}

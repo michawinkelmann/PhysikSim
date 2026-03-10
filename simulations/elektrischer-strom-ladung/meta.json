@@ -1,0 +1,9 @@
+{
+  "category": "Elektrischer Strom",
+  "categoryIcon": "E",
+  "categoryColor": "#d97706",
+  "order": 2,
+  "title": "02 Elektrischer Strom und Ladung",
+  "description": "Lade Kugeln und weise die Ladung mit einer Glimmlampe nach. Untersuche Anziehung und Absto\u00dfung, Ladungsansammlung an Metallplatten und Ladungstrennung durch Reibung.",
+  "experiments": 4
+}

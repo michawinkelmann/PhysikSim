@@ -20,110 +20,54 @@
 
   <script>
     /*
-     * Simulationsverzeichnis
+     * Dynamische Übersichtsseite
+     * Simulationen werden aus simulations.json geladen.
+     * Diese Datei wird automatisch per generate-manifest.sh erzeugt.
+     *
      * Um eine neue Simulation hinzuzufügen:
-     * 1. Neuen Ordner unter simulations/ anlegen
-     * 2. Eintrag hier in der passenden Kategorie ergänzen
+     * 1. Neuen Ordner unter simulations/ anlegen (index.html, simulation.js, style.css)
+     * 2. meta.json im Ordner erstellen mit: category, categoryIcon, categoryColor, order, title, description, experiments
+     * 3. generate-manifest.sh ausführen (passiert automatisch beim Commit)
      */
-    const categories = [
-      {
-        name: 'Magnetismus',
-        icon: 'M',
-        color: '#2563eb',
-        simulations: [
-          {
-            title: '01 Wirkung von Magneten',
-            description: 'Untersuche, welche Stoffe und Metalle von Magneten angezogen werden, wie weit die Wirkung reicht und welche Materialien abschirmen.',
-            path: 'simulations/magnetismus-wirkung/index.html',
-            experiments: 4
-          },
-          {
-            title: '02 Magnete haben Pole',
-            description: 'Untersuche die Pole eines Stabmagneten, bestimme Nord- und Südpol, entdecke gegenseitige Anziehung und teste, wie zwei Magnete aufeinander wirken.',
-            path: 'simulations/magnetismus-pole/index.html',
-            experiments: 4
-          },
-          {
-            title: '03 Wie lässt sich Magnetismus erklären',
-            description: 'Stelle selbst einen Magneten her, entmagnetisiere ihn wieder und entdecke das Modell der Elementarmagnete. Teile einen Magneten und beobachte, was passiert.',
-            path: 'simulations/magnetismus-erklaerung/index.html',
-            experiments: 2
-          },
-          {
-            title: '04 Magnetwirkung sichtbar machen',
-            description: 'Mache Magnetfelder mit Eisenpfeilspänen sichtbar. Untersuche verschiedene Magnetformen und beobachte die Wechselwirkung zwischen zwei Magneten.',
-            path: 'simulations/magnetismus-sichtbar/index.html',
-            experiments: 2
-          }
-        ]
-      },
-      {
-        name: 'Elektrischer Strom',
-        icon: 'E',
-        color: '#d97706',
-        simulations: [
-          {
-            title: '01 Energie und Elektrizität',
-            description: 'Untersuche Energieumwandlungen: Dampfmaschine mit Generator, Solarzelle mit Ventilator, Windkraftanlage, Kurbel-Generator, Höhenenergie und Energiemessung beim Föhn.',
-            path: 'simulations/energie-elektrizitaet/index.html',
-            experiments: 7
-          },
-          {
-            title: '02 Elektrischer Strom und Ladung',
-            description: 'Lade Kugeln und weise die Ladung mit einer Glimmlampe nach. Untersuche Anziehung und Abstoßung, Ladungsansammlung an Metallplatten und Ladungstrennung durch Reibung.',
-            path: 'simulations/elektrischer-strom-ladung/index.html',
-            experiments: 4
-          },
-          {
-            title: '03 Messung der elektrischen Stromstärke',
-            description: 'Miss die Stromstärke mit einem Elektromagneten und Federdehnung sowie in einem Lampenstromkreis an verschiedenen Messstellen bei veränderbarer Helligkeit.',
-            path: 'simulations/messung-der-elektrischen-stromstaerke/index.html',
-            experiments: 2
-          },
-          {
-            title: '04 Elektrische Spannung',
-            description: 'Untersuche die Stromstärke bei verschiedenen Lampen und Quellen, beobachte die Spannungsaufteilung in Reihenschaltungen und entdecke das Prinzip des Spannungsteilers.',
-            path: 'simulations/elektrische-spannung/index.html',
-            experiments: 3
-          },
-          {
-            title: '05 Elektrische Energie, Spannung und Stromstärke',
-            description: 'Vergleiche Glühlampen bei gleicher Stromstärke, untersuche Motoren an einstellbarer Spannung und entdecke den Unterschied zwischen Reihen- und Parallelschaltung.',
-            path: 'simulations/elektrische-energie/index.html',
-            experiments: 4
-          },
-          {
-            title: '06 Das Ohmsche Gesetz',
-            description: 'Untersuche den temperaturabhängigen Widerstand einer Glühlampe, vergleiche Eisendraht und Konstantandraht beim Erwärmen und entdecke das Ohmsche Gesetz anhand von U-I-Kennlinien.',
-            path: 'simulations/ohmsches-gesetz/index.html',
-            experiments: 3
-          },
-          {
-            title: '07 Der Widerstand von Leitungen',
-            description: 'Untersuche, wie der elektrische Widerstand von der Länge, dem Querschnitt und dem Material einer Leitung abhängt. Bestätige die Formel R = ρ · l / A mit Messungen an Konstantan-, Eisen- und Chrom-Nickel-Drähten.',
-            path: 'simulations/widerstand-von-leitungen/index.html',
-            experiments: 3
-          },
-          {
-            title: '08 Parallel- und Reihenschaltung',
-            description: 'Baue eine Parallelschaltung und eine Reihenschaltung auf. Miss Stromstärken und Spannungen und entdecke die Gesetzmäßigkeiten: In der Parallelschaltung addieren sich die Ströme, in der Reihenschaltung teilt sich die Spannung auf.',
-            path: 'simulations/parallel-und-reihenschaltung/index.html',
-            experiments: 2
-          }
-        ]
-      },
-      // Weitere Kategorien hier ergänzen, z.B.:
-      // {
-      //   name: 'Optik',
-      //   icon: 'O',
-      //   color: '#d97706',
-      //   simulations: []
-      // },
-    ];
 
-    function render() {
+    fetch('simulations.json')
+      .then(r => r.json())
+      .then(render)
+      .catch(() => {
+        document.getElementById('content').innerHTML =
+          '<p style="text-align:center;padding:2rem;color:#666">Simulationen konnten nicht geladen werden.</p>';
+      });
+
+    function render(simulations) {
       const content = document.getElementById('content');
       content.innerHTML = '';
+
+      // Nach Kategorie gruppieren
+      const categoryMap = new Map();
+      simulations.forEach(sim => {
+        const key = sim.category;
+        if (!categoryMap.has(key)) {
+          categoryMap.set(key, {
+            name: sim.category,
+            icon: sim.categoryIcon,
+            color: sim.categoryColor,
+            simulations: []
+          });
+        }
+        categoryMap.get(key).simulations.push(sim);
+      });
+
+      // Simulationen innerhalb jeder Kategorie nach order sortieren
+      categoryMap.forEach(cat => {
+        cat.simulations.sort((a, b) => a.order - b.order);
+      });
+
+      // Kategorien alphabetisch nach erstem Simulationstitel sortieren
+      const categories = [...categoryMap.values()].sort((a, b) => {
+        const aTitle = a.simulations[0]?.title || '';
+        const bTitle = b.simulations[0]?.title || '';
+        return aTitle.localeCompare(bTitle, 'de');
+      });
 
       categories.forEach(cat => {
         if (cat.simulations.length === 0) return;
@@ -161,8 +105,6 @@
         content.appendChild(section);
       });
     }
-
-    render();
   </script>
 </body>
 </html>
