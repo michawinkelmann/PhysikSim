@@ -24,7 +24,7 @@
       id: 'c',
       tab: 'V3: U-I-Kennlinie',
       title: 'V3: Strom-Spannungs-Kennlinien',
-      instruction: 'Schließe nacheinander eine Glühlampe, einen Konstantandraht (Länge 1,6\u202fm; Querschnittsfläche 0,01\u202fmm²) und einen Eisendraht an eine elektrische Quelle an. Miss die Stromstärke für verschiedene Spannungen. Wiederhole die Messung für den Eisendraht im Wasserbad.',
+      instruction: 'Schließe nacheinander eine Glühlampe, einen Konstantandraht (Länge 1,6\u202fm; Querschnittsfläche 0,1\u202fmm²) und einen Eisendraht an eine elektrische Quelle an. Miss die Stromstärke für verschiedene Spannungen. Wiederhole die Messung für den Eisendraht im Wasserbad.',
       type: 'ui-chart',
       conclusion: 'Verdoppeln von U führt beim Konstantandraht zur Verdopplung von I – Spannung und Stromstärke sind proportional. Das ist das Ohmsche Gesetz: U = R · I. Bei der Glühlampe und dem Eisendraht in Luft besteht dagegen kein proportionaler Zusammenhang, weil sich der Widerstand durch die Erwärmung ändert. Durch das Wasserbad erwärmt sich der Eisendraht weniger – Spannung und Stromstärke sind im gekühlten Draht proportional.'
     }
