@@ -158,8 +158,11 @@
       var dy = y - p.y;
       var r2 = dx * dx + dy * dy;
       if (r2 < 25) r2 = 25;
-      bx += p.q * dx / r2;
-      by += p.q * dy / r2;
+      // 3D monopole model (1/r²): more realistic for iron filings
+      // on a 2D surface experiencing a 3D magnetic field
+      var r3 = r2 * Math.sqrt(r2);
+      bx += p.q * dx / r3;
+      by += p.q * dy / r3;
     }
     return { x: bx, y: by };
   }
@@ -216,7 +219,7 @@
         strength: str,
         delay: Math.random() * 500,
         opacity: 0,
-        length: 3 + Math.min(str * 400, 5)
+        length: 3 + Math.min(str * 15000, 5)
       });
     }
     return filings;
@@ -253,7 +256,7 @@
         strength: str,
         delay: Math.random() * 500,
         opacity: 0,
-        length: 3 + Math.min(str * 400, 5)
+        length: 3 + Math.min(str * 15000, 5)
       });
     }
     return filings;
@@ -453,7 +456,7 @@
         f.currentAngle += diff * blend;
         if (blend < 1 || f.opacity < 1) allSettled = false;
 
-        var alpha = f.opacity * Math.min(0.85, f.strength * 200 + 0.08);
+        var alpha = f.opacity * Math.min(0.85, f.strength * 5000 + 0.06);
         if (alpha < 0.03) continue;
 
         ctx.save();
@@ -504,7 +507,7 @@
     ctx.translate(cw / 2, ch / 2);
     for (var i = 0; i < filings.length; i++) {
       var f = filings[i];
-      var alpha = Math.min(0.85, f.strength * 200 + 0.08);
+      var alpha = Math.min(0.85, f.strength * 5000 + 0.06);
       if (alpha < 0.03) continue;
       ctx.save();
       ctx.translate(f.x, f.y);
