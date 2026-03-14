@@ -108,12 +108,14 @@
 
   function buildTabs() {
     var tabs = document.getElementById('tabs');
+    tabs.setAttribute('role', 'tablist');
     Object.keys(EXPERIMENTS).forEach(function (key) {
       var exp = EXPERIMENTS[key];
       var btn = document.createElement('button');
       btn.className = 'tab';
       btn.textContent = exp.tab;
       btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', 'false');
       btn.setAttribute('data-exp', key);
       btn.addEventListener('click', function () {
         switchExperiment(key);
@@ -128,10 +130,12 @@
     cleanupFns = [];
     document.querySelectorAll('.tab').forEach(function (t) {
       t.classList.toggle('active', t.getAttribute('data-exp') === key);
+      t.setAttribute('aria-selected', t.getAttribute('data-exp') === key);
     });
     resetState(key);
     var container = document.getElementById('experiment-container');
     container.innerHTML = '';
+    container.setAttribute('role', 'tabpanel');
     var exp = EXPERIMENTS[key];
     if (exp.type === 'field-viz') renderFieldViz(container, exp);
     else if (exp.type === 'interaction-viz') renderInteractionViz(container, exp);
@@ -666,7 +670,7 @@
     var conc = document.createElement('div');
     conc.className = 'conclusion hidden';
     conc.id = 'conclusion';
-    conc.innerHTML = '<strong>Erkenntnis</strong>' + exp.conclusion;
+    conc.innerHTML = '<strong>Erkenntnis:</strong>' + exp.conclusion;
     root.appendChild(conc);
 
     // Reset
@@ -823,7 +827,7 @@
     var conc = document.createElement('div');
     conc.className = 'conclusion hidden';
     conc.id = 'conclusion';
-    conc.innerHTML = '<strong>Erkenntnis</strong>' + exp.conclusion;
+    conc.innerHTML = '<strong>Erkenntnis:</strong>' + exp.conclusion;
     root.appendChild(conc);
 
     // Reset

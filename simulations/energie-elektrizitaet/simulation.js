@@ -151,12 +151,14 @@
   /* ===== BUILD TABS ===== */
   function buildTabs() {
     var tabBar = document.getElementById('tabs');
+    tabBar.setAttribute('role', 'tablist');
     tabBar.innerHTML = '';
     EXPERIMENTS.forEach(function (exp) {
       var btn = document.createElement('button');
       btn.className = 'tab';
       btn.textContent = exp.tab;
       btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', 'false');
       btn.setAttribute('data-exp', exp.id);
       tabBar.appendChild(btn);
       // Use direct addEventListener (not addEvt) so tab handlers survive cleanup()
@@ -168,6 +170,7 @@
     var tabs = document.querySelectorAll('#tabs .tab');
     tabs.forEach(function (t) {
       t.classList.toggle('active', t.getAttribute('data-exp') === id);
+      t.setAttribute('aria-selected', t.getAttribute('data-exp') === id);
     });
   }
 
@@ -176,6 +179,7 @@
     cleanup();
     state = {};
     setActiveTab(id);
+    container().setAttribute('role', 'tabpanel');
     var exp = EXPERIMENTS.filter(function (e) { return e.id === id; })[0];
     if (!exp) return;
 

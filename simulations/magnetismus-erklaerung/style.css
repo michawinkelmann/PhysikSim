@@ -13,7 +13,7 @@
   --accent: #2563eb;
   --green: #16a34a;
   --red: #dc2626;
-  --orange: #ea580c;
+  --orange: #d97706;
   --radius: 12px;
   --shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
@@ -942,4 +942,12 @@ main {
   header h1 { font-size: 1rem; }
   main { padding: 0.75rem; }
   .mag-viz, .wire-viz, .bar-magnets-area { height: 240px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

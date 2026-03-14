@@ -53,12 +53,14 @@
 
   function buildTabs() {
     var tabs = document.getElementById('tabs');
+    tabs.setAttribute('role', 'tablist');
     tabs.innerHTML = '';
     Object.keys(EXPERIMENTS).forEach(function (key) {
       var exp = EXPERIMENTS[key];
       var btn = document.createElement('button');
       btn.className = 'tab';
       btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', 'false');
       btn.textContent = exp.tab;
       btn.addEventListener('click', function () { switchExperiment(key); });
       tabs.appendChild(btn);
@@ -76,10 +78,12 @@
     var keys = Object.keys(EXPERIMENTS);
     tabBtns.forEach(function (btn, i) {
       btn.classList.toggle('active', keys[i] === key);
+      btn.setAttribute('aria-selected', keys[i] === key);
     });
 
     var container = document.getElementById('experiment-container');
     container.innerHTML = '';
+    container.setAttribute('role', 'tabpanel');
 
     var panel = document.createElement('div');
     panel.className = 'experiment';

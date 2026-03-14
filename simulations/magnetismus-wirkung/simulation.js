@@ -88,12 +88,14 @@
 
   function buildTabs() {
     var tabs = document.getElementById('tabs');
+    tabs.setAttribute('role', 'tablist');
     Object.keys(EXPERIMENTS).forEach(function (key) {
       var exp = EXPERIMENTS[key];
       var btn = document.createElement('button');
       btn.className = 'tab';
       btn.textContent = exp.tab;
       btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', 'false');
       btn.setAttribute('data-exp', key);
       btn.addEventListener('click', function () {
         switchExperiment(key);
@@ -110,12 +112,14 @@
     // Update tabs
     document.querySelectorAll('.tab').forEach(function (t) {
       t.classList.toggle('active', t.getAttribute('data-exp') === key);
+      t.setAttribute('aria-selected', t.getAttribute('data-exp') === key);
     });
     // Reset state for this experiment
     resetState(key);
     // Render
     var container = document.getElementById('experiment-container');
     container.innerHTML = '';
+    container.setAttribute('role', 'tabpanel');
     var exp = EXPERIMENTS[key];
     if (exp.type === 'magnet-test') renderMagnetTest(container, exp);
     else if (exp.type === 'distance') renderDistance(container, exp);
