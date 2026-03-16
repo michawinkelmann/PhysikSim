@@ -588,7 +588,7 @@
 
     // Strip label 1
     var lbl1 = document.createElement('span');
-    lbl1.style.cssText = 'position:absolute; font-size:0.65rem; font-weight:600; color:var(--text-sec); z-index:4; bottom:30px; left:calc(50% - 70px); text-align:center;';
+    lbl1.style.cssText = 'position:absolute; font-size:0.65rem; font-weight:600; color:var(--text-sec); z-index:4; bottom:30px; left:calc(50% - 55px); text-align:center;';
     lbl1.textContent = 'Streifen 1';
     container.appendChild(lbl1);
 
@@ -618,31 +618,47 @@
 
     // Strip label 2
     var lbl2 = document.createElement('span');
-    lbl2.style.cssText = 'position:absolute; font-size:0.65rem; font-weight:600; color:var(--text-sec); z-index:4; bottom:30px; left:calc(50% + 25px); text-align:center;';
+    lbl2.style.cssText = 'position:absolute; font-size:0.65rem; font-weight:600; color:var(--text-sec); z-index:4; bottom:30px; left:calc(50% + 15px); text-align:center;';
     lbl2.textContent = 'Streifen 2';
     container.appendChild(lbl2);
 
     // Interaction arrows
     if (interaction === 'repel') {
+      // Arrow left of strip 1 pointing outward
       var arrowL = document.createElement('span');
-      arrowL.style.cssText = 'position:absolute; font-size:1.5rem; color:#ca8a04; z-index:5; top:50%; left:calc(50% - 68px); transform:translateY(-50%);';
+      arrowL.style.cssText = 'position:absolute; font-size:1.8rem; color:#ca8a04; z-index:5; top:55%; left:calc(50% - 60px); transform:translateY(-50%); font-weight:bold;';
       arrowL.textContent = '\u2190';
       container.appendChild(arrowL);
 
+      // Arrow right of strip 2 pointing outward
       var arrowR = document.createElement('span');
-      arrowR.style.cssText = 'position:absolute; font-size:1.5rem; color:#ca8a04; z-index:5; top:50%; left:calc(50% + 48px); transform:translateY(-50%);';
+      arrowR.style.cssText = 'position:absolute; font-size:1.8rem; color:#ca8a04; z-index:5; top:55%; left:calc(50% + 36px); transform:translateY(-50%); font-weight:bold;';
       arrowR.textContent = '\u2192';
       container.appendChild(arrowR);
+
+      // Label
+      var repelLabel = document.createElement('span');
+      repelLabel.style.cssText = 'position:absolute; font-size:0.6rem; font-weight:700; color:#ca8a04; z-index:5; bottom:8px; left:50%; transform:translateX(-50%); white-space:nowrap; text-transform:uppercase; letter-spacing:0.05em;';
+      repelLabel.textContent = 'Absto\u00dfung';
+      container.appendChild(repelLabel);
     } else if (interaction === 'attract') {
+      // Arrow right of strip 1 pointing inward
       var arrowL2 = document.createElement('span');
-      arrowL2.style.cssText = 'position:absolute; font-size:1.5rem; color:var(--green); z-index:5; top:50%; left:calc(50% - 63px); transform:translateY(-50%);';
+      arrowL2.style.cssText = 'position:absolute; font-size:1.8rem; color:var(--green); z-index:5; top:55%; left:calc(50% - 38px); transform:translateY(-50%); font-weight:bold;';
       arrowL2.textContent = '\u2192';
       container.appendChild(arrowL2);
 
+      // Arrow left of strip 2 pointing inward
       var arrowR2 = document.createElement('span');
-      arrowR2.style.cssText = 'position:absolute; font-size:1.5rem; color:var(--green); z-index:5; top:50%; left:calc(50% + 43px); transform:translateY(-50%);';
+      arrowR2.style.cssText = 'position:absolute; font-size:1.8rem; color:var(--green); z-index:5; top:55%; left:calc(50% + 14px); transform:translateY(-50%); font-weight:bold;';
       arrowR2.textContent = '\u2190';
       container.appendChild(arrowR2);
+
+      // Label
+      var attractLabel = document.createElement('span');
+      attractLabel.style.cssText = 'position:absolute; font-size:0.6rem; font-weight:700; color:var(--green); z-index:5; bottom:8px; left:50%; transform:translateX(-50%); white-space:nowrap; text-transform:uppercase; letter-spacing:0.05em;';
+      attractLabel.textContent = 'Anziehung';
+      container.appendChild(attractLabel);
     }
   }
 
