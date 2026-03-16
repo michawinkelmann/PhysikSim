@@ -448,14 +448,16 @@
     battLabel.textContent = state.voltage.toFixed(1) + ' V';
     svg.appendChild(battLabel);
 
-    // Circuit wires
+    // Circuit wires – route through the coil so the series connection is clearly visible
     var wireColor = '#dc2626';
     var pathD =
       'M ' + (battX + 28) + ' ' + battY +
       ' L ' + rightX + ' ' + battY +
       ' L ' + rightX + ' ' + botY +
       ' L ' + (springCenterX + coilRX + 4) + ' ' + botY +
-      ' M ' + (springCenterX - coilRX - 4) + ' ' + botY +
+      ' L ' + (springCenterX + coilRX + 4) + ' ' + coilCenterY +
+      ' M ' + (springCenterX - coilRX - 4) + ' ' + coilCenterY +
+      ' L ' + (springCenterX - coilRX - 4) + ' ' + botY +
       ' L ' + leftX + ' ' + botY +
       ' L ' + leftX + ' ' + battY +
       ' L ' + (battX - 28) + ' ' + battY;
@@ -503,24 +505,7 @@
     ammVal.textContent = currentmA + ' mA';
     svg.appendChild(ammVal);
 
-    // Coil connection to circuit (bottom wires into coil)
-    var coilWireL = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    coilWireL.setAttribute('x1', springCenterX - coilRX - 4);
-    coilWireL.setAttribute('y1', botY);
-    coilWireL.setAttribute('x2', springCenterX - coilRX - 4);
-    coilWireL.setAttribute('y2', coilCenterY);
-    coilWireL.setAttribute('stroke', wireColor);
-    coilWireL.setAttribute('stroke-width', '2.5');
-    svg.appendChild(coilWireL);
-
-    var coilWireR = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    coilWireR.setAttribute('x1', springCenterX + coilRX + 4);
-    coilWireR.setAttribute('y1', botY);
-    coilWireR.setAttribute('x2', springCenterX + coilRX + 4);
-    coilWireR.setAttribute('y2', coilCenterY);
-    coilWireR.setAttribute('stroke', wireColor);
-    coilWireR.setAttribute('stroke-width', '2.5');
-    svg.appendChild(coilWireR);
+    // Coil connection wires are now part of the main circuit path above
 
     // Current flow animation
     var flowPath =
