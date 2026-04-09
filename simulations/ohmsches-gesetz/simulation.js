@@ -621,24 +621,33 @@
 
   function drawV1Circuit(viz) {
     // All-SVG circuit with fixed viewBox — no gaps
+    // Ohmmeter is connected in PARALLEL across the bulb
     var svg = createSVG(viz, 500, 270);
 
     // Layout coordinates
     var batX = 65, batY = 135;    // Battery center
     var swL = 160, swR = 220, swY = 48; // Switch contacts
-    var bulbX = 320, bulbY = 48;        // Bulb center
-    var ohmX = 430, ohmY = 135;         // Ohmmeter center
+    var bulbX = 340, bulbY = 48;        // Bulb center
+    var ohmX = 340, ohmY = 155;         // Ohmmeter center (below bulb, parallel)
+    var jAX = 270;                      // Junction A (before bulb)
+    var jBX = 410;                      // Junction B (after bulb)
     var botY = 235;                     // Bottom wire Y
 
     // --- Wires (drawn first, behind components) ---
     // Battery top → up → left switch contact
     wire(svg, [[batX, batY - 22], [batX, swY], [swL, swY]]);
-    // Right switch contact → bulb left
+    // Right switch contact → bulb left (through junction A)
     wire(svg, [[swR, swY], [bulbX - 18, swY]]);
-    // Bulb right → ohmmeter top
-    wire(svg, [[bulbX + 18, swY], [ohmX, swY], [ohmX, ohmY - 23]]);
-    // Ohmmeter bottom → bottom → battery bottom
-    wire(svg, [[ohmX, ohmY + 25], [ohmX, botY], [batX, botY], [batX, batY + 22]]);
+    // Bulb right → junction B → down → bottom → battery bottom
+    wire(svg, [[bulbX + 18, swY], [jBX, swY], [jBX, botY], [batX, botY], [batX, batY + 22]]);
+    // Ohmmeter parallel: junction A → down → ohmmeter left
+    wire(svg, [[jAX, swY], [jAX, ohmY], [ohmX - 32, ohmY]]);
+    // Ohmmeter parallel: ohmmeter right → junction B
+    wire(svg, [[ohmX + 32, ohmY], [jBX, ohmY]]);
+
+    // Junction dots (T-connections for parallel branch)
+    svg.appendChild(svgEl('circle', { cx: jAX, cy: swY, r: '4', fill: '#334155' }));
+    svg.appendChild(svgEl('circle', { cx: jBX, cy: ohmY, r: '4', fill: '#334155' }));
 
     // --- Components ---
     drawBattery(svg, batX, batY, '6 V');
@@ -655,7 +664,7 @@
     }));
     // Arrow on bottom wire (left direction)
     svg.appendChild(svgEl('polygon', {
-      points: (ohmX - 60) + ',' + (botY - 5) + ' ' + (ohmX - 70) + ',' + botY + ' ' + (ohmX - 60) + ',' + (botY + 5),
+      points: (jBX - 60) + ',' + (botY - 5) + ' ' + (jBX - 70) + ',' + botY + ' ' + (jBX - 60) + ',' + (botY + 5),
       fill: arrowColor
     }));
   }
