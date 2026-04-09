@@ -765,11 +765,15 @@
       document.getElementById('v2-const-val').textContent = state.constantanR.toFixed(1).replace('.', ',') + ' \u03A9';
       document.getElementById('v2-heat-fill').style.width = state.heatLevel + '%';
 
-      // Update SVG displays
+      // Update SVG displays (ohmmeter readings + labels under coils)
       var ironOhmDisplay = document.getElementById('v2-iron-ohm');
       var constOhmDisplay = document.getElementById('v2-const-ohm');
       if (ironOhmDisplay) ironOhmDisplay.textContent = state.ironR.toFixed(1) + ' Ω';
       if (constOhmDisplay) constOhmDisplay.textContent = state.constantanR.toFixed(1) + ' Ω';
+      var ironMeter = document.getElementById('v2-iron-meter');
+      var constMeter = document.getElementById('v2-const-meter');
+      if (ironMeter) ironMeter.textContent = state.ironR.toFixed(1) + ' Ω';
+      if (constMeter) constMeter.textContent = state.constantanR.toFixed(1) + ' Ω';
 
       // Update iron coil color based on heat (gets reddish)
       var ironBody = document.getElementById('v2-iron-coil-body');
@@ -888,6 +892,12 @@
       var heatWaves = document.getElementById('v2-heat-waves');
       if (heatWaves) heatWaves.setAttribute('opacity', '0');
 
+      // Reset ohmmeter displays to cold values
+      var ironMeter = document.getElementById('v2-iron-meter');
+      if (ironMeter) ironMeter.textContent = '2.0 Ω';
+      var constMeter = document.getElementById('v2-const-meter');
+      if (constMeter) constMeter.textContent = '8.0 Ω';
+
       // Reset iron coil color
       var ironBody = document.getElementById('v2-iron-coil-body');
       if (ironBody) {
@@ -912,35 +922,42 @@
   function drawV2Circuit(viz) {
     var svg = createSVG(viz, 500, 310);
 
-    // Layout coordinates
-    var ohmX = 250, ohmY = 35;
-    var ironX = 115, coilY = 140;
-    var constX = 385, constY = 140;
+    // Layout: two ohmmeters, each connected in PARALLEL across its own coil
+    var ironX = 140, constX = 360;
+    var ohmY = 45;                      // Ohmmeter center Y
+    var coilY = 140;                    // Coil center Y
     var candleX = 250, candleY = 230;
-    var botY = 260;
 
-    // --- Wires ---
-    // Ohmmeter left → iron coil top
-    wire(svg, [[ohmX - 32, ohmY], [ironX, ohmY], [ironX, coilY - 14]]);
-    // Iron coil bottom → bottom wire → constantan bottom
-    wire(svg, [[ironX, coilY + 14], [ironX, botY], [constX, botY], [constX, constY + 14]]);
-    // Constantan coil top → ohmmeter right
-    wire(svg, [[constX, constY - 14], [constX, ohmY], [ohmX + 32, ohmY]]);
+    // --- Wires (parallel connections: ohmmeter ↔ coil on each side) ---
+    // Iron: ohmmeter left edge ↔ coil left edge (vertical)
+    wire(svg, [[ironX - 32, ohmY + 25], [ironX - 32, coilY - 14]]);
+    // Iron: ohmmeter right edge ↔ coil right edge (vertical)
+    wire(svg, [[ironX + 32, ohmY + 25], [ironX + 32, coilY - 14]]);
+
+    // Constantan: ohmmeter left edge ↔ coil left edge (vertical)
+    wire(svg, [[constX - 32, ohmY + 25], [constX - 32, coilY - 14]]);
+    // Constantan: ohmmeter right edge ↔ coil right edge (vertical)
+    wire(svg, [[constX + 32, ohmY + 25], [constX + 32, coilY - 14]]);
 
     // --- Components ---
-    drawOhmmeter(svg, ohmX, ohmY, 'v2-ohm-display');
+    drawOhmmeter(svg, ironX, ohmY, 'v2-iron-meter');
+    drawOhmmeter(svg, constX, ohmY, 'v2-const-meter');
+
+    // Set initial ohmmeter readings (ohmmeters always connected)
+    svg.querySelector('#v2-iron-meter').textContent = '2.0 Ω';
+    svg.querySelector('#v2-const-meter').textContent = '8.0 Ω';
 
     // Iron coil
-    var ironGroup = drawCoil(svg, ironX, coilY, 'v2-iron-coil', 'Eisendraht', 'Fe', '#d1d5db', '#6b7280');
+    drawCoil(svg, ironX, coilY, 'v2-iron-coil', 'Eisendraht', 'Fe', '#d1d5db', '#6b7280');
     // Resistance display under iron coil
     svg.appendChild(svgEl('rect', { x: ironX - 24, y: coilY + 20, width: 48, height: 16, rx: 3, fill: '#f0fdf4', stroke: '#bbf7d0', 'stroke-width': '1' }));
     txt(svg, ironX, coilY + 31, '2.0 Ω', { size: '9', weight: '700', fill: '#166534', id: 'v2-iron-ohm' });
 
     // Constantan coil
-    drawCoil(svg, constX, constY, 'v2-const-coil', 'Konstantandraht', 'CuNi', '#fcd34d', '#d97706');
+    drawCoil(svg, constX, coilY, 'v2-const-coil', 'Konstantandraht', 'CuNi', '#fcd34d', '#d97706');
     // Resistance display under constantan coil
-    svg.appendChild(svgEl('rect', { x: constX - 24, y: constY + 20, width: 48, height: 16, rx: 3, fill: '#dbeafe', stroke: '#bfdbfe', 'stroke-width': '1' }));
-    txt(svg, constX, constY + 31, '8.0 Ω', { size: '9', weight: '700', fill: '#1e40af', id: 'v2-const-ohm' });
+    svg.appendChild(svgEl('rect', { x: constX - 24, y: coilY + 20, width: 48, height: 16, rx: 3, fill: '#dbeafe', stroke: '#bfdbfe', 'stroke-width': '1' }));
+    txt(svg, constX, coilY + 31, '8.0 Ω', { size: '9', weight: '700', fill: '#1e40af', id: 'v2-const-ohm' });
 
     // Heat waves (between candle and coils)
     drawHeatWaves(svg, candleX, coilY + 50, 'v2-heat-waves');
