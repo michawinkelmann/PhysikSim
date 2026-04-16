@@ -12,7 +12,6 @@ OUTPUT="simulations.json"
 
 # Alle meta.json Dateien einlesen, path-Feld aus dem Ordnernamen ableiten
 # und zu einem JSON-Array zusammenfassen
-jq -s '.' /dev/null > "$OUTPUT.tmp" 2>/dev/null || true
 echo '[' > "$OUTPUT.tmp"
 
 first=true

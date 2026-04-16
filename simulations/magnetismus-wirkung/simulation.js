@@ -54,7 +54,7 @@
       id: 'd',
       tab: 'D: Abschirmung',
       title: 'D: Durchdringung und Abschirmung untersuchen',
-      instruction: 'W\u00e4hle ein Material aus und platziere es zwischen dem Magneten und der B\u00fcroklammer. Beobachte, ob die B\u00fcroklammer weiter schwebt oder herunterfallt.',
+      instruction: 'W\u00e4hle ein Material aus und platziere es zwischen dem Magneten und der B\u00fcroklammer. Beobachte, ob die B\u00fcroklammer weiter schwebt oder herunterfällt.',
       type: 'shielding',
       conclusion: 'Magnetische Felder durchdringen die meisten Materialien wie Papier, Holz, Kunststoff, Glas, Aluminium und Kupfer. Nur ferromagnetische Materialien wie Eisen, Stahl und Nickel k\u00f6nnen ein Magnetfeld abschirmen.',
       materials: [
@@ -212,7 +212,7 @@
     var conc = document.createElement('div');
     conc.className = 'conclusion hidden';
     conc.id = 'conclusion';
-    conc.innerHTML = '<strong>Erkenntnis</strong>' + exp.conclusion;
+    conc.innerHTML = '<strong>Erkenntnis:</strong> ' + exp.conclusion;
     root.appendChild(conc);
 
     // Reset button
@@ -326,7 +326,7 @@
 
     var rulerHTML =
       '<div class="ruler-container" id="ruler-container">' +
-        '<div class="ruler-distance" id="ruler-distance">Entfernung: 8.0 cm</div>' +
+        '<div class="ruler-distance" id="ruler-distance">Entfernung: 8,0 cm</div>' +
         '<div class="ruler-track"></div>' +
         '<div class="ruler-ticks" id="ruler-ticks"></div>' +
         '<div class="ruler-magnet" id="ruler-magnet">' +
@@ -369,7 +369,7 @@
     var conc = document.createElement('div');
     conc.className = 'conclusion hidden';
     conc.id = 'conclusion';
-    conc.innerHTML = '<strong>Erkenntnis</strong>' + exp.conclusion;
+    conc.innerHTML = '<strong>Erkenntnis:</strong> ' + exp.conclusion;
     root.appendChild(conc);
 
     container.appendChild(root);
@@ -419,7 +419,7 @@
       // Distance in cm (0 to 8 cm scale)
       var distance = (1 - state.magnetPos) * 8;
       distance = Math.round(distance * 10) / 10;
-      distLabel.textContent = 'Entfernung: ' + distance.toFixed(1) + ' cm';
+      distLabel.textContent = 'Entfernung: ' + distance.toFixed(1).replace('.', ',') + ' cm';
 
       // Check if close enough to snap
       var trialIndex = state.measurements.length;
@@ -429,7 +429,7 @@
           state.snapped = true;
           state.currentDistance = critical;
           paperclip.style.transform = 'translateX(-15px)';
-          distLabel.textContent = 'Entfernung: ' + critical.toFixed(1) + ' cm';
+          distLabel.textContent = 'Entfernung: ' + critical.toFixed(1).replace('.', ',') + ' cm';
           recordBtn.disabled = false;
         }
       }
@@ -481,12 +481,12 @@
 
     var index = state.measurements.length;
     state.measurements.push(state.currentDistance);
-    document.getElementById('meas-' + (index + 1)).textContent = state.currentDistance.toFixed(1) + ' cm';
+    document.getElementById('meas-' + (index + 1)).textContent = state.currentDistance.toFixed(1).replace('.', ',') + ' cm';
 
     if (state.measurements.length >= 3) {
       var sum = state.measurements.reduce(function (a, b) { return a + b; }, 0);
       var avg = sum / state.measurements.length;
-      document.getElementById('meas-avg').textContent = avg.toFixed(1) + ' cm';
+      document.getElementById('meas-avg').textContent = avg.toFixed(1).replace('.', ',') + ' cm';
       document.getElementById('record-btn').disabled = true;
       document.getElementById('conclusion').classList.remove('hidden');
     }
@@ -502,7 +502,7 @@
     magnet.style.left = '40px';
     state.magnetPos = 0;
     var distLabel = document.getElementById('ruler-distance');
-    distLabel.textContent = 'Entfernung: 8.0 cm';
+    distLabel.textContent = 'Entfernung: 8,0 cm';
 
     if (state.measurements.length < 3) {
       document.getElementById('record-btn').disabled = true;
@@ -612,7 +612,7 @@
     var conc = document.createElement('div');
     conc.className = 'conclusion hidden';
     conc.id = 'conclusion';
-    conc.innerHTML = '<strong>Erkenntnis</strong>' + exp.conclusion;
+    conc.innerHTML = '<strong>Erkenntnis:</strong> ' + exp.conclusion;
     root.appendChild(conc);
 
     // Reset

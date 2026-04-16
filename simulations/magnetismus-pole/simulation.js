@@ -177,7 +177,7 @@
     var conc = document.createElement('div');
     conc.className = 'conclusion hidden';
     conc.id = 'conclusion';
-    conc.innerHTML = '<strong>Erkenntnis</strong>' + exp.conclusion;
+    conc.innerHTML = '<strong>Erkenntnis:</strong> ' + exp.conclusion;
     root.appendChild(conc);
 
     // Reset
@@ -354,7 +354,7 @@
     var conc = document.createElement('div');
     conc.className = 'conclusion hidden';
     conc.id = 'conclusion';
-    conc.innerHTML = '<strong>Erkenntnis</strong>' + exp.conclusion;
+    conc.innerHTML = '<strong>Erkenntnis:</strong> ' + exp.conclusion;
     root.appendChild(conc);
 
     // Reset
@@ -592,7 +592,7 @@
     var conc = document.createElement('div');
     conc.className = 'conclusion hidden';
     conc.id = 'conclusion';
-    conc.innerHTML = '<strong>Erkenntnis</strong>' + exp.conclusion;
+    conc.innerHTML = '<strong>Erkenntnis:</strong> ' + exp.conclusion;
     root.appendChild(conc);
 
     // Reset
@@ -899,7 +899,7 @@
     var conc = document.createElement('div');
     conc.className = 'conclusion hidden';
     conc.id = 'conclusion';
-    conc.innerHTML = '<strong>Erkenntnis</strong>' + exp.conclusion;
+    conc.innerHTML = '<strong>Erkenntnis:</strong> ' + exp.conclusion;
     root.appendChild(conc);
 
     // Reset

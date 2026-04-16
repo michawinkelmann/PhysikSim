@@ -396,7 +396,7 @@
   function addConclusion(panel, text) {
     var box = document.createElement('div');
     box.className = 'conclusion';
-    box.innerHTML = '<strong>Erkenntnis</strong>' + text;
+    box.innerHTML = '<strong>Erkenntnis:</strong> ' + text;
     panel.appendChild(box);
   }
 
