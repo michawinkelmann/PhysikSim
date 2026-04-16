@@ -228,7 +228,7 @@
             { cls: 'light', label: 'Licht' }
           ]) +
         '</div>' +
-        '<div class="conclusion hidden" id="conclusion"><strong>Erkenntnis</strong>' + exp.conclusion + '</div>' +
+        '<div class="conclusion hidden" id="conclusion"><strong>Erkenntnis:</strong> ' + exp.conclusion + '</div>' +
       '</div>';
 
     var circuit = document.getElementById('steam-circuit');
@@ -396,7 +396,7 @@
             { cls: 'kinetic', label: 'Bewegung' }
           ]) +
         '</div>' +
-        '<div class="conclusion hidden" id="conclusion"><strong>Erkenntnis</strong>' + exp.conclusion + '</div>' +
+        '<div class="conclusion hidden" id="conclusion"><strong>Erkenntnis:</strong> ' + exp.conclusion + '</div>' +
       '</div>';
 
     var circuit = document.getElementById('solar-circuit');
@@ -539,7 +539,7 @@
             '<strong>Vergleich mit V2</strong>Beide Ventilatoren drehen sich langsamer als der einzelne Ventilator in V2, da die Energie auf zwei Verbraucher aufgeteilt wird.' +
           '</div>' +
         '</div>' +
-        '<div class="conclusion hidden" id="conclusion2"><strong>Erkenntnis</strong>' + exp.conclusion + '</div>' +
+        '<div class="conclusion hidden" id="conclusion2"><strong>Erkenntnis:</strong> ' + exp.conclusion + '</div>' +
       '</div>';
 
     var circuit = document.getElementById('solar-circuit2');
@@ -713,7 +713,7 @@
             { cls: 'light', label: 'Licht' }
           ]) +
         '</div>' +
-        '<div class="conclusion hidden" id="conclusion-w"><strong>Erkenntnis</strong>' + exp.conclusion + '</div>' +
+        '<div class="conclusion hidden" id="conclusion-w"><strong>Erkenntnis:</strong> ' + exp.conclusion + '</div>' +
       '</div>';
 
     var circuit = document.getElementById('wind-circuit');
@@ -870,7 +870,7 @@
             { cls: 'light', label: 'Licht' }
           ]) +
         '</div>' +
-        '<div class="conclusion hidden" id="conclusion-c"><strong>Erkenntnis</strong>' + exp.conclusion + '</div>' +
+        '<div class="conclusion hidden" id="conclusion-c"><strong>Erkenntnis:</strong> ' + exp.conclusion + '</div>' +
       '</div>';
 
     var circuit = document.getElementById('crank-circuit');
@@ -1048,7 +1048,7 @@
             { cls: 'light', label: 'Licht' }
           ]) +
         '</div>' +
-        '<div class="conclusion hidden" id="conclusion-wt"><strong>Erkenntnis</strong>' + exp.conclusion + '</div>' +
+        '<div class="conclusion hidden" id="conclusion-wt"><strong>Erkenntnis:</strong> ' + exp.conclusion + '</div>' +
       '</div>';
 
     var circuit = document.getElementById('weight-circuit');
@@ -1270,7 +1270,7 @@
             '<tbody id="fd-tbody"></tbody>' +
           '</table>' +
         '</div>' +
-        '<div class="conclusion hidden" id="conclusion-fd"><strong>Erkenntnis</strong>' + exp.conclusion + '</div>' +
+        '<div class="conclusion hidden" id="conclusion-fd"><strong>Erkenntnis:</strong> ' + exp.conclusion + '</div>' +
       '</div>';
 
     var circuit = document.getElementById('dryer-circuit');

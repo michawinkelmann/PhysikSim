@@ -125,7 +125,7 @@
       '<span>Amperemeter:</span>' +
       '<span id="v1-current-val">111</span>' +
       '<span class="unit">mA</span>' +
-      '<span class="badge-stretch" id="v1-stretch-val">Federdehnung: 8 mm</span>';
+      '<span class="badge-stretch" id="v1-stretch-val">Federdehnung: 11 mm</span>';
     panel.appendChild(currentCard);
 
     // Save button + results table

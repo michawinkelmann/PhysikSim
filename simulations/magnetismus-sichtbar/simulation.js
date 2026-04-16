@@ -8,15 +8,15 @@
       id: 'a',
       tab: 'A: Magnetfelder',
       title: 'A: Magnetfelder sichtbar machen',
-      instruction: 'Wähle einen Magneten aus und streue Eisenpfeilspäne auf die Folie. Beobachte, wie sich die Späne ausrichten und wo die Wirkung besonders stark ist.',
+      instruction: 'Wähle einen Magneten aus und streue Eisenfeilspäne auf die Folie. Beobachte, wie sich die Späne ausrichten und wo die Wirkung besonders stark ist.',
       type: 'field-viz',
-      conclusion: 'Die Eisenpfeilspäne ordnen sich entlang der Feldlinien an. An den Polen ist die magnetische Wirkung am stärksten \u2013 dort sind die Feldlinien am dichtesten. Je dichter die Feldlinien beieinander liegen, desto stärker ist die magnetische Wirkung.'
+      conclusion: 'Die Eisenfeilspäne ordnen sich entlang der Feldlinien an. An den Polen ist die magnetische Wirkung am stärksten \u2013 dort sind die Feldlinien am dichtesten. Je dichter die Feldlinien beieinander liegen, desto stärker ist die magnetische Wirkung.'
     },
     b: {
       id: 'b',
       tab: 'B: Wechselwirkung',
       title: 'B: Die Wechselwirkung sichtbar machen',
-      instruction: 'Wähle eine Polkombination und streue Eisenpfeilspäne. Beobachte, wie sich das Feldlinienbild je nach Ausrichtung der Pole verändert.',
+      instruction: 'Wähle eine Polkombination und streue Eisenfeilspäne. Beobachte, wie sich das Feldlinienbild je nach Ausrichtung der Pole verändert.',
       type: 'interaction-viz',
       conclusion: 'Bei ungleichnamigen Polen (N\u2194S) verlaufen die Feldlinien von einem Magneten zum anderen \u2013 die Magnete ziehen sich an. Bei gleichnamigen Polen (N\u2194N oder S\u2194S) stoßen sich die Feldlinien ab, es bildet sich ein feldfreier Bereich zwischen den Magneten \u2013 die Magnete stoßen sich ab.'
     }
@@ -649,7 +649,7 @@
     var actionRow = document.createElement('div');
     actionRow.className = 'btn-row';
     actionRow.innerHTML =
-      '<button class="btn btn-primary" id="sprinkle-btn" disabled>Eisenpfeilspäne streuen</button>' +
+      '<button class="btn btn-primary" id="sprinkle-btn" disabled>Eisenfeilspäne streuen</button>' +
       '<button class="btn btn-secondary" id="clear-btn" disabled>Folie anheben</button>';
     root.appendChild(actionRow);
 
@@ -666,7 +666,7 @@
     var conc = document.createElement('div');
     conc.className = 'conclusion hidden';
     conc.id = 'conclusion';
-    conc.innerHTML = '<strong>Erkenntnis</strong>' + exp.conclusion;
+    conc.innerHTML = '<strong>Erkenntnis:</strong> ' + exp.conclusion;
     root.appendChild(conc);
 
     // Reset
@@ -806,7 +806,7 @@
     var actionRow = document.createElement('div');
     actionRow.className = 'btn-row';
     actionRow.innerHTML =
-      '<button class="btn btn-primary" id="sprinkle-btn" disabled>Eisenpfeilspäne streuen</button>' +
+      '<button class="btn btn-primary" id="sprinkle-btn" disabled>Eisenfeilspäne streuen</button>' +
       '<button class="btn btn-secondary" id="clear-btn" disabled>Folie anheben</button>';
     root.appendChild(actionRow);
 
@@ -823,7 +823,7 @@
     var conc = document.createElement('div');
     conc.className = 'conclusion hidden';
     conc.id = 'conclusion';
-    conc.innerHTML = '<strong>Erkenntnis</strong>' + exp.conclusion;
+    conc.innerHTML = '<strong>Erkenntnis:</strong> ' + exp.conclusion;
     root.appendChild(conc);
 
     // Reset
@@ -855,25 +855,11 @@
   }
 
   function buildPoleIcons(cfg) {
-    // Show left-pole-facing → right-pole-facing
-    var leftInner = cfg.leftFlip ? 'S' : 'N';
-    var leftColor = cfg.leftFlip ? 'pole-green' : 'pole-red';
-    var rightInner = cfg.rightFlip ? 'N' : 'S';
-    var rightColor = cfg.rightFlip ? 'pole-red' : 'pole-green';
-    // Which pole of left magnet faces right? If not flipped: N|S → S faces right. If flipped: S|N → N faces right.
-    // Actually, for bar magnets: not flipped = [N][S], inner pole facing gap = S
-    // flipped = [S][N], inner pole facing gap = N
+    // Which pole faces the gap? not flipped = [N][S] → S faces right; flipped = [S][N] → N faces right
     var leftFacing = cfg.leftFlip ? 'N' : 'S';
     var leftFacingColor = cfg.leftFlip ? 'pole-red' : 'pole-green';
     var rightFacing = cfg.rightFlip ? 'S' : 'N';
     var rightFacingColor = cfg.rightFlip ? 'pole-green' : 'pole-red';
-    // Wait, the pole configs define which poles face each other.
-    // leftFlip=false: [N][S] → right side is S. leftFlip=true: [S][N] → right side is N
-    // rightFlip=false: [N][S] → left side is N. rightFlip=true: [S][N] → left side is S
-    // So facing poles: left-right-side ↔ right-left-side
-    // leftFlip=false,rightFlip=false: S ↔ N → wait, that should be for N↔N config...
-    // Let me recheck. The POLE_CONFIGS define the actual pole positions/charges.
-    // For the buttons, just show the config name
     return '<span class="combo-pole ' + leftFacingColor + '">' + leftFacing + '</span>' +
       '<span class="combo-arrow">\u2194</span>' +
       '<span class="combo-pole ' + rightFacingColor + '">' + rightFacing + '</span>';
@@ -981,5 +967,5 @@
 
   // ==================== START ====================
 
-  init();
+  document.addEventListener('DOMContentLoaded', init);
 })();

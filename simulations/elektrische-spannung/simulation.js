@@ -325,21 +325,7 @@
     var wireColor = isOn ? '#dc2626' : '#6b7280';
     var wireWidth = isOn ? '3' : '2';
 
-    // Simple circuit path: battery top -> right side -> ammeter -> bottom right -> bulb -> bottom left -> battery bottom
-    var paths = [
-      // Top from battery to right
-      'M 50% 45px L 80% 45px',
-      // Right side down to ammeter area
-      'M 80% 45px L 80% 45% L 80% 55% L 80% 75%',
-      // Bottom from right to bulb
-      'M 80% 75% L 50% 75%',
-      // Bottom from bulb to left
-      'M 50% 75% L 20% 75%',
-      // Left side up to battery
-      'M 20% 75% L 20% 45px L 50% 45px'
-    ];
-
-    // Use simpler coordinate-based wires
+    // Coordinate-based wires
     var w = container.offsetWidth || 400;
     var h = container.offsetHeight || 320;
 
